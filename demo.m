@@ -13,7 +13,6 @@ function demo()
         %print(gcf, '-dpng', '-r0', [output_dir '/' curr_img]);
     end
 
-
 function pyra = time_extract_hog(img_name, model)
     im = imread(img_name);
     %im = color(im);
@@ -26,7 +25,12 @@ function pyra = time_extract_hog(img_name, model)
 function visHog(pyra)
     %just visualize top HOG level
     
-    w = foldHOG(pyra.feat{1});
-    visualizeHOG(double(max(0,w)));
-    
+    nlevels = length(pyra.feat);
+
+    for level = 1:10:nlevels
+        figure(level)
+        w = foldHOG(pyra.feat{level});
+        visualizeHOG(double(max(0,w)));
+    end    
+
 
