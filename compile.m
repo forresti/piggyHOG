@@ -51,29 +51,6 @@ if nargin < 3
 
   eval([mexcmd ' features/resize.cc']);
   eval([mexcmd ' features/features.cc']);
-  eval([mexcmd ' gdetect/dt.cc']);
-  eval([mexcmd ' gdetect/bounded_dt.cc']);
-  eval([mexcmd ' gdetect/get_detection_trees.cc']);
-  eval([mexcmd ' gdetect/compute_overlap.cc']);
-
-  % Convolution routine
-  %   Use one of the following depending on your setup
-  %   (0) is fastest, (2) is slowest 
-
-  % 0) multithreaded convolution using SSE
-  eval([mexcmd ' gdetect/fconvsse.cc -o fconv']);
-  eval([mexcmd ' gdetect/fconvsse.cc']);
-  % 1) multithreaded convolution
-  %eval([mexcmd ' gdetect/fconv_var_dim_MT.cc -o fconv']);
-  eval([mexcmd ' gdetect/fconv_var_dim_MT.cc']);
-  % 2) basic convolution, very compatible
-  %eval([mexcmd ' gdetect/fconv_var_dim.cc -o fconv']);
-
-  % Convolution routine that can handle feature dimenions other than 32
-  % 0) multithreaded convolution
-  eval([mexcmd ' gdetect/fconv_var_dim_MT.cc -o fconv_var_dim']);
-  % 1) single-threaded convolution
-  % eval([mexcmd ' gdetect/fconv_var_dim.cc -o fconv_var_dim']);
 else
   eval([mexcmd ' ' mex_file]);
 end
