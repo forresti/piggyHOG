@@ -8,7 +8,7 @@ if isempty(G_STARTUP)
   % a VERY large number of subdirectories, which makes 
   % startup slow
 
-  incl = {'images_640x480', 'reference_code', 'vis'};
+  incl = {'images_640x480', 'vis', 'reference_code', 'reference_code/voc5_features', 'bin'};
   for i = 1:length(incl)
     addpath(genpath(incl{i}));
   end

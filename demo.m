@@ -1,21 +1,32 @@
 
 function demo()
-    img_dir = 'ig02-v1.0-cars/cars';
-    imgs = dir([car_dir '/*.png']) %640x480 car images
+    img_dir = 'images_640x480';
+    imgs = dir([img_dir '/*.png']); %640x480 car images
     %output_dir = './cascade-results-g02-v1.0-cars';
-    load('VOC2007/car_final');
+    load('VOC2007/car_final'); %load 'model' structure
 
-    for idx = 1:length(car_imgs)
-        car_img = car_imgs(idx).name
-        test([car_dir '/' car_img], model, useCascade);
-        print(gcf, '-dpng', '-r0', [output_dir '/' car_img]);
+    for idx = 1:length(imgs)
+        curr_img = imgs(idx).name
+        pyra = time_extract_hog(curr_img, model);
+
+        visHog(pyra)
+        %print(gcf, '-dpng', '-r0', [output_dir '/' curr_img]);
     end
 
 
-function pyra = time_extract_hog(im)
+function pyra = time_extract_hog(img_name, model)
+    im = imread(img_name);
+    %im = color(im);
+
     th = tic();
-    pyra = featpyramid(double(im), csc_model);
+    pyra = featpyramid(double(im), model);
     tF = toc(th);
     fprintf('  --> HOG pyramid extraction took %f seconds\n', tF);
 
+function visHog(pyra)
+    %just visualize top HOG level
+    
+    w = foldHOG(pyra.feat{1});
+    visualizeHOG(double(max(0,w)));
+    
 
