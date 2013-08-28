@@ -1,7 +1,7 @@
 # This Makefile is used under Linux
 
 CXX = g++
-CFLAGS = -g -fopenmp -O3 -fPIC -I/usr/local/include/ -I/usr/include/libxml2/ -I./eigen
+CFLAGS = -g -fopenmp -O3 -fPIC -I/usr/local/include/ -I/usr/include/libxml2/ -I./Eigen
 LDLIBS = -g -lgomp -ljpeg -lxml2 -L/usr/local/lib64 -lfftw3f -lfftw3 -lm -Wl,-rpath,/usr/local/lib64
 OBJS = HOGPyramid.o JPEGImage.o 
 
