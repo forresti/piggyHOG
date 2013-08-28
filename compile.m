@@ -44,13 +44,9 @@ mexcmd = [mexcmd ' CXXFLAGS="\$CXXFLAGS -Wall"'];
 mexcmd = [mexcmd ' LDFLAGS="\$LDFLAGS -Wall"'];
 
 if nargin < 3
-  % Build feature vector cache code
-  fv_compile(opt, verb);
-  % Build the star-cascade code
-  %cascade_compile(opt, verb);
 
-  eval([mexcmd ' features/resize.cc']);
-  eval([mexcmd ' features/features.cc']);
+  eval([mexcmd ' reference_code/voc5_features/resize.cc']);
+  eval([mexcmd ' reference_code/voc5_features/features.cc']);
 else
   eval([mexcmd ' ' mex_file]);
 end
