@@ -1,4 +1,4 @@
-function pyra = featpyramid(im, model, padx, pady)
+function pyra = featpyramid_fhog(im, model, padx, pady)
     % Compute a feature pyramid.
     %   pyra = featpyramid(im, model, padx, pady)
     %
