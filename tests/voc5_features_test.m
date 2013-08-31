@@ -23,9 +23,10 @@ function transpose_and_writeCsv(pyra, output_dir, curr_img)
     %TODO: transpose!
     for level = 1:10:nlevels
         [path, imgname, ext] = fileparts(curr_img);
-        csvwrite([output_dir '/' imgname '_scale_' int2str(level) '.csv'], pyra.feat{level});
+        %csvwrite([output_dir '/' imgname '_scale_' int2str(level) '.csv'], pyra.feat{level});
+        writeToCsv_withSize([output_dir '/' imgname '_scale_' int2str(level) '.csv'], pyra.feat{level});
     end
-
+keyboard
 
 % @param curr_img is just for setting an output path.
 function visHog(pyra, output_dir, curr_img)

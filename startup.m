@@ -9,7 +9,7 @@ if isempty(G_STARTUP)
   % startup slow
 
   incl = {'images_640x480', 'vis', 'reference_code', 'reference_code/voc5_features', 'reference_code/piotr_fhog', ...
-          'tests', 'bin'};
+          'tests', 'bin', 'common'};
   for i = 1:length(incl)
     addpath(genpath(incl{i}));
   end
