@@ -2,6 +2,7 @@
 
 function writeToCsv_withSize(fname, array)
     csvwrite(fname, array);
+    internal_writeToCsv(array);
 
     mySize = size(array);
     if(length(size(array)) == 2)
@@ -12,6 +13,14 @@ function writeToCsv_withSize(fname, array)
 
     prepend2file(sizeStr, fname, true);
     %prepend2file([num2str], fname, true)
+end
+
+%produce a string, where each line is the "d" dimension in array(d,y,x). 
+%So, each line in the output is one feature descriptor.
+function csvString = internal_writeToCsv(array)
+   [depth, height, width] = size(array) 
+
+    csvString = '...'; %placeholder
 end
 
 %thanks to: http://www.mathworks.com/support/solutions/en/data/1-1BM4K/index.html?product=SL&solution=1-1BM4K
