@@ -20,6 +20,7 @@
 #include "SimpleOpt.h"
 #include "HOGPyramid.h"
 #include "JPEGImage.h" 
+#include "common/helpers.h"
 
 #include <algorithm>
 #include <fstream>

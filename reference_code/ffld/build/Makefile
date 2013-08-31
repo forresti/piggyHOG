@@ -4,14 +4,14 @@ CXX = g++
 CFLAGS = -g -fopenmp -O3 -fPIC -I/usr/local/include/ -I/usr/include/libxml2/ -I../eigen -I..
 LDLIBS = -g -lgomp -ljpeg -lxml2 -L/usr/local/lib64 -lfftw3f -lfftw3 -lm -Wl,-rpath,/usr/local/lib64 
 #OBJS = HOGPyramid.o JPEGImage.o Mixture.o Model.o Object.o Patchwork.o Rectangle.o Scene.o ffld.o
-OBJS = HOGPyramid.o JPEGImage.o ffld.o
+OBJS = HOGPyramid.o JPEGImage.o helpers.o ffld.o
 all:	ffld 
 
 ffld: $(OBJS) 
 	$(CXX) -o ffld $(OBJS) $(LDLIBS)
 
 #ffld.o: ../ffld.cpp ../HOGPyramid.h ../Intersector.h ../JPEGImage.h ../Mixture.h ../Model.h ../Object.h ../Patchwork.h ../Scene.h ../SimpleOpt.h ../Rectangle.h  
-ffld.o: ../ffld.cpp ../HOGPyramid.h ../JPEGImage.h
+ffld.o: ../ffld.cpp ../HOGPyramid.h ../JPEGImage.h ../common/helpers.h
 	$(CXX) $(CFLAGS) -c ../ffld.cpp
 
 HOGPyramid.o:	../HOGPyramid.cpp ../HOGPyramid.h ../JPEGImage.h
@@ -20,8 +20,8 @@ HOGPyramid.o:	../HOGPyramid.cpp ../HOGPyramid.h ../JPEGImage.h
 JPEGImage.o: ../JPEGImage.cpp ../JPEGImage.h
 	$(CXX) $(CFLAGS) -c ../JPEGImage.cpp 
 
-#Mixture.o: ../Mixture.cpp ../Mixture.h ../Model.h ../Patchwork.h
-#	$(CXX) $(CFLAGS) -c ../Mixture.cpp 
+helpers.o: ../common/helpers.cpp ../common/helpers.h 
+	$(CXX) $(CFLAGS) -c ../common/helpers.cpp 
 
 #Model.o:	../Model.cpp ../Model.h ../HOGPyramid.h
 #	$(CXX) $(CFLAGS) -c ../Model.cpp 
