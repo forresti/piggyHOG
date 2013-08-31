@@ -57,6 +57,12 @@ void showUsage()
 		 << endl;
 }
 
+void parseArgs(int &padding, int &interval){
+    padding = 2;
+    interval = 2;
+}
+
+
 // Test a mixture model (compute a ROC curve)
 int main(int argc, char * argv[])
 {
@@ -140,6 +146,9 @@ int main(int argc, char * argv[])
         cerr << "\nInvalid image " << file << endl;
         return -1;
     }
+
+parseArgs(interval, padding);
+    printf("interval = %d \n", interval);
     
     // Compute the HOG features
     double start_hog = read_timer();    
