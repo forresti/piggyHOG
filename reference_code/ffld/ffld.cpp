@@ -167,7 +167,6 @@ int main(int argc, char * argv[])
         return -1;
     }
     
-    
     // Compute the HOG features
     start();
     
