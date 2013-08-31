@@ -27,33 +27,6 @@
 #include <iomanip>
 #include <iostream>
 
-#ifndef _WIN32 //Linux
-#include <sys/time.h>
-timeval Start, Stop;
-inline void start(){
-	gettimeofday(&Start, 0);
-}
-inline int stop(){
-	gettimeofday(&Stop, 0);
-	timeval duration;
-	timersub(&Stop, &Start, &duration);
-	return duration.tv_sec * 1000 + (duration.tv_usec + 500) / 1000;
-}
-#else //Windows
-#include <time.h>
-#include <windows.h>
-ULARGE_INTEGER Start, Stop;
-
-inline void start(){
-	GetSystemTimeAsFileTime((FILETIME *)&Start);
-}
-inline int stop(){
-	GetSystemTimeAsFileTime((FILETIME *)&Stop);
-	Stop.QuadPart -= Start.QuadPart;
-	return (Stop.QuadPart + 5000) / 10000;
-}
-#endif
-
 using namespace FFLD;
 using namespace std;
 
@@ -169,8 +142,8 @@ int main(int argc, char * argv[])
     }
     
     // Compute the HOG features
-    start();
-    
+    double start_hog = read_timer();    
+
     HOGPyramid pyramid(image, padding, padding, interval);
     
     if (pyramid.empty()) {
@@ -179,7 +152,8 @@ int main(int argc, char * argv[])
         return -1;
     }
     
-    cout << "Computed HOG features in " << stop() << " ms" << endl;
+    double time_hog = read_timer() - start_hog;
+    cout << "Computed HOG features in " << time_hog << " ms" << endl;
 
    	return EXIT_SUCCESS;
 }
