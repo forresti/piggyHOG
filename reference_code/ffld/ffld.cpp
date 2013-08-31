@@ -33,7 +33,7 @@ using namespace std;
 // SimpleOpt array of valid options
 enum
 {
-    OPT_HELP, OPT_PADDING, OPT_INTERVAL, OPT_IMAGES
+    OPT_HELP, OPT_PADDING, OPT_INTERVAL
 };
 
 CSimpleOpt::SOption SOptions[] =
@@ -68,7 +68,7 @@ void parseArgs(int &padding, int &interval, string &file){
 int main(int argc, char * argv[])
 {
 	// Default parameters
-	string images;
+	//string images;
 	int padding = 12;
 	int interval = 10;
 	
@@ -81,11 +81,11 @@ int main(int argc, char * argv[])
 				showUsage();
 				return 0;
 			}
-
+#if 0
 			else if (args.OptionId() == OPT_IMAGES) {
 				images = args.OptionArg();
 			}
-
+#endif
 			else if (args.OptionId() == OPT_PADDING) {
 				padding = atoi(args.OptionArg());
 				
@@ -148,7 +148,7 @@ int main(int argc, char * argv[])
         return -1;
     }
 
-parseArgs(interval, padding, file);
+//parseArgs(interval, padding, file);
     printf("interval = %d \n", interval);
     printf("file = %s \n", file.c_str());
     
