@@ -72,30 +72,6 @@ inline int stop()
 using namespace FFLD;
 using namespace std;
 
-#if 0
-struct Detection : public FFLD::Rectangle
-{
-	HOGPyramid::Scalar score;
-	int l;
-	int x;
-	int y;
-	
-	Detection() : score(0), l(0), x(0), y(0)
-	{
-	}
-	
-	Detection(HOGPyramid::Scalar score, int l, int x, int y, FFLD::Rectangle bndbox) :
-	FFLD::Rectangle(bndbox), score(score), l(l), x(x), y(y)
-	{
-	}
-	
-	bool operator<(const Detection & detection) const
-	{
-		return score > detection.score;
-	}
-};
-#endif
-
 // SimpleOpt array of valid options
 enum
 {
@@ -149,15 +125,9 @@ void showUsage()
 int main(int argc, char * argv[])
 {
 	// Default parameters
-	string model("model.txt");
-	//Object::Name name = Object::PERSON;
-	string results;
 	string images;
-	int nbNegativeScenes = -1;
 	int padding = 12;
 	int interval = 10;
-	double threshold =-10.0;
-	double overlap = 0.5;
 	
 	// Parse the parameters
 	CSimpleOpt args(argc, argv, SOptions);
@@ -168,52 +138,11 @@ int main(int argc, char * argv[])
 				showUsage();
 				return 0;
 			}
-#if 0
-			else if (args.OptionId() == OPT_MODEL) {
-				model = args.OptionArg();
-			}
-			else if (args.OptionId() == OPT_NAME) {
-				string arg = args.OptionArg();
-				transform(arg.begin(), arg.end(), arg.begin(), static_cast<int (*)(int)>(tolower));
-				const string Names[20] =
-				{
-					"aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair",
-					"cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant",
-					"sheep", "sofa", "train", "tvmonitor"
-				};
-				
-				const string * iter = find(Names, Names + 20, arg);
-				
-				// Error checking
-				if (iter == Names + 20) {
-					showUsage();
-					cerr << "\nInvalid name arg " << args.OptionArg() << endl;
-					return -1;
-				}
-				else {
-					name = static_cast<Object::Name>(iter - Names);
-				}
-			}
-			else if (args.OptionId() == OPT_RESULTS) {
-				results = args.OptionArg();
-			}
-#endif
+
 			else if (args.OptionId() == OPT_IMAGES) {
 				images = args.OptionArg();
 			}
 
-#if 0
-			else if (args.OptionId() == OPT_NB_NEG) {
-				nbNegativeScenes = atoi(args.OptionArg());
-				
-				// Error checking
-				if (nbNegativeScenes < 0) {
-					showUsage();
-					cerr << "\nInvalid nb-negatives arg " << args.OptionArg() << endl;
-					return -1;
-				}
-			}
-#endif
 			else if (args.OptionId() == OPT_PADDING) {
 				padding = atoi(args.OptionArg());
 				
@@ -235,19 +164,6 @@ int main(int argc, char * argv[])
 					return -1;
 				}
 			}
-			else if (args.OptionId() == OPT_THRESHOLD) {
-				threshold = atof(args.OptionArg());
-			}
-			else if (args.OptionId() == OPT_OVERLAP) {
-				overlap = atof(args.OptionArg());
-				
-				// Error checking
-				if ((overlap <= 0.0) || (overlap >= 1.0)) {
-					showUsage();
-					cerr << "\nInvalid overlap arg " << args.OptionArg() << endl;
-					return -1;
-				}
-			}
 		}
 		else {
 			showUsage();
@@ -255,7 +171,6 @@ int main(int argc, char * argv[])
 			return -1;
 		}
 	}
-	
 	if (!args.FileCount()) {
 		showUsage();
 		cerr << "\nNo image/dataset provided" << endl;
@@ -266,79 +181,43 @@ int main(int argc, char * argv[])
 		cerr << "\nMore than one image/dataset provided" << endl;
 		return -1;
 	}
-	
-	// Try to open the mixture
-#if 0
-	ifstream in(model.c_str(), ios::binary);
-	
-	if (!in.is_open()) {
-		showUsage();
-		cerr << "\nInvalid model file " << model << endl;
-		return -1;
-	}
-	
-	Mixture mixture;
-	in >> mixture;
-	
-	if (mixture.empty()) {
-		showUsage();
-		cerr << "\nInvalid model file " << model << endl;
-		return -1;
-	}
-#endif
+
 	// The image/dataset
 	const string file(args.File(0));
-	
 	const size_t lastDot = file.find_last_of('.');
-	
 	if ((lastDot == string::npos) ||
 		((file.substr(lastDot) != ".jpg") && (file.substr(lastDot) != ".txt"))) {
 		showUsage();
 		cerr << "\nInvalid file " << file << ", should be .jpg or .txt" << endl;
 		return -1;
 	}
-	
-	// Try to open the results
-#if 0
-	ofstream out;
-	
-	if (!results.empty()) {
-		out.open(results.c_str(), ios::binary);
-		
-		if (!out.is_open()) {
-			showUsage();
-			cerr << "\nInvalid results file " << results << endl;
-			return -1;
-		}
-	}
-#endif	
 
 	// Try to load the image
-	if (file.substr(lastDot) == ".jpg") {
-		JPEGImage image(file);
-		
-		if (image.empty()) {
-			showUsage();
-			cerr << "\nInvalid image " << file << endl;
-			return -1;
-		}
-		
-		// Compute the HOG features
-		start();
-		
-		HOGPyramid pyramid(image, padding, padding, interval);
-		
-		if (pyramid.empty()) {
-			showUsage();
-			cerr << "\nInvalid image " << file << endl;
-			return -1;
-		}
-		
-		cout << "Computed HOG features in " << stop() << " ms" << endl;
-    }
-    else{
+	if (file.substr(lastDot) != ".jpg") {
         cout << "need to input a JPG image" << endl;
+        exit(1);
     }
 
-	return EXIT_SUCCESS;
+	JPEGImage image(file);
+    if (image.empty()) {
+        showUsage();
+        cerr << "\nInvalid image " << file << endl;
+        return -1;
+    }
+    
+    
+    // Compute the HOG features
+    start();
+    
+    HOGPyramid pyramid(image, padding, padding, interval);
+    
+    if (pyramid.empty()) {
+        showUsage();
+        cerr << "\nInvalid image " << file << endl;
+        return -1;
+    }
+    
+    cout << "Computed HOG features in " << stop() << " ms" << endl;
+
+   	return EXIT_SUCCESS;
 }
