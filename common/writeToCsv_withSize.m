@@ -3,9 +3,7 @@
 function writeToCsv_withSize(fname, array)
     %csvwrite(fname, array);
     csvwrite(fname, ''); %clear the output file
-    internal_writeToCsv_v2(fname, array);
-
-    %csvStrings = internal_writeToCsv(array);
+    internal_writeToCsv(fname, array);
 
     mySize = size(array);
     if(length(size(array)) == 2)
@@ -19,26 +17,11 @@ function writeToCsv_withSize(fname, array)
 end
 
 %write one line at a time, doing an append.
-function internal_writeToCsv_v2(fname, array)
+function internal_writeToCsv(fname, array)
     [depth, height, width] = size(array);
     for x=1:width
         for y=1:height
             dlmwrite(fname, array(:, y, x)', '-append');
-        end
-    end
-end
-
-%produce a string, where each line is the "d" dimension in array(d,y,x). 
-%So, each line in the output is one feature descriptor.
-function csvStrings = internal_writeToCsv(array)
-    [depth, height, width] = size(array);
-
-    csvStrings = [];
-    for x=1:width 
-        for y=1:height
-            %csvStrings{i} = mat2str(array(:, y, x));
-            %csvStrings{(x-1)*height + y} = 'dummy';
-            csvStrings{(x-1)*height + y} = array(:, y, x);
         end
     end
 end

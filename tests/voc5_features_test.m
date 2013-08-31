@@ -6,6 +6,7 @@ function demo()
     load('VOC2007/car_final'); %load 'model' structure
     pyra = time_extract_hog(curr_img, model);
 
+    display('writing HOG features to CSV files...');
     transpose_and_writeCsv(pyra, output_dir, curr_img)
     visHog(pyra, output_dir, curr_img)
 
