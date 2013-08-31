@@ -158,5 +158,12 @@ int main(int argc, char * argv[])
     double time_hog = read_timer() - start_hog;
     cout << "Computed HOG features in " << time_hog << " ms" << endl;
 
+    //TODO:
+    // let's have nRows = 32
+    //            nCols = width*height
+    //            pyramid[level].data    <- get raw ptr.
+    //        or, pyramid.levels()[level].data()
+    //writeCsv_2dFloat(pyramid[level], nRows, nCols, fname)
+
    	return EXIT_SUCCESS;
 }
