@@ -1,8 +1,11 @@
 
 
 function writeToCsv_withSize(fname, array)
-    csvwrite(fname, array);
-    internal_writeToCsv(array);
+    %csvwrite(fname, array);
+    csvwrite(fname, ''); %clear the output file
+    internal_writeToCsv_v2(fname, array);
+
+    %csvStrings = internal_writeToCsv(array);
 
     mySize = size(array);
     if(length(size(array)) == 2)
@@ -15,12 +18,29 @@ function writeToCsv_withSize(fname, array)
     %prepend2file([num2str], fname, true)
 end
 
+%write one line at a time, doing an append.
+function internal_writeToCsv_v2(fname, array)
+    [depth, height, width] = size(array);
+    for x=1:width
+        for y=1:height
+            dlmwrite(fname, array(:, y, x)', '-append');
+        end
+    end
+end
+
 %produce a string, where each line is the "d" dimension in array(d,y,x). 
 %So, each line in the output is one feature descriptor.
-function csvString = internal_writeToCsv(array)
-   [depth, height, width] = size(array) 
+function csvStrings = internal_writeToCsv(array)
+    [depth, height, width] = size(array);
 
-    csvString = '...'; %placeholder
+    csvStrings = [];
+    for x=1:width 
+        for y=1:height
+            %csvStrings{i} = mat2str(array(:, y, x));
+            %csvStrings{(x-1)*height + y} = 'dummy';
+            csvStrings{(x-1)*height + y} = array(:, y, x);
+        end
+    end
 end
 
 %thanks to: http://www.mathworks.com/support/solutions/en/data/1-1BM4K/index.html?product=SL&solution=1-1BM4K
