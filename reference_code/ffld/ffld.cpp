@@ -81,11 +81,6 @@ int main(int argc, char * argv[])
 				showUsage();
 				return 0;
 			}
-#if 0
-			else if (args.OptionId() == OPT_IMAGES) {
-				images = args.OptionArg();
-			}
-#endif
 			else if (args.OptionId() == OPT_PADDING) {
 				padding = atoi(args.OptionArg());
 				
@@ -96,7 +91,6 @@ int main(int argc, char * argv[])
 					return -1;
 				}
 			}
-
 			else if (args.OptionId() == OPT_INTERVAL) {
 				interval = atoi(args.OptionArg());
 				
@@ -126,7 +120,8 @@ int main(int argc, char * argv[])
 	}
 
 	// The image/dataset
-	 string file(args.File(0));
+	//string file(args.File(0));
+    string file = args.File(0);
 	const size_t lastDot = file.find_last_of('.');
 	if ((lastDot == string::npos) ||
 		((file.substr(lastDot) != ".jpg") && (file.substr(lastDot) != ".txt"))) {
