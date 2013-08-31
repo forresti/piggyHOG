@@ -57,9 +57,10 @@ void showUsage()
 		 << endl;
 }
 
-void parseArgs(int &padding, int &interval){
+void parseArgs(int &padding, int &interval, string &file){
     padding = 2;
     interval = 2;
+    file = "dummy";
 }
 
 
@@ -125,7 +126,7 @@ int main(int argc, char * argv[])
 	}
 
 	// The image/dataset
-	const string file(args.File(0));
+	 string file(args.File(0));
 	const size_t lastDot = file.find_last_of('.');
 	if ((lastDot == string::npos) ||
 		((file.substr(lastDot) != ".jpg") && (file.substr(lastDot) != ".txt"))) {
@@ -147,8 +148,9 @@ int main(int argc, char * argv[])
         return -1;
     }
 
-parseArgs(interval, padding);
+parseArgs(interval, padding, file);
     printf("interval = %d \n", interval);
+    printf("file = %s \n", file.c_str());
     
     // Compute the HOG features
     double start_hog = read_timer();    
