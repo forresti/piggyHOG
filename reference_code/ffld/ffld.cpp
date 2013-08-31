@@ -57,29 +57,16 @@ void showUsage()
 		 << endl;
 }
 
-void parseArgs(int &padding, int &interval, string &file){
-    padding = 2;
-    interval = 2;
-    file = "dummy";
-}
-
-
-// Test a mixture model (compute a ROC curve)
-int main(int argc, char * argv[])
-{
-	// Default parameters
-	//string images;
-	int padding = 12;
-	int interval = 10;
-	
-	// Parse the parameters
+// Parse command line parameters
+//   put the appropriate values in (padding, interval, file) based on cmd-line args
+void parseArgs(int &padding, int &interval, string &file, int argc, char * argv[]){
 	CSimpleOpt args(argc, argv, SOptions);
 
 	while (args.Next()) {
 		if (args.LastError() == SO_SUCCESS) {
 			if (args.OptionId() == OPT_HELP) {
 				showUsage();
-				return 0;
+				exit(0);
 			}
 			else if (args.OptionId() == OPT_PADDING) {
 				padding = atoi(args.OptionArg());
@@ -88,7 +75,7 @@ int main(int argc, char * argv[])
 				if (padding <= 1) {
 					showUsage();
 					cerr << "\nInvalid padding arg " << args.OptionArg() << endl;
-					return -1;
+					exit(1);
 				}
 			}
 			else if (args.OptionId() == OPT_INTERVAL) {
@@ -98,36 +85,35 @@ int main(int argc, char * argv[])
 				if (interval <= 0) {
 					showUsage();
 					cerr << "\nInvalid interval arg " << args.OptionArg() << endl;
-					return -1;
+					exit(1);
 				}
 			}
 		}
 		else {
 			showUsage();
 			cerr << "\nUnknown option " << args.OptionText() << endl;
-			return -1;
+			exit(1);
 		}
 	}
 	if (!args.FileCount()) {
 		showUsage();
 		cerr << "\nNo image/dataset provided" << endl;
-		return -1;
+		exit(1);
 	}
 	else if (args.FileCount() > 1) {
 		showUsage();
 		cerr << "\nMore than one image/dataset provided" << endl;
-		return -1;
+		exit(1);
 	}
 
 	// The image/dataset
-	//string file(args.File(0));
-    string file = args.File(0);
+    file = args.File(0);
 	const size_t lastDot = file.find_last_of('.');
 	if ((lastDot == string::npos) ||
 		((file.substr(lastDot) != ".jpg") && (file.substr(lastDot) != ".txt"))) {
 		showUsage();
 		cerr << "\nInvalid file " << file << ", should be .jpg or .txt" << endl;
-		return -1;
+		exit(1);
 	}
 
 	// Try to load the image
@@ -135,18 +121,29 @@ int main(int argc, char * argv[])
         cout << "need to input a JPG image" << endl;
         exit(1);
     }
+}
 
+// Test a mixture model (compute a ROC curve)
+int main(int argc, char * argv[])
+{
+	// Default parameters
+    string file;
+	int padding = 12;
+	int interval = 10;
+
+    //parseArgs params are passed by reference, so they get updated here
+    parseArgs(padding, interval, file, argc, argv); //update parameters with any command-line inputs
+
+    printf("    padding = %d \n", padding);
+    printf("    interval = %d \n", interval);
+    printf("    file = %s \n", file.c_str());
+ 
 	JPEGImage image(file);
     if (image.empty()) {
         showUsage();
         cerr << "\nInvalid image " << file << endl;
         return -1;
-    }
-
-//parseArgs(interval, padding, file);
-    printf("interval = %d \n", interval);
-    printf("file = %s \n", file.c_str());
-    
+    }   
     // Compute the HOG features
     double start_hog = read_timer();    
 
