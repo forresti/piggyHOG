@@ -19,6 +19,7 @@ function pyra = time_extract_hog(img_name, model)
 
 function transpose_and_writeCsv(pyra, output_dir, curr_img)
     nlevels = length(pyra.feat);
+    pyra = transposePyra(pyra);
 
     %TODO: transpose!
     for level = 1:10:nlevels
@@ -26,9 +27,18 @@ function transpose_and_writeCsv(pyra, output_dir, curr_img)
         %csvwrite([output_dir '/' imgname '_scale_' int2str(level) '.csv'], pyra.feat{level});
         writeToCsv_withSize([output_dir '/' imgname '_scale_' int2str(level) '.csv'], pyra.feat{level});
     end
-keyboard
+
+% @input dims:  (y, x, d)
+% @output dims: (d, y, x)
+%                d + y*depth + x*depth*height
+function pyra = transposePyra(pyra)
+    nlevels = length(pyra.feat);
+    for level = 1:nlevels
+        pyra.feat{level} = permute(pyra.feat{level}, [3 1 2]);
+    end
 
 % @param curr_img is just for setting an output path.
+% visHog does NOT want transposed HOG features... it wants (y, x, d).
 function visHog(pyra, output_dir, curr_img)
     nlevels = length(pyra.feat);
 
