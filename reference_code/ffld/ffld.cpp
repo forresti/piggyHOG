@@ -17,52 +17,36 @@
 // You should have received a copy of the GNU General Public License along with FFLD. If not, see
 // <http://www.gnu.org/licenses/>.
 //--------------------------------------------------------------------------------------------------
-
 #include "SimpleOpt.h"
-
 #include "HOGPyramid.h"
 #include "JPEGImage.h" 
-//#include "Intersector.h"
-//#include "Mixture.h"
-//#include "Scene.h" //for Object.h, which is needed for "PASCAL object type." TODO: remove soon.
 
 #include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 
-#ifndef _WIN32
+#ifndef _WIN32 //Linux
 #include <sys/time.h>
-
 timeval Start, Stop;
-
-inline void start()
-{
+inline void start(){
 	gettimeofday(&Start, 0);
 }
-
-inline int stop()
-{
+inline int stop(){
 	gettimeofday(&Stop, 0);
-	
 	timeval duration;
 	timersub(&Stop, &Start, &duration);
-	
 	return duration.tv_sec * 1000 + (duration.tv_usec + 500) / 1000;
 }
-#else
+#else //Windows
 #include <time.h>
 #include <windows.h>
-
 ULARGE_INTEGER Start, Stop;
 
-inline void start()
-{
+inline void start(){
 	GetSystemTimeAsFileTime((FILETIME *)&Start);
 }
-
-inline int stop()
-{
+inline int stop(){
 	GetSystemTimeAsFileTime((FILETIME *)&Stop);
 	Stop.QuadPart -= Start.QuadPart;
 	return (Stop.QuadPart + 5000) / 10000;
@@ -75,32 +59,17 @@ using namespace std;
 // SimpleOpt array of valid options
 enum
 {
-	OPT_HELP, OPT_MODEL, OPT_NAME, OPT_RESULTS, OPT_IMAGES, OPT_NB_NEG, OPT_PADDING, OPT_INTERVAL,
-	OPT_THRESHOLD, OPT_OVERLAP
+    OPT_HELP, OPT_PADDING, OPT_INTERVAL, OPT_IMAGES
 };
 
 CSimpleOpt::SOption SOptions[] =
 {
 	{ OPT_HELP, "-h", SO_NONE },
 	{ OPT_HELP, "--help", SO_NONE },
-	//{ OPT_MODEL, "-m", SO_REQ_SEP },
-	//{ OPT_MODEL, "--model", SO_REQ_SEP },
-	//{ OPT_NAME, "-n", SO_REQ_SEP },
-	//{ OPT_NAME, "--name", SO_REQ_SEP },
-	//{ OPT_RESULTS, "-r", SO_REQ_SEP },
-	//{ OPT_RESULTS, "--results", SO_REQ_SEP },
-	//{ OPT_IMAGES, "-i", SO_REQ_SEP },
-	//{ OPT_IMAGES, "--images", SO_REQ_SEP },
-	//{ OPT_NB_NEG, "-z", SO_REQ_SEP },
-	//{ OPT_NB_NEG, "--nb-negatives", SO_REQ_SEP },
 	{ OPT_PADDING, "-p", SO_REQ_SEP },
 	{ OPT_PADDING, "--padding", SO_REQ_SEP },
 	{ OPT_INTERVAL, "-e", SO_REQ_SEP },
 	{ OPT_INTERVAL, "--interval", SO_REQ_SEP },
-	//{ OPT_THRESHOLD, "-t", SO_REQ_SEP },
-	//{ OPT_THRESHOLD, "--threshold", SO_REQ_SEP },
-	//{ OPT_OVERLAP, "-v", SO_REQ_SEP },
-	//{ OPT_OVERLAP, "--overlap", SO_REQ_SEP },
 	SO_END_OF_OPTIONS
 };
 
@@ -109,15 +78,8 @@ void showUsage()
 	cout << "Usage: test [options] image.jpg, or\n       test [options] image_set.txt\n\n"
 			"Options:\n"
 			"  -h,--help               Display this information\n"
-			//"  -m,--model <file>       Read the input model from <file> (default \"model.txt\")\n"
-			//"  -n,--name <arg>         Name of the object to detect (default \"person\")\n"
-			//"  -r,--results <file>     Write the detection results to <file> (default none)\n"
-			//"  -i,--images <folder>    Draw the detections to <folder> (default none)\n"
-			//"  -z,--nb-negatives <arg> Maximum number of negative images to consider (default all)\n"
-			"  -p,--padding <arg>      Amount of zero padding in HOG cells (default 12)\n"
+    		"  -p,--padding <arg>      Amount of zero padding in HOG cells (default 12)\n"
 			"  -e,--interval <arg>     Number of levels per octave in the HOG pyramid (default 10)\n"
-			//"  -t,--threshold <arg>    Minimum detection threshold (default -10)\n"
-			//"  -v,--overlap <arg>      Minimum overlap in non maxima suppression (default 0.5)"
 		 << endl;
 }
 
