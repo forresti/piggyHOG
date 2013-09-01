@@ -160,6 +160,9 @@ int main(int argc, char * argv[])
 
     int level = 0;
     const float* raw_hog = pyramid.levels()[level].data()->data();
+    int width = pyramid.levels()[level].cols();
+    int height = pyramid.levels()[level].rows();
+
 
     //TODO:
     // let's have nRows = 32
