@@ -32,12 +32,12 @@ function transpose_and_writeCsv(pyra, output_dir, curr_img)
     end
 
 % @input dims:  (y, x, d)
-% @output dims: (d, y, x)
-%                d + y*depth + x*depth*height
+% @output dims: (d, x, y) -- same as FFLD.
+%                d + x*depth + y*depth*width
 function pyra = transposePyra(pyra)
     nlevels = length(pyra.feat);
     for level = 1:nlevels
-        pyra.feat{level} = permute(pyra.feat{level}, [3 1 2]);
+        pyra.feat{level} = permute(pyra.feat{level}, [3 2 1]); %[y x d] -> [d x y]
     end
 
 % @param curr_img is just for setting an output path.
