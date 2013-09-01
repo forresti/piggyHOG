@@ -188,11 +188,12 @@ void printHogSizes(HOGPyramid pyramid){
 void writePyraToCsv(HOGPyramid pyramid){
     int nlevels = pyramid.levels().size();
     for(int level = 0; level < nlevels; level++){
+        printf("writing to CSV: level %d \n", level);
         const float* raw_hog = pyramid.levels()[level].data()->data();        int width = pyramid.levels()[level].cols();
         int height = pyramid.levels()[level].rows();
         int depth = pyramid.NbFeatures;
         ostringstream fname;
-        fname << "./tests/level" << level << ".csv"; //TODO: get orig img name into the CSV name.
+        fname << "../ffld_results/level" << level << ".csv"; //TODO: get orig img name into the CSV name.
     
         int nCols = depth; //one descriptor per row
         int nRows = width*height;
