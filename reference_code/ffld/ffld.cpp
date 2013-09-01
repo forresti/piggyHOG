@@ -165,19 +165,17 @@ int main(int argc, char * argv[])
     //TODO:
     // let's have nRows = 32
     //            nCols = width*height
-    //            pyramid[level].data    <- get raw ptr.
-    //        or, pyramid.levels()[level].data()
+    //            const float* raw_hog = pyramid.levels()[level].data()->data();
     //writeCsv_2dFloat(pyramid[level], nRows, nCols, fname)
 
    	return EXIT_SUCCESS;
 }
 
-
 void printHogSizes(HOGPyramid pyramid){
     int nlevels = pyramid.levels().size();
 
     for(int level = 0; level < nlevels; level++){ 
-        const float* raw_hog = pyramid.levels()[level].data()->data();
+        //const float* raw_hog = pyramid.levels()[level].data()->data();
         int width = pyramid.levels()[level].cols();
         int height = pyramid.levels()[level].rows();
         printf("level %d: width=%d, height=%d \n", level, width, height);

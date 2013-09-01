@@ -1,7 +1,7 @@
 # This Makefile is used under Linux
 
 CXX = g++
-CFLAGS = -g -fopenmp -O3 -fPIC -I/usr/local/include/ -I../eigen -I.. #-I/usr/include/libxml2/ 
+CFLAGS = -g -fopenmp -O3 -fPIC -I/usr/local/include/ -I../eigen -I.. -DFFLD_HOGPYRAMID_FELZENSZWALB_FEATURES 
 LDLIBS = -g -lgomp -ljpeg #-lxml2 -L/usr/local/lib64 -lfftw3f -lfftw3 -lm -Wl,-rpath,/usr/local/lib64 
 #OBJS = HOGPyramid.o JPEGImage.o Mixture.o Model.o Object.o Patchwork.o Rectangle.o Scene.o ffld.o
 OBJS = HOGPyramid.o JPEGImage.o helpers.o ffld.o
