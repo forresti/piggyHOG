@@ -19,16 +19,16 @@ end
 function internal_writeToCsv(fname, array)
     [depth, height, width] = size(array);
     
-    outBuf = '';
+    outBuf = ''; %TODO: write to buffer, then write the buffer to file.
 
     for x=1:width
         for y=1:height
-            row = array(:, y, x);
-            rowStr = mat2str(row); %TODO: mat2str(buf, 5) -- '5' = digits of precision
-            rowStr = matStr_to_csv(rowStr);
-            outBuf = [outBuf '\n' rowStr];
+            %row = array(:, y, x);
+            %rowStr = mat2str(row); %TODO: mat2str(buf, 5) -- '5' = digits of precision
+            %rowStr = matStr_to_csv(rowStr);
+            %outBuf = [outBuf '\n' rowStr];
 
-            %dlmwrite(fname, array(:, y, x)', '-append');
+            dlmwrite(fname, array(:, y, x)', '-append');
         end
     end
 
