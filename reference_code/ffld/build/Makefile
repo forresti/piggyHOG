@@ -1,5 +1,3 @@
-# This Makefile is used under Linux
-
 CXX = g++
 CFLAGS = -g -fopenmp -O3 -fPIC -I/usr/local/include/ -I../eigen -I.. -DFFLD_HOGPYRAMID_FELZENSZWALB_FEATURES 
 LDLIBS = -g -lgomp -ljpeg 
@@ -20,21 +18,6 @@ JPEGImage.o: ../JPEGImage.cpp ../JPEGImage.h
 
 helpers.o: ../common/helpers.cpp ../common/helpers.h 
 	$(CXX) $(CFLAGS) -c ../common/helpers.cpp 
-
-#Model.o:	../Model.cpp ../Model.h ../HOGPyramid.h
-#	$(CXX) $(CFLAGS) -c ../Model.cpp 
-
-#Object.o: 	../Object.cpp ../Object.h ../Rectangle.h
-#	$(CXX) $(CFLAGS) -c ../Object.cpp 
-
-#Patchwork.o:	../Patchwork.cpp ../Patchwork.h ../Rectangle.h ../HOGPyramid.h
-#	$(CXX) $(CFLAGS) -c ../Patchwork.cpp 
-
-#Rectangle.o:	../Rectangle.cpp ../Rectangle.h 
-#	$(CXX)	$(CFLAGS) -c ../Rectangle.cpp 
-
-#Scene.o:	../Scene.cpp ../Scene.h ../Object.h
-#	$(CXX)	$(CFLAGS) -c ../Scene.cpp 
 
 clean:
 	rm -f *~ *.o *.mex* *.obj 
