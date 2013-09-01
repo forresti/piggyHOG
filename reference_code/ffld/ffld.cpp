@@ -158,6 +158,9 @@ int main(int argc, char * argv[])
     double time_hog = read_timer() - start_hog;
     cout << "Computed HOG features in " << time_hog << " ms" << endl;
 
+    int level = 0;
+    const float* raw_hog = pyramid.levels()[level].data()->data();
+
     //TODO:
     // let's have nRows = 32
     //            nCols = width*height
