@@ -20,10 +20,33 @@ function internal_writeToCsv(fname, array)
     [depth, height, width] = size(array);
     for x=1:width
         for y=1:height
-            dlmwrite(fname, array(:, y, x)', '-append');
+            %myRow = '';
+            for d = 1:depth
+                buf = array(:, y, x);
+                %C = textscan(sprintf('%s %s\n', buf{:}), '%s', 'delimiter', '\n')
+
+                rowStr = mat2str(buf); %TODO: mat2str(buf, 5) -- '5' = digits of precision
+                rowStr = matStr_to_csv(rowStr)
+
+                %dlmwrite(fname, array(:, y, x)', '-append');
+            end
         end
     end
 end
+
+% [1 2 3 4] -> 1,2,3,4
+function matStr = matStr_to_csv(matStr)
+    %space to comma
+    underscore_loc = findstr(matStr, ' ');
+    matStr(underscore_loc) = ',';
+
+    %remove brackets
+    bracket_loc = findstr(matStr, '['); 
+    matStr(bracket_loc) = ''; 
+    bracket_loc = findstr(matStr, ']');
+    matStr(bracket_loc) = ''; 
+end
+
 
 %thanks to: http://www.mathworks.com/support/solutions/en/data/1-1BM4K/index.html?product=SL&solution=1-1BM4K
 function prepend2file( string, filename, newline )
