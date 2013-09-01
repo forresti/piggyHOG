@@ -10,7 +10,7 @@ void writeCsv_2dFloat(const float* vec, int nRows, int nCols, string fname)
         for(int col=0; col<(nCols-1); col++){
             myfile << vec[row*nCols + col] << ",";
         }
-        myfile << vec[row*nCols + (nCols-1)] << endl; //don't put a ',' after final element on a CSV line
+        myfile << vec[row*nCols + (nCols-1)] << "\n"; //don't put a ',' after final element on a CSV line
     }
     myfile.close();
 }
