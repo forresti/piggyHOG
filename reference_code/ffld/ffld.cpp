@@ -150,8 +150,11 @@ int main(int argc, char * argv[])
     // Compute the HOG features
     double start_hog = read_timer();    
 
-    HOGPyramid pyramid(image, padding, padding, interval);
-    
+    int padx = 11; //ignoring cmd-line padding arg.
+    int pady = 6; //to match voc5 dims
+    //HOGPyramid pyramid(image, padding, padding, interval);
+    HOGPyramid pyramid(image, padx, pady, interval); 
+
     if (pyramid.empty()) {
         showUsage();
         cerr << "\nInvalid image " << file << endl;
@@ -163,12 +166,6 @@ int main(int argc, char * argv[])
 
     printHogSizes(pyramid);
     writePyraToCsv(pyramid);
-
-    //TODO:
-    // let's have nRows = 32
-    //            nCols = width*height
-    //            const float* raw_hog = pyramid.levels()[level].data()->data();
-    //writeCsv_2dFloat(pyramid[level], nRows, nCols, fname)
 
    	return EXIT_SUCCESS;
 }
@@ -185,6 +182,8 @@ void printHogSizes(HOGPyramid pyramid){
     }
 }
 
+// nRows = 32
+// nCols = width*height
 void writePyraToCsv(HOGPyramid pyramid){
     int nlevels = pyramid.levels().size();
     for(int level = 0; level < nlevels; level++){
