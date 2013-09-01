@@ -10,7 +10,7 @@ function demo()
     display('writing HOG features to CSV files...');
 
     transpose_and_writeCsv(pyra, output_dir, curr_img)
-    visHog(pyra, output_dir, curr_img)
+    %visHog(pyra, output_dir, curr_img)
 
 function pyra = time_extract_hog(img_name, model)
     im = imread(img_name);
