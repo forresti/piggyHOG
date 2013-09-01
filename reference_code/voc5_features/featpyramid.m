@@ -45,12 +45,15 @@ function pyra = featpyramid(im, model, padx, pady)
             pyra.feat{i} = features(scaled, sbin/4);
             pyra.scales(i) = 4/sc^(i-1);
         end
+
         % (sbin/2) x (sbin/2) features
         pyra.feat{i+extra_interval} = features(scaled, sbin/2);
         pyra.scales(i+extra_interval) = 2/sc^(i-1);
+
         % sbin x sbin HOG features 
         pyra.feat{i+extra_interval+interval} = features(scaled, sbin);
         pyra.scales(i+extra_interval+interval) = 1/sc^(i-1);
+
         % Remaining pyramid octaves 
         for j = i+interval:interval:max_scale
             scaled = resize(scaled, 0.5);
