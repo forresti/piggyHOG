@@ -5,10 +5,12 @@ function demo()
 
     load('VOC2007/car_final'); %load 'model' structure
     pyra = time_extract_hog(curr_img, model);
-
+    
+    printHogSizes(pyra)
     display('writing HOG features to CSV files...');
-    transpose_and_writeCsv(pyra, output_dir, curr_img)
-    visHog(pyra, output_dir, curr_img)
+
+    %transpose_and_writeCsv(pyra, output_dir, curr_img)
+    %visHog(pyra, output_dir, curr_img)
 
 function pyra = time_extract_hog(img_name, model)
     im = imread(img_name);
@@ -50,5 +52,13 @@ function visHog(pyra, output_dir, curr_img)
         [path, imgname, ext] = fileparts(curr_img);
         print(gcf, '-dpng', '-r0', [output_dir '/' imgname '_scale_' int2str(level) ext]);
     end    
+
+%for best results, call this BEFORE transposing the pyramid.
+function printHogSizes(pyra)
+    nlevels = length(pyra.feat);
+    for level = 1:nlevels
+        [h w d] = size(pyra.feat{level});
+        display(sprintf('level %d: width=%d, height=%d, depth=%d', level, w, h, d)) 
+    end
 
 
