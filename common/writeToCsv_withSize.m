@@ -13,7 +13,6 @@ function writeToCsv_withSize(fname, array)
     end
 
     prepend2file(sizeStr, fname, true);
-    %prepend2file([num2str], fname, true)
 end
 
 %write one line at a time, doing an append.

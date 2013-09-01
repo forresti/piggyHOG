@@ -124,6 +124,7 @@ void parseArgs(int &padding, int &interval, string &file, int argc, char * argv[
 }
 
 void printHogSizes(HOGPyramid pyramid);
+void writePyraToCsv(HOGPyramid pyramid);
 
 // Test a mixture model (compute a ROC curve)
 int main(int argc, char * argv[])
@@ -161,6 +162,7 @@ int main(int argc, char * argv[])
     cout << "Computed HOG features in " << time_hog << " ms" << endl;
 
     printHogSizes(pyramid);
+    writePyraToCsv(pyramid);
 
     //TODO:
     // let's have nRows = 32
@@ -182,5 +184,22 @@ void printHogSizes(HOGPyramid pyramid){
         printf("level %d: width=%d, height=%d, depth=%d \n", level, width, height, depth);
     }
 }
+
+void writePyraToCsv(HOGPyramid pyramid){
+    int nlevels = pyramid.levels().size();
+    for(int level = 0; level < nlevels; level++){
+        const float* raw_hog = pyramid.levels()[level].data()->data();        int width = pyramid.levels()[level].cols();
+        int height = pyramid.levels()[level].rows();
+        int depth = pyramid.NbFeatures;
+        ostringstream fname;
+        fname << "./tests/level" << level << ".csv"; //TODO: get orig img name into the CSV name.
+    
+        int nCols = depth; //one descriptor per row
+        int nRows = width*height;
+
+        writeCsv_2dFloat(raw_hog, nRows, nCols, fname.str());
+    }
+}
+
 
 

@@ -9,7 +9,7 @@
 #include <sys/time.h>
 using namespace std;
 
-void writeCsv_2dFloat(vector<float> vec, int nRows, int nCols, string fname);
+void writeCsv_2dFloat(const float* vec, int nRows, int nCols, string fname);
 double read_timer();
 
 #endif
