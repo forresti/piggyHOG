@@ -1,5 +1,5 @@
 CXX = g++
-CFLAGS = -g -fopenmp -O3 -fPIC -I/usr/local/include/ -I../eigen -I.. -DFFLD_HOGPYRAMID_FELZENSZWALB_FEATURES -funroll-all-loops 
+CFLAGS = -g -fopenmp -O3 -fPIC -I/usr/local/include/ -I../eigen -I.. -DFFLD_HOGPYRAMID_FELZENSZWALB_FEATURES  
 LDLIBS = -g -lgomp -ljpeg 
 OBJS = HOGPyramid.o JPEGImage.o helpers.o ffld.o
 all:	ffld 

@@ -178,7 +178,8 @@ void printHogSizes(HOGPyramid pyramid){
         //const float* raw_hog = pyramid.levels()[level].data()->data();
         int width = pyramid.levels()[level].cols();
         int height = pyramid.levels()[level].rows();
-        printf("level %d: width=%d, height=%d \n", level, width, height);
+        int depth = pyramid.NbFeatures;
+        printf("level %d: width=%d, height=%d, depth=%d \n", level, width, height, depth);
     }
 }
 
