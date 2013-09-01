@@ -158,10 +158,16 @@ int main(int argc, char * argv[])
     double time_hog = read_timer() - start_hog;
     cout << "Computed HOG features in " << time_hog << " ms" << endl;
 
-    int level = 0;
-    const float* raw_hog = pyramid.levels()[level].data()->data();
-    int width = pyramid.levels()[level].cols();
-    int height = pyramid.levels()[level].rows();
+
+    //REFACTOR: outputHogs()
+    int nlevels = pyramid.levels().size();
+
+    for(int level = 0; level < nlevels; level++){ 
+        const float* raw_hog = pyramid.levels()[level].data()->data();
+        int width = pyramid.levels()[level].cols();
+        int height = pyramid.levels()[level].rows();
+        printf("level %d: width=%d, height=%d \n", level, width, height);
+    }
 
 
     //TODO:
