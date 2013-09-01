@@ -24,7 +24,6 @@ function transpose_and_writeCsv(pyra, output_dir, curr_img)
     nlevels = length(pyra.feat);
     pyra = transposePyra(pyra);
 
-    %TODO: transpose!
     for level = 1:10:nlevels
         [path, imgname, ext] = fileparts(curr_img);
         %csvwrite([output_dir '/' imgname '_scale_' int2str(level) '.csv'], pyra.feat{level});
