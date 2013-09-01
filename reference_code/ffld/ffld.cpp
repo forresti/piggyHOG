@@ -188,7 +188,7 @@ void printHogSizes(HOGPyramid pyramid){
 void writePyraToCsv(HOGPyramid pyramid){
     int nlevels = pyramid.levels().size();
     for(int level = 0; level < nlevels; level++){
-        printf("writing to CSV: level %d \n", level);
+        //printf("writing to CSV: level %d \n", level);
         const float* raw_hog = pyramid.levels()[level].data()->data();        int width = pyramid.levels()[level].cols();
         int height = pyramid.levels()[level].rows();
         int depth = pyramid.NbFeatures;
@@ -198,6 +198,7 @@ void writePyraToCsv(HOGPyramid pyramid){
         int nCols = depth; //one descriptor per row
         int nRows = width*height;
 
+        //TODO: also write (depth, width, height) -- in some order -- to the top of the CSV file.
         writeCsv_2dFloat(raw_hog, nRows, nCols, fname.str());
     }
 }
