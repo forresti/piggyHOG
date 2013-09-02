@@ -73,9 +73,9 @@ pady_(0), interval_(0)
 	int i;
 #pragma omp parallel for private(i)
 	for (i = 0; i < interval; ++i) {
-		//double scale = pow(2.0, static_cast<double>(-i) / interval);
-        double sc = pow(2.0, (1/double(interval)));	
-        double scale = pow(1/sc, i);
+		double scale = pow(2.0, static_cast<double>(-i) / interval);
+        //double sc = pow(2.0, (1/double(interval)));	
+        //double scale = pow(1/sc, i);
 
 		JPEGImage scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
 		
@@ -89,39 +89,41 @@ pady_(0), interval_(0)
 		
 		// Remaining octaves
 		for (int j = 2; i + j * interval <= maxScale; ++j) {
-			//scale *= 0.5;
-            double sc = pow(4.0, (1/double(interval)));
+			scale *= 0.5;
+            //double sc = pow(4.0, (1/double(interval)));
 			scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
 			Hog(scaled, levels_[i + j * interval], padx, pady, 8);
 		}
 #else
 		Hog(scaled.scanLine(0), scaled.width(), scaled.height(), scaled.depth(), levels_[i], 4);
-        scales[i] = scale*2.0f;
+        //scales[i] = scale*2.0f;
 
 		// Second octave at the original resolution
 		if (i + interval <= maxScale)
 			Hog(scaled.scanLine(0), scaled.width(), scaled.height(), scaled.depth(),
 				levels_[i + interval], 8);
-        scales[i + interval] = scale;
+        //scales[i + interval] = scale;
 
 		// Remaining octaves
 		for (int j = 2; i + j * interval <= maxScale; ++j) {
 			scale *= 0.5;
-			//scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
-            scaled = image.resize(round(image.width() * scale), image.height() * scale + 0.5);
+			scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
+            //scaled = image.resize(round(image.width() * scale), image.height() * scale + 0.5);
 			Hog(scaled.scanLine(0), scaled.width(), scaled.height(), scaled.depth(),
 				levels_[i + j * interval], 8);
-           scales[i + j*interval] = scale;
+           //scales[i + j*interval] = scale;
 		}
 #endif
 	}
 	
+    #if 0 //Forrest's debug statements
     //print (using C++ 0-indexing, not Matlab 1-indexing)
     for(i=0; i<maxScale+1; i++){
         printf("scales[%d] = %f \n", i, scales[i]);
         printf("    image.width() * scales[%d] = %f \n", i, image.width() * scales[i]);
     }
     printf("image.width()=%d, image.height()=%d \n", image.width(), image.height());
+    #endif
 
 	// Add padding
 #ifdef FFLD_HOGPYRAMID_FELZENSZWALB_FEATURES
