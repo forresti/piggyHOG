@@ -74,9 +74,6 @@ pady_(0), interval_(0)
 #pragma omp parallel for private(i)
 	for (i = 0; i < interval; ++i) {
 		double scale = pow(2.0, static_cast<double>(-i) / interval);
-        //double sc = pow(2.0, (1/double(interval)));	
-        //double scale = pow(1/sc, i);
-
 		JPEGImage scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
 		
 		// First octave at twice the image resolution
@@ -90,13 +87,11 @@ pady_(0), interval_(0)
 		// Remaining octaves
 		for (int j = 2; i + j * interval <= maxScale; ++j) {
 			scale *= 0.5;
-            //double sc = pow(4.0, (1/double(interval)));
 			scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
 			Hog(scaled, levels_[i + j * interval], padx, pady, 8);
 		}
 #else
 		Hog(scaled.scanLine(0), scaled.width(), scaled.height(), scaled.depth(), levels_[i], 4);
-        //scales[i] = scale*2.0f;
 
 		// Second octave at the original resolution
 		if (i + interval <= maxScale)
@@ -108,7 +103,6 @@ pady_(0), interval_(0)
 		for (int j = 2; i + j * interval <= maxScale; ++j) {
 			scale *= 0.5;
 			scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
-            //scaled = image.resize(round(image.width() * scale), image.height() * scale + 0.5);
 			Hog(scaled.scanLine(0), scaled.width(), scaled.height(), scaled.depth(),
 				levels_[i + j * interval], 8);
            //scales[i + j*interval] = scale;
