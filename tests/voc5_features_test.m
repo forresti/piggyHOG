@@ -1,11 +1,11 @@
 
-function demo()
+function voc5_features_test()
     output_dir = 'tests/voc5_features_results'
     curr_img = 'images_640x480/carsgraz_001.image.png';
 
     load('VOC2007/car_final'); %load 'model' structure
     pyra = time_extract_hog(curr_img, model);
-    
+ 
     printHogSizes(pyra)
     display('writing HOG features to CSV files...');
 
