@@ -89,7 +89,8 @@ pady_(0), interval_(0)
 		
 		// Remaining octaves
 		for (int j = 2; i + j * interval <= maxScale; ++j) {
-			scale *= 0.5;
+			//scale *= 0.5;
+            double sc = pow(4.0, (1/double(interval)));
 			scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
 			Hog(scaled, levels_[i + j * interval], padx, pady, 8);
 		}
