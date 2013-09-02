@@ -20,8 +20,8 @@ function mydiff(ffldCsv, voc5Csv, h)
 
     resultSize = inHeight * inWidth;
     display(['hog[' int2str(h) ']:'])
-    display(['    size(voc5Result) = ' mat2str(size(voc5Result)) ' = ' num2str(inHeight_voc5*inWidth_voc5)])
-    display(['    size(ffldResult) = ' mat2str(size(ffldResult)) ' = ' num2str(resultSize)])
+    %display(['    size(voc5Result) = ' mat2str(size(voc5Result)) ' = ' num2str(inHeight_voc5*inWidth_voc5)])
+    %display(['    size(ffldResult) = ' mat2str(size(ffldResult)) ' = ' num2str(resultSize)])
     %display(['    nnz(diff) = ' num2str(nnz(diff))])
     %display(['    num diff elements above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)) ])
     display(['    percent mismatches above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)/resultSize * 100) '%'])
