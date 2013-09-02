@@ -73,8 +73,10 @@ pady_(0), interval_(0)
 	int i;
 #pragma omp parallel for private(i)
 	for (i = 0; i < interval; ++i) {
-		double scale = pow(2.0, static_cast<double>(-i) / interval);
-		
+		//double scale = pow(2.0, static_cast<double>(-i) / interval);
+        double sc = pow(2.0, (1/double(interval)));	
+        double scale = pow(1/sc, i);
+
 		JPEGImage scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
 		
 		// First octave at twice the image resolution
@@ -116,7 +118,9 @@ pady_(0), interval_(0)
     //print (using C++ 0-indexing, not Matlab 1-indexing)
     for(i=0; i<maxScale+1; i++){
         printf("scales[%d] = %f \n", i, scales[i]);
+        printf("    image.width() * scales[%d] = %f \n", i, image.width() * scales[i]);
     }
+    printf("image.width()=%d, image.height()=%d \n", image.width(), image.height());
 
 	// Add padding
 #ifdef FFLD_HOGPYRAMID_FELZENSZWALB_FEATURES

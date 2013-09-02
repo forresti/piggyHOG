@@ -14,7 +14,7 @@ function mydiff(ffldCsv, voc5Csv, h)
     voc5Result = voc5Result(2:end, :); %remove header (which shows dims)
 
     thresh = 0.1;
-    %diff = abs(ffldResult - voc5Result);
+    diff = abs(ffldResult - voc5Result);
     [inHeight inWidth] = size(ffldResult);
     [inHeight_voc5 inWidth_voc5] = size(voc5Result);
 
@@ -24,6 +24,6 @@ function mydiff(ffldCsv, voc5Csv, h)
     display(['    size(ffldResult) = ' mat2str(size(ffldResult)) ' = ' num2str(resultSize)])
     %display(['    nnz(diff) = ' num2str(nnz(diff))])
     %display(['    num diff elements above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)) ])
-    %display(['    percent mismatches above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)/resultSize * 100) '%'])
+    display(['    percent mismatches above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)/resultSize * 100) '%'])
 end
 
