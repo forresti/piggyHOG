@@ -56,9 +56,10 @@ function pyra = featpyramid(im, model, padx, pady)
 
         % Remaining pyramid octaves 
         for j = i+interval:interval:max_scale
-            scaled = resize(scaled, 0.5);
-            pyra.feat{j+extra_interval+interval} = features(scaled, sbin);
+            %scaled = resize(scaled, 0.5);
             pyra.scales(j+extra_interval+interval) = 0.5 * pyra.scales(j+extra_interval);
+            scaled = resize(im, pyra.scales(j+extra_interval+interval)); %Trying to get with FFLD dims for a the last couple of mismatched dims
+            pyra.feat{j+extra_interval+interval} = features(scaled, sbin);
         end
     end
 
