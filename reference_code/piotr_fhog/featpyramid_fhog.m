@@ -19,7 +19,7 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
     %                   resolution of pyra.feat{i}
 
 
-    im=imResample(single(im)/255,[480 640]);
+    im=imResample(single(im)/255,[480 640]); %from Piotr's codebase
 
     if nargin < 3
     [padx, pady] = getpadding(model);
@@ -47,18 +47,15 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
 
         if extra_interval > 0
             % Optional (sbin/4) x (sbin/4) features
-            %pyra.feat{i} = fhog(scaled, sbin/4);
             pyra.feat{i} = fhog(scaled_single, sbin/4);
             pyra.scales(i) = 4/sc^(i-1);
         end
 
         % (sbin/2) x (sbin/2) features
-        %pyra.feat{i+extra_interval} = fhog(scaled, sbin/2);
         pyra.feat{i+extra_interval} = fhog(scaled_single, sbin/2);
         pyra.scales(i+extra_interval) = 2/sc^(i-1);
 
         % sbin x sbin HOG features 
-        %pyra.feat{i+extra_interval+interval} = fhog(scaled, sbin);
         pyra.feat{i+extra_interval+interval} = fhog(scaled_single, sbin);
         pyra.scales(i+extra_interval+interval) = 1/sc^(i-1);
 
@@ -66,7 +63,6 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
         for j = i+interval:interval:max_scale
             scaled = resize(scaled, 0.5);
             scaled_single = single(scaled); 
-            %pyra.feat{j+extra_interval+interval} = fhog(scaled, sbin);
             pyra.feat{j+extra_interval+interval} = fhog(scaled_single, sbin); 
             pyra.scales(j+extra_interval+interval) = 0.5 * pyra.scales(j+extra_interval);
         end
