@@ -20,6 +20,7 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
 
 
     im=imResample(single(im)/255,[480 640]); %from Piotr's codebase
+    hog_time = 0;
 
     if nargin < 3
     [padx, pady] = getpadding(model);
@@ -52,21 +53,29 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
         end
 
         % (sbin/2) x (sbin/2) features
+          hog_tic = tic();
         pyra.feat{i+extra_interval} = fhog(scaled_single, sbin/2);
+          hog_time = hog_time + toc(hog_tic);
         pyra.scales(i+extra_interval) = 2/sc^(i-1);
 
-        % sbin x sbin HOG features 
+        % sbin x sbin HOG features
+          hog_tic = tic();
         pyra.feat{i+extra_interval+interval} = fhog(scaled_single, sbin);
+          hog_time = hog_time + toc(hog_tic);
         pyra.scales(i+extra_interval+interval) = 1/sc^(i-1);
 
         % Remaining pyramid octaves 
         for j = i+interval:interval:max_scale
             scaled = resize(scaled, 0.5);
             scaled_single = single(scaled); 
-            pyra.feat{j+extra_interval+interval} = fhog(scaled_single, sbin); 
+              hog_tic = tic();
+            pyra.feat{j+extra_interval+interval} = fhog(scaled_single, sbin);
+              hog_time = hog_time + toc(hog_tic); 
             pyra.scales(j+extra_interval+interval) = 0.5 * pyra.scales(j+extra_interval);
         end
     end
+
+    display(sprintf('    spent %f sec extracting HOG. Not including downsampling, padding, or place features', hog_time))
 
     pyra.num_levels = length(pyra.feat);
 
