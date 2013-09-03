@@ -21,6 +21,7 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
 
     im=imResample(single(im)/255,[480 640]); %from Piotr's codebase
     hog_time = 0;
+    scale_time = 0;
 
     if nargin < 3
     [padx, pady] = getpadding(model);
@@ -43,8 +44,11 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
     % our resize function wants floating point values
     im = double(im);
     for i = 1:interval
+
+          scale_tic = tic();
         scaled = resize(im, 1/sc^(i-1)); %TODO: use Piotr's imResample()?
         scaled_single = single(scaled);
+          scale_time = scale_time + toc(scale_tic);
 
         if extra_interval > 0
             % Optional (sbin/4) x (sbin/4) features
@@ -66,8 +70,10 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
 
         % Remaining pyramid octaves 
         for j = i+interval:interval:max_scale
+              scale_tic = tic();
             scaled = resize(scaled, 0.5);
-            scaled_single = single(scaled); 
+            scaled_single = single(scaled);
+              scale_time = scale_time + toc(scale_tic); 
               hog_tic = tic();
             pyra.feat{j+extra_interval+interval} = fhog(scaled_single, sbin);
               hog_time = hog_time + toc(hog_tic); 
@@ -75,6 +81,8 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
         end
     end
 
+
+    display(sprintf('    spent %f sec downsampling images.', scale_time))
     display(sprintf('    spent %f sec extracting HOG. Not including downsampling, padding, or place features', hog_time))
 
     pyra.num_levels = length(pyra.feat);
