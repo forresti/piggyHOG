@@ -71,9 +71,12 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
         % Remaining pyramid octaves 
         for j = i+interval:interval:max_scale
               scale_tic = tic();
-            scaled = resize(scaled, 0.5);
+            pyra.scales(j+extra_interval+interval) = 0.5 * pyra.scales(j+extra_interval);
+            scaled = resize(im, pyra.scales(j+extra_interval+interval)); %to match FFLD
+            %scaled = resize(scaled, 0.5);
             scaled_single = single(scaled);
-              scale_time = scale_time + toc(scale_tic); 
+              scale_time = scale_time + toc(scale_tic);
+ 
               hog_tic = tic();
             pyra.feat{j+extra_interval+interval} = fhog(scaled_single, sbin);
               hog_time = hog_time + toc(hog_tic); 

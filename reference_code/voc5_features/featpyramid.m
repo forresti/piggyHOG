@@ -18,6 +18,9 @@ function pyra = featpyramid(im, model, padx, pady)
     %                   Feature map computed at exactly half the 
     %                   resolution of pyra.feat{i}
 
+    hog_time = 0;
+    scale_time = 0;
+
     if nargin < 3
         [padx, pady] = getpadding(model);
     end
@@ -39,7 +42,10 @@ function pyra = featpyramid(im, model, padx, pady)
     % our resize function wants floating point values
     im = double(im);
     for i = 1:interval
+          scale_tic = tic();
         scaled = resize(im, 1/sc^(i-1));
+          scale_time = scale_time + toc(scale_tic);
+
         if extra_interval > 0
             % Optional (sbin/4) x (sbin/4) features
             pyra.feat{i} = features(scaled, sbin/4);
@@ -47,21 +53,33 @@ function pyra = featpyramid(im, model, padx, pady)
         end
 
         % (sbin/2) x (sbin/2) features
+          hog_tic = tic();
         pyra.feat{i+extra_interval} = features(scaled, sbin/2);
+          hog_time = hog_time + toc(hog_tic);
         pyra.scales(i+extra_interval) = 2/sc^(i-1);
 
         % sbin x sbin HOG features 
+          hog_tic = tic();
         pyra.feat{i+extra_interval+interval} = features(scaled, sbin);
+          hog_time = hog_time + toc(hog_tic);
         pyra.scales(i+extra_interval+interval) = 1/sc^(i-1);
 
         % Remaining pyramid octaves 
         for j = i+interval:interval:max_scale
             %scaled = resize(scaled, 0.5);
             pyra.scales(j+extra_interval+interval) = 0.5 * pyra.scales(j+extra_interval);
+              scale_tic = tic();
             scaled = resize(im, pyra.scales(j+extra_interval+interval)); %Trying to get with FFLD dims for a the last couple of mismatched dims
+              scale_time = scale_time + toc(scale_tic);
+
+              hog_tic = tic();
             pyra.feat{j+extra_interval+interval} = features(scaled, sbin);
+              hog_time = hog_time + toc(hog_tic);
         end
     end
+
+    display(sprintf('    spent %f sec downsampling images.', scale_time))
+    display(sprintf('    spent %f sec extracting HOG. Not including downsampling, padding, or place features', hog_time))
 
     pyra.num_levels = length(pyra.feat);
 
