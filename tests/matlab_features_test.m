@@ -30,6 +30,8 @@ function pyra = time_extract_hog(img_name, model, hogMethod)
     if(strcmp(hogMethod, 'voc5') == 1)
         pyra = featpyramid(double(im), model);
     elseif(strcmp(hogMethod, 'piotr') == 1)
+        %TODO: model.padx--;
+        %      model.pady--;
         pyra = featpyramid_fhog(single(im), model);
     end
     tF = toc(th);
