@@ -3,14 +3,18 @@
 %@param hogMethod = 'voc5' or 'piotr'
 function matlab_features_test(hogMethod)
 
-    
-    
+    if(strcmp(hogMethod, 'voc5') == 1)
+        output_dir = 'tests/voc5_features_results';
+    elseif (strcmp(hogMethod, 'piotr') == 1) 
+        output_dir = 'tests/piotr_results';
+    else
+        error('unknown HOG extraction method. use hogMethod={voc5 or piotr}')
+    end
 
-    output_dir = 'tests/voc5_features_results'
     curr_img = 'images_640x480/carsgraz_001.image.png';
 
     load('VOC2007/car_final'); %load 'model' structure
-    pyra = time_extract_hog(curr_img, model);
+    pyra = time_extract_hog(curr_img, model, hogMethod);
 
     printHogSizes(pyra)
     display('writing HOG features to CSV files...');
@@ -18,11 +22,16 @@ function matlab_features_test(hogMethod)
     transpose_and_writeCsv(pyra, output_dir, curr_img)
     %visHog(pyra, output_dir, curr_img)
 
-function pyra = time_extract_hog(img_name, model)
+function pyra = time_extract_hog(img_name, model, hogMethod)
     im = imread(img_name);
 
     th = tic();
-    pyra = featpyramid(double(im), model);
+
+    if(strcmp(hogMethod, 'voc5') == 1)
+        pyra = featpyramid(double(im), model);
+    elseif(strcmp(hogMethod, 'piotr') == 1)
+        pyra = featpyramid_fhog(single(im), model);
+    end
     tF = toc(th);
     fprintf('  --> HOG pyramid extraction took %f seconds\n', tF);
 
