@@ -393,7 +393,8 @@ void mGradHist( int nl, mxArray *pl[], int nr, const mxArray *pr[] ) {
     useHog   = (nr>=6) ? (int)   mxGetScalar(pr[5])    : 0;
     clipHog  = (nr>=7) ? (float) mxGetScalar(pr[6])    : 0.2f;
     full     = (nr>=8) ? (bool) (mxGetScalar(pr[7])>0) : false;
-    hb=h/binSize; wb=w/binSize;
+    //hb=h/binSize; wb=w/binSize; //Piotr's orig
+    hb = round(h/binSize); wb = round(w/binSize); // Forrest (to match VOC5?)
     if( useHog==0 ) {
         pl[0] = mxCreateMatrix3(hb,wb,nOrients,mxSINGLE_CLASS,1,(void**)&H);
         gradHist( M, O, H, h, w, binSize, nOrients, softBin, full );
