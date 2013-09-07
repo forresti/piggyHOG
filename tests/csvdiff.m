@@ -2,8 +2,8 @@ function csvdiff()
 
     %for h=1:10:41
     for h=1:41
-        experimentalCsv = ['./ffld_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
-        %experimentalCsv = ['./piotr_results/level/carsgraz_001.image_scale_' int2str(h) '.csv'];
+        %experimentalCsv = ['./ffld_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
+        experimentalCsv = ['./piotr_results/carsgraz_001.image_scale_' int2str(h) '.csv'];
         referenceCsv = ['./voc5_features_results/carsgraz_001.image_scale_' int2str(h) '.csv']; %VOC5 is our baseline reference 
         mydiff(experimentalCsv, referenceCsv, h)
     end
@@ -11,6 +11,7 @@ end
 
 function mydiff(experimentalCsv, referenceCsv, h)
     experimentalResult = csvread(experimentalCsv);
+    experimentalResult = experimentalResult(2:end, :); %remove header (which shows dims)
     referenceResult = csvread(referenceCsv);
     referenceResult = referenceResult(2:end, :); %remove header (which shows dims)
 
