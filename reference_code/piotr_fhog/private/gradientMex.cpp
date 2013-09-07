@@ -298,7 +298,11 @@ void hog( float *M, float *O, float *H, int h, int w, int binSize,
 void fhog( float *M, float *O, float *H, int h, int w, int binSize,
         int nOrients, int softBin, float clip )
 {
-    const int hb=h/binSize, wb=w/binSize, nb=hb*wb, nbo=nb*nOrients;
+    //const int hb=h/binSize, wb=w/binSize, nb=hb*wb, nbo=nb*nOrients;
+    const int hb= float(h) / float(binSize) + 0.5;   //Forrest -- to match VOC5 dims
+    const int wb=w/binSize;
+    const int nb=hb*wb;
+    const int nbo=nb*nOrients;
     float *N, *R1, *R2; int o, x;
     // compute unnormalized constrast sensitive histograms
     R1 = (float*) wrCalloc(wb*hb*nOrients*2,sizeof(float));
