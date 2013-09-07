@@ -34,3 +34,10 @@ function mydiff(experimentalCsv, referenceCsv, h)
     %display(['    percent mismatches above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)/resultSize * 100) '%'])
 end
 
+%if one of the HOG results is bigger than the other, trim it down.
+% naive: just taking the top-left corner when trimming.
+%[referenceResult experimentalResult] = trimToMinSize(referenceResult, experimentalResult)
+    %[h w d] = reshape.... %ah, crap, need the original dims.
+    %minWidth = 
+
+
