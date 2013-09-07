@@ -148,7 +148,11 @@ void gradQuantize( float *O, float *M, int *O0, int *O1, float *M0, float *M1,
 void gradHist( float *M, float *O, float *H, int h, int w,
         int bin, int nOrients, int softBin, bool full )
 {
-    const int hb=h/bin, wb=w/bin, h0=hb*bin, w0=wb*bin, nb=wb*hb;
+    //const int hb = round((float)h / (float)bin); // Forrest (to match VOC5) 
+    //const int wb = round((float)w / (float)bin); 
+
+    const int hb=h/bin, wb=w/bin, h0=hb*bin, w0=wb*bin, nb=wb*hb; //Piotr's orig code
+    //const int h0=hb*bin, w0=wb*bin, nb=wb*hb;
     const float s=(float)bin, sInv=1/s, sInv2=1/s/s;
     float *H0, *H1, *M0, *M1; int x, y; int *O0, *O1;
     O0=(int*)alMalloc(h*sizeof(int),16); M0=(float*) alMalloc(h*sizeof(float),16);
@@ -283,7 +287,12 @@ void hogChannels( float *H, const float *R, const float *N,
 void hog( float *M, float *O, float *H, int h, int w, int binSize,
         int nOrients, int softBin, bool full, float clip )
 {
-    float *N, *R; const int hb=h/binSize, wb=w/binSize, nb=hb*wb;
+    const int hb = round((float)h / (float)binSize); // Forrest (to match VOC5) 
+    const int wb = round((float)w / (float)binSize); 
+
+    float *N, *R; 
+    //const int hb=h/binSize, wb=w/binSize; //Piotr's orig code
+    const int nb=hb*wb;
     // compute unnormalized gradient histograms
     R = (float*) wrCalloc(wb*hb*nOrients,sizeof(float));
     gradHist( M, O, R, h, w, binSize, nOrients, softBin, full );
@@ -298,7 +307,11 @@ void hog( float *M, float *O, float *H, int h, int w, int binSize,
 void fhog( float *M, float *O, float *H, int h, int w, int binSize,
         int nOrients, int softBin, float clip )
 {
-    const int hb=h/binSize, wb=w/binSize, nb=hb*wb, nbo=nb*nOrients; //Piotr's orig dims
+    const int hb = round((float)h / (float)binSize); // Forrest (to match VOC5) 
+    const int wb = round((float)w / (float)binSize); 
+
+    //const int hb=h/binSize, wb=w/binSize, nb=hb*wb, nbo=nb*nOrients; //Piotr's orig dims
+    const int nb=hb*wb, nbo=nb*nOrients;
     float *N, *R1, *R2; int o, x;
     // compute unnormalized constrast sensitive histograms
     R1 = (float*) wrCalloc(wb*hb*nOrients*2,sizeof(float));
@@ -389,7 +402,7 @@ void mGradHist( int nl, mxArray *pl[], int nr, const mxArray *pr[] ) {
     useHog   = (nr>=6) ? (int)   mxGetScalar(pr[5])    : 0;
     clipHog  = (nr>=7) ? (float) mxGetScalar(pr[6])    : 0.2f;
     full     = (nr>=8) ? (bool) (mxGetScalar(pr[7])>0) : false;
-    //hb=h/binSize; wb=w/binSize; //Piotr's orig
+    //hb=h/binSize; wb=w/binSize; //Piotr's orig dums
     hb = round((float)h / (float)binSize); wb = round((float)w / (float)binSize); // Forrest (to match VOC5)
     if( useHog==0 ) {
         pl[0] = mxCreateMatrix3(hb,wb,nOrients,mxSINGLE_CLASS,1,(void**)&H);
