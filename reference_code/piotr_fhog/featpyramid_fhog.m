@@ -27,6 +27,9 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
     [padx, pady] = getpadding(model);
     end
 
+    padx = padx - 1; %special for Piotr's code
+    pady = pady - 1; 
+
     extra_interval = 0;
     if model.features.extra_octave
     extra_interval = model.interval;
