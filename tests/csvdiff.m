@@ -1,5 +1,4 @@
 function csvdiff()
-
     %for h=1:10:41
     for h=1:41
         %experimentalCsv = ['./ffld_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
