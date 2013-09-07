@@ -148,11 +148,12 @@ void gradQuantize( float *O, float *M, int *O0, int *O1, float *M0, float *M1,
 void gradHist( float *M, float *O, float *H, int h, int w,
         int bin, int nOrients, int softBin, bool full )
 {
-    //const int hb = round((float)h / (float)bin); // Forrest (to match VOC5) 
+    const int hb = round((float)h / (float)bin); // Forrest (to match VOC5) 
     //const int wb = round((float)w / (float)bin); 
+    const int wb = w / bin;
 
-    const int hb=h/bin, wb=w/bin, h0=hb*bin, w0=wb*bin, nb=wb*hb; //Piotr's orig code
-    //const int h0=hb*bin, w0=wb*bin, nb=wb*hb;
+    //const int hb=h/bin, wb=w/bin, h0=hb*bin, w0=wb*bin, nb=wb*hb; //Piotr's orig code
+    const int h0=(hb-1)*bin, w0=(wb-1)*bin, nb=wb*hb;
     const float s=(float)bin, sInv=1/s, sInv2=1/s/s;
     float *H0, *H1, *M0, *M1; int x, y; int *O0, *O1;
     O0=(int*)alMalloc(h*sizeof(int),16); M0=(float*) alMalloc(h*sizeof(float),16);
