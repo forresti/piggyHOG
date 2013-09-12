@@ -18,9 +18,10 @@ fhog.m
   gradientHist.m
     gradientMex('gradientHist', ...)
       mGradHist()
-        gradHist()
-          gradQuantize()
-
+        fhog() //in gradientMex.cpp, not fhog.m
+          gradHist()
+            gradQuantize()
+          hogNormMatrix()
 
 in gradientMag.cpp, these are unused:
     mGrad2()
@@ -28,18 +29,35 @@ in gradientMag.cpp, these are unused:
   
 
 If we *don't* use the Matlab interface, we can use these functions in graduentMag.cpp:
-fhog() //gradientMag.cpp -- non-Matlab interface
-  hogNormMatrix() //looks roughly like FFLD code to do cells -> blocks 
-  hogChannels() //does texture features, hog[28:31]
+[None?]
+(is there a usable non-matlab interface, or do I roll this myself?)
+  I think I just call the same sequence of things in C++ that I would do in fhog.m, and skip the mGradMag() and mGradHist() steps.
 
 
-PERF QUESTIONS:
+GENERAL QUESTIONS:
 - inputs and outputs of gradMag, gradMagNorm, and gradHist?
 - breakdown of perf among gradMag, gradMagNorm, and gradHist?
 - what's convTri()? (it happens after gradMag, but before gradMagNorm)
-- is the C/C++ interface any faster?
-- does the C/C++ interface give the same result? 
-    can hack this C++ interface into a version of the FFLD HOG code, 
+    convolution with a triangle filter. (why do we use a triangle filter?)
+- How do I use the C/C++ interface?
+    //I think this (roughly) would work:
+    //TODO: malloc
+    uchar* I = img //what type?
+    float* O = malloc... //orientations
+    float* M = malloc... //magnitudes
+
+    //@input: I = img
+    //@output: O = orientations; M = magnitudes    
+    gradientMag(I, O, M, ...)
+   
+    
+ 
+- does the C/C++ interface give the same result?
+    can hack this C++ interface into a version of the FFLD HOG code,
     plus a transpose to get the right output dimension order
+
+PERF QUESTIONS:
+- is the C/C++ interface any faster?
 - where might be a good place in the Piotr's code to switch to 'depth as inner dim' data layout?
+
 
