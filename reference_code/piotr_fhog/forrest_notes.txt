@@ -42,21 +42,36 @@ GENERAL QUESTIONS:
 - How do I use the C/C++ interface?
     //I think this (roughly) would work:
     //TODO: malloc
-    uchar* I = img //what type?
+    float* I = img //what type?
     float* O = malloc... //orientations
     float* M = malloc... //magnitudes
 
     //@input: I = img
     //@output: O = orientations; M = magnitudes    
-    gradientMag(I, O, M, ...)
+    gradMag(I, O, M, ...)
    
+    S = convTri(M, normRad);
+
+    //@input: M = magnitudes, S = (binned orientations?)
+    //@output: (updated M and/or S?)
+    gradMagNorm(M, S, ...)
+
+    //we don't use 'S' from here on in... (at least in fhog.m)
+
+    float* H = malloc... //final HOG hist
+
+    //@input M = magnitudes, O = orientations (what data layout? these are binned now, right?)
+    //@output H = final hog histogram
+    gradientHist(M, O, H, ...);
     
+     
  
 - does the C/C++ interface give the same result?
     can hack this C++ interface into a version of the FFLD HOG code,
     plus a transpose to get the right output dimension order
 
 PERF QUESTIONS:
+- how fast is imResample? (compared to Ross's imresize)
 - is the C/C++ interface any faster?
 - where might be a good place in the Piotr's code to switch to 'depth as inner dim' data layout?
 
