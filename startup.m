@@ -11,6 +11,7 @@ if isempty(G_STARTUP)
   incl = {'images_640x480', 'vis', ... 
           'reference_code', 'reference_code/voc5_features', 'reference_code/piotr_fhog', ... %'reference_code/piotr_fhog/private', ...
           'tests', 'bin', 'common'};
+          %'reference_code/piotr_fhog/piotr_mex', 'tests', 'bin', 'common'}; %TODO: remove
   for i = 1:length(incl)
     addpath(genpath(incl{i}));
   end
