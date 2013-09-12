@@ -4,9 +4,13 @@ fhog.m
   gradientMag.m
     gradientMex('gradientMag', ...)  
       mGradMag()
-        gradMag() // (Forrest untangled this one in gradientMex_simplified.m)
+        // (Forrest untangled gradMag in gradientMex_simplified.m)
+        // gradMag just produces magnitude and orientation, not in HOG Cell Bins.
+        gradMag() //output: float* M (magnitude), float* O (orientation) 
           acosTable()
-          grad1() 
+          grad1() // has a lot of for loops without braces ... fixing line breaks might mess up logic (be careful) 
+
+    //
     gradientMex('gradientMagNorm', ...)
       mGradMagNorm()
         gradMagNorm()
@@ -28,4 +32,14 @@ fhog() //gradientMag.cpp -- non-Matlab interface
   hogNormMatrix() //looks roughly like FFLD code to do cells -> blocks 
   hogChannels() //does texture features, hog[28:31]
 
+
+PERF QUESTIONS:
+- inputs and outputs of gradMag, gradMagNorm, and gradHist?
+- breakdown of perf among gradMag, gradMagNorm, and gradHist?
+- what's convTri()? (it happens after gradMag, but before gradMagNorm)
+- is the C/C++ interface any faster?
+- does the C/C++ interface give the same result? 
+    can hack this C++ interface into a version of the FFLD HOG code, 
+    plus a transpose to get the right output dimension order
+- where might be a good place in the Piotr's code to switch to 'depth as inner dim' data layout?
 
