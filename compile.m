@@ -33,7 +33,7 @@ end
 % Add optimizations if requested
 if opt
   mexcmd = [mexcmd ' -O'];
-  mexcmd = [mexcmd ' CXXOPTIMFLAGS="-O3 -DNDEBUG -mavx -msse2avx -mtune=corei7-avx"'];
+  mexcmd = [mexcmd ' CXXOPTIMFLAGS="-O3 -DNDEBUG "'];
   mexcmd = [mexcmd ' LDOPTIMFLAGS="-O3"'];
 else
   mexcmd = [mexcmd ' -g'];
