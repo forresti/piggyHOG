@@ -1,5 +1,4 @@
 
-
 fhog.m
   gradientMag.m
     gradientMex('gradientMag', ...)  
@@ -10,7 +9,7 @@ fhog.m
           acosTable()
           grad1() // has a lot of for loops without braces ... fixing line breaks might mess up logic (be careful) 
 
-    //
+    // compute HOG cells
     gradientMex('gradientMagNorm', ...)
       mGradMagNorm()
         gradMagNorm()
@@ -19,6 +18,7 @@ fhog.m
     gradientMex('gradientHist', ...)
       mGradHist()
         fhog() //in gradientMex.cpp, not fhog.m
+          //compute HOG blocks
           gradHist()
             gradQuantize()
           hogNormMatrix()
