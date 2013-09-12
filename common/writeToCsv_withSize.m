@@ -3,8 +3,9 @@
 function writeToCsv_withSize(fname, array)
     %csvwrite(fname, array);
     csvwrite(fname, ''); %clear the output file
-    internal_writeToCsv(fname, array);
 
+    internal_writeToCsv(fname, array);
+keyboard
     mySize = size(array);
     if(length(size(array)) == 2)
         sizeStr = sprintf('%d,%d', mySize(1), mySize(2));
@@ -13,6 +14,13 @@ function writeToCsv_withSize(fname, array)
     end
 
     prepend2file(sizeStr, fname, true);
+end
+
+function internal_writeToCsv_v2(fname, array)
+    [depth, height, width] = size(array);
+    array = reshape(array, [depth width*height]);
+    %csvwrite(fname, array);
+
 end
 
 %write one line at a time, doing an append.
