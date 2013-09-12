@@ -1,9 +1,31 @@
 
 
-fhog
-  gradientMag
+fhog.m
+  gradientMag.m
+    gradientMex('gradientMag', ...)  
+      mGradMag()
+        gradMag()
+          acosTable()
+          grad1() 
+    gradientMex('gradientMagNorm', ...)
+      mGradMagNorm()
+        gradMagNorm()
 
-  gradientHist
+  gradientHist.m
+    gradientMex('gradientHist', ...)
+      mGradHist()
+        gradHist()
+          gradQuantize()
 
+
+in gradientMag.cpp, these are unused:
+    mGrad2()
+      grad2()
+  
+
+If we *don't* use the Matlab interface, we can use these functions in graduentMag.cpp:
+fhog() //gradientMag.cpp -- non-Matlab interface
+  hogNormMatrix() //looks roughly like FFLD code to do cells -> blocks 
+  hogChannels() //does texture features, hog[28:31]
 
 
