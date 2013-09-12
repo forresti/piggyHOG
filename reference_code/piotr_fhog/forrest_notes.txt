@@ -4,7 +4,7 @@ fhog.m
   gradientMag.m
     gradientMex('gradientMag', ...)  
       mGradMag()
-        gradMag()
+        gradMag() // (Forrest untangled this one in gradientMex_simplified.m)
           acosTable()
           grad1() 
     gradientMex('gradientMagNorm', ...)
