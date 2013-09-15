@@ -49,6 +49,7 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
     for i = 1:interval
 
           scale_tic = tic();
+        display(['resize(im, ' num2str(1/sc^(i-1)) ')'])
         scaled = resize(im, 1/sc^(i-1)); %TODO: use Piotr's imResample()?
         scaled_single = single(scaled);
           scale_time = scale_time + toc(scale_tic);
