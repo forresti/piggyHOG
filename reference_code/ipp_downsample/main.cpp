@@ -35,7 +35,7 @@ Mat downsampleWithIPP(Mat img, int scale){
     int inHeight = img.rows;  
     int nChannels = img.depth();  
   
-    assert(nChannels == 3);  
+    //assert(nChannels == 3);  
     assert(img.type() == CV_8UC3);  
   
     int outWidth = round(inWidth * scale);  
