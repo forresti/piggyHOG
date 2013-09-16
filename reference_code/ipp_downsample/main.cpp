@@ -12,6 +12,7 @@ using namespace cv;
 
 //returns execution time of ippiFilter
 //double runIppConvolution(int imgRows, int imgCols, int kernelRows, int kernelCols, string dataType)
+#if 0
 double demoIppConvolution(int kernelRows, int kernelCols) //just use Lena.png
 {
     Mat img = imread("./Lena.pgm");
@@ -27,7 +28,7 @@ double demoIppConvolution(int kernelRows, int kernelCols) //just use Lena.png
     int imgCols = img.cols;
     int imgRows = img.rows;
 
-    int step = imgRows*3; //pitch
+    int step = imgCols*3; //pitch
     const Ipp32s kernel_int[kernelRows*kernelCols]; //zeros
     const Ipp32f kernel_float[kernelRows*kernelCols];
     IppiSize kernelSize = {kernelCols, kernelRows};
@@ -81,12 +82,31 @@ void benchmarkIppConvolution()
     }
 #endif
 }
+#endif
+
+//from my StackOverflow post: http://stackoverflow.com/questions/13465914/using-opencv-mat-images-with-intel-ipp
+void demoIppConvolution(){
+    Mat img = imread("./Lena.pgm"); //OpenCV 8U_C1 image
+    Mat outImg = img.clone(); //allocate space for convolution results
+
+    int step = img.cols; //pitch
+    const Ipp32s kernel[9] = {-1, 0, 1, -1, 0, 1, -1, 0, 1};
+    IppiSize kernelSize = {3,3};
+    IppiSize dstRoiSize = {img.cols - kernelSize.width + 1, img.rows - kernelSize.height + 1};
+    IppiPoint anchor = {2,2};
+    int divisor = 1;
+
+    IppStatus status = ippiFilter_8u_C1R((const Ipp8u*)&img.data[0], step,
+                                         (Ipp8u*)&outImg.data[0], step, dstRoiSize,
+                                         kernel, kernelSize, anchor, divisor);
+}
 
 int main (int argc, char **argv)
 {
     //double execTime = runIppConvolution(200, 200, 5, 5);
     //printf("execTime = %f \n", execTime);
-    benchmarkIppConvolution();
+    //benchmarkIppConvolution();
+    demoIppConvolution();
 
     return 0;
 }
