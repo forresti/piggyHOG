@@ -23,8 +23,11 @@ $(EXENAME) : $(OBJS)
 main.o : main.cpp helpers.h
 	$(CC) $(CCOPTS) main.cpp
 
-helpers.o : helpers.cpp helpers.h
-	$(CC) $(CCOPTS) helpers.cpp
+helpers_ipp.o : helpers_ipp.cpp helpers_ipp.h    
+	$(CC) $(CCOPTS) helpers_ipp.cpp
+
+helpers.o : common/helpers.cpp common/helpers.h
+	$(CC) $(CCOPTS) common/helpers.cpp
 
 clean : 
 	rm -f *.o $(EXENAME) 2>/dev/null

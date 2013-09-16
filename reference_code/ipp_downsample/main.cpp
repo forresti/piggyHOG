@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include "helpers.h"
+#include "common/helpers.h"
+#include "helpers_ipp.h"
 using namespace std;
 using namespace cv;
 
