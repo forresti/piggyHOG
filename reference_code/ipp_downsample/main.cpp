@@ -57,6 +57,7 @@ Mat downsampleWithIPP(Mat img, int scale){
     int bufsize; 
     IppStatus status = ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_LINEAR, &bufsize); 
     Ipp8u* pBuffer = (Ipp8u*)ippMalloc(bufsize);  
+printf("ippiResizeGetBufSize err = %s \n", ippGetStatusString(status));
  
     int specSize; 
     int initSize;
