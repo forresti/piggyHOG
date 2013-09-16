@@ -1,34 +1,42 @@
 
-Ipp8u* pDst
-IppiSize dstRoi
-IppiRect srcRect = { 0, 0, m_roi.width, m_roi.height };
-IppiRect dstRect = { 0, 0, dstRoi.width, dstRoi.height };
 
-//scale factors -- similar to what we have in Piotr's imResample()
-double xFactor = (double)dstRoi.width  / (double)m_roi.width;  //outWidth / inWidth
-double yFactor = (double)dstRoi.height / (double)m_roi.height; //outHeight / inHeight
+<image type> downsampleWithIPP(Mat img, scale){
+    int inWidth = img.cols;
+    int inHeight = img.rows;
 
-IppiStatus status = ippiResizeGetBufSize(srcRect, dstRect, m_nchannels, IPPI_INTER_SUPER, &bufsize);  
-if(ippStsNoErr != status)    
-    return -1;  
+    //output img dims -- similar to what we have in Piotr's imResample()
+    double outWidth = inWidth * scale;
+    double outHeight = inHeight * scale;
 
-buf = (Ipp8u*)ippMalloc(bufsize);  
-if(0 == buf)    
-    return -1;
+    Ipp8u* pDst
+    IppiSize dstRoi
+    IppiRect srcRect = { 0, 0, m_roi.width, m_roi.height };
+    IppiRect dstRect = { 0, 0, dstRoi.width, dstRoi.height };
 
 
-//http://software.intel.com/sites/products/documentation/hpc/ipp/ippi/ippi_ch12/functn_ResizeSqrPixel.html
-IppStatus ippiResizeSqrPixel_<mod> (const Ipp<datatype>* pSrc, 
-                                    IppiSize srcSize, 
-                                    int srcStep, 
-                                    IppiRect srcRoi, 
-                                    Ipp<datatype>* pDst, 
-                                    int dstStep, 
-                                    IppiRect dstRoi, 
-                                    double xFactor, 
-                                    double yFactor, 
-                                    double xShift, 
-                                    double yShift, 
-                                    int interpolation, 
-                                    Ipp8u* pBuffer);
+    Mat outImg = ... //TODO: allocate based on output size...
+
+    IppiStatus status = ippiResizeGetBufSize(srcRect, dstRect, m_nchannels, IPPI_INTER_SUPER, &bufsize);  
+    if(ippStsNoErr != status)    
+        return -1;  
+
+    buf = (Ipp8u*)ippMalloc(bufsize);  
+    if(0 == buf)    
+        return -1;
+
+
+    //http://software.intel.com/sites/products/documentation/hpc/ipp/ippi/ippi_ch12/functn_ResizeSqrPixel.html
+    IppStatus ippiResizeSqrPixel_<mod> (const Ipp<datatype>* pSrc, 
+                                        IppiSize srcSize, 
+                                        int srcStep, 
+                                        IppiRect srcRoi, 
+                                        Ipp<datatype>* pDst, 
+                                        int dstStep, 
+                                        IppiRect dstRoi, 
+                                        double xFactor, 
+                                        double yFactor, 
+                                        double xShift, 
+                                        double yShift, 
+                                        int interpolation, 
+                                        Ipp8u* pBuffer);
 
