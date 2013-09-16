@@ -3,19 +3,23 @@
 <image type> downsampleWithIPP(Mat img, scale){
     int inWidth = img.cols;
     int inHeight = img.rows;
+    int nChannels = img.depth;
+
+    assert(nChannels == 3); 
+    assert(img.type() == CV_8UC3);
 
     //output img dims -- similar to what we have in Piotr's imResample()
     double outWidth = inWidth * scale;
     double outHeight = inHeight * scale;
+    Mat outImg(outWidth, outHeight, CV_8UC3); 
 
-    Ipp8u* pDst
+    Ipp8u* pSrc = (Ipp8u*)&img.data[0]; 
+    Ipp8u* pDst = (Ipp8u*)&outImg.data[0]; 
     IppiSize dstRoi
-    IppiRect srcRect = { 0, 0, m_roi.width, m_roi.height };
-    IppiRect dstRect = { 0, 0, dstRoi.width, dstRoi.height };
+    IppiRect srcRect = {0, 0, inWidth, inHeight};
+    IppiRect dstRect = {0, 0, outWidth, outHeight};
 
-    Mat outImg = ... //TODO: allocate based on output size...
-
-    IppiStatus status = ippiResizeGetBufSize(srcRect, dstRect, m_nchannels, IPPI_INTER_SUPER, &bufsize);  
+    IppiStatus status = ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_SUPER, &bufsize);  
     if(ippStsNoErr != status)    
         return -1;  
 
@@ -24,25 +28,9 @@
         return -1;
 
 
-    //http://software.intel.com/sites/products/documentation/hpc/ipp/ippi/ippi_ch12/functn_ResizeSqrPixel.html
-    IppStatus ippiResizeSqrPixel_<mod> (const Ipp<datatype>* pSrc, 
-                                        IppiSize srcSize, 
-                                        int srcStep, 
-                                        IppiRect srcRoi, 
-                                        Ipp<datatype>* pDst, 
-                                        int dstStep, 
-                                        IppiRect dstRoi, 
-                                        double xFactor, //use 'scale' input 
-                                        double yFactor, //use 'scale' input
-                                        double xShift, //typically 0.0 
-                                        double yShift, //typically 0.0
-                                        int interpolation, 
-                                        Ipp8u* pBuffer);
-
-
-
     IppStatus ippiResizeLinearInit_<mod>(IppiSize srcSize, IppiSize dstSize, IppiResizeSpec_32f* pSpec);
 
+    //http://software.intel.com/sites/products/documentation/doclib/ipp_sa/71/ipp_manual/IPPI/ippi_ch12/functn_ResizeLinear.htm
     IppStatus ippiResizeLinear_<mod>(const Ipp8u* pSrc, 
                                      Ipp32s srcStep, 
                                      Ipp8u* pDst, 
