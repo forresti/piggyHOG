@@ -2,8 +2,8 @@
 
 function writeToCsv_withSize(fname, array)
     %csvwrite(fname, array);
-    csvwrite(fname, ''); %clear the output file
-    internal_writeToCsv(fname, array);
+
+    internal_writeToCsv_v2(fname, array);
 
     mySize = size(array);
     if(length(size(array)) == 2)
@@ -15,28 +15,22 @@ function writeToCsv_withSize(fname, array)
     prepend2file(sizeStr, fname, true);
 end
 
+function internal_writeToCsv_v2(fname, array)
+    [depth, height, width] = size(array);
+    squishedArray = reshape(array, [depth width*height]);
+    csvwrite(fname, squishedArray'); %output: [nCols=depth, nRows=width*height]
+end
+
 %write one line at a time, doing an append.
 function internal_writeToCsv(fname, array)
     [depth, height, width] = size(array);
-    
-    outBuf = ''; %TODO: write to buffer, then write the buffer to file.
-
+    csvwrite(fname, ''); %clear the output file   
+ 
     for x=1:width
         for y=1:height
-            %row = array(:, y, x);
-            %rowStr = mat2str(row); %TODO: mat2str(buf, 5) -- '5' = digits of precision
-            %rowStr = matStr_to_csv(rowStr);
-            %outBuf = [outBuf '\n' rowStr];
-
             dlmwrite(fname, array(:, y, x)', '-append');
         end
     end
-
-    %TODO:
-    %f = fopen(fname);
-    %fprintf(f, outBuf);
-    %fclose(f);
-
 end
 
 % [1 2 3 4] -> 1,2,3,4

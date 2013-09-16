@@ -19,7 +19,8 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
     %                   resolution of pyra.feat{i}
 
 
-    im=imResample(single(im)/255,[480 640]); %from Piotr's codebase
+    [h w d] = size(im);
+    im=imResample(single(im)/255,[h w]); %from Piotr's codebase
     hog_time = 0;
     scale_time = 0;
 
@@ -49,7 +50,10 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
     for i = 1:interval
 
           scale_tic = tic();
-        scaled = resize(im, 1/sc^(i-1)); %TODO: use Piotr's imResample()?
+        downsampleFactor = 1/sc^(i-1);
+        display(['resize(im, ' num2str(downsampleFactor) ')'])
+        %scaled = resize(im, downsampleFactor); %VOC5 downsample
+        scaled = imResample(im, [round(h*downsampleFactor) round(w*downsampleFactor)]); %Piotr downsample (TODO: make a wrapper of this that matches VOC5 interface)
         scaled_single = single(scaled);
           scale_time = scale_time + toc(scale_tic);
 
@@ -75,15 +79,18 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
         for j = i+interval:interval:max_scale
               scale_tic = tic();
             pyra.scales(j+extra_interval+interval) = 0.5 * pyra.scales(j+extra_interval);
-            scaled = resize(im, pyra.scales(j+extra_interval+interval)); %to match FFLD
+            %scaled = resize(im, pyra.scales(j+extra_interval+interval)); %to match FFLD
             %scaled = resize(scaled, 0.5);
+            
+            [currH currW currD] = size(scaled);
+            scaled = imResample(scaled, [currH*0.5 currW*0.5]); 
+
             scaled_single = single(scaled);
               scale_time = scale_time + toc(scale_tic);
  
               hog_tic = tic();
             pyra.feat{j+extra_interval+interval} = fhog(scaled_single, sbin);
               hog_time = hog_time + toc(hog_tic); 
-            pyra.scales(j+extra_interval+interval) = 0.5 * pyra.scales(j+extra_interval);
         end
     end
 

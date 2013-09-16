@@ -50,5 +50,6 @@ if(nargin<5 || isempty(full)), full=0; end
 if(nargout<=1), M=gradientMex('gradientMag',I,channel,full);
 else [M,O]=gradientMex('gradientMag',I,channel,full); end
 
+%Forrest: typically, we use normRad=0, so we don't need convTri and gradientMagNorm
 if( normRad==0 ), return; end; S = convTri( M, normRad );
 gradientMex('gradientMagNorm',M,S,normConst); % operates on M
