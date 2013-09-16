@@ -9,36 +9,39 @@
     assert(img.type() == CV_8UC3);
 
     //output img dims -- similar to what we have in Piotr's imResample()
-    double outWidth = inWidth * scale;
-    double outHeight = inHeight * scale;
-    Mat outImg(outWidth, outHeight, CV_8UC3); 
+    int outWidth = round(inWidth * scale);
+    int outHeight = round(inHeight * scale);
 
+    Mat outImg(outWidth, outHeight, CV_8UC3); 
     Ipp8u* pSrc = (Ipp8u*)&img.data[0]; 
     Ipp8u* pDst = (Ipp8u*)&outImg.data[0]; 
-    IppiSize dstRoi
+
     IppiRect srcRect = {0, 0, inWidth, inHeight};
     IppiRect dstRect = {0, 0, outWidth, outHeight};
+    IppiSize srcSize = {inWidth, inHeight};
+    IppiSize dstSize = {outWidth, outHeight};
+    IppiPoint dstOffset = {0, 0};
 
     IppiStatus status = ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_SUPER, &bufsize);  
     if(ippStsNoErr != status)    
         return -1;  
 
-    buf = (Ipp8u*)ippMalloc(bufsize);  
+    pBuffer = (Ipp8u*)ippMalloc(bufsize);  
     if(0 == buf)    
         return -1;
 
 
-    IppStatus ippiResizeLinearInit_<mod>(IppiSize srcSize, IppiSize dstSize, IppiResizeSpec_32f* pSpec);
+    IppStatus ippiResizeLinearInit_8u_C3R(IppiSize srcSize, IppiSize dstSize, IppiResizeSpec_32f* pSpec);
 
     //http://software.intel.com/sites/products/documentation/doclib/ipp_sa/71/ipp_manual/IPPI/ippi_ch12/functn_ResizeLinear.htm
-    IppStatus ippiResizeLinear_<mod>(const Ipp8u* pSrc, 
-                                     Ipp32s srcStep, 
-                                     Ipp8u* pDst, 
-                                     Ipp32s dstStep, 
-                                     IppiPoint dstOffset, 
-                                     IppiSize dstSize, 
-                                     IppiBorderType border, 
-                                     Ippi8u* borderValue, 
-                                     IppiResizeSpec_32f* pSpec, 
-                                     Ipp8u* pBuffer);
+    IppStatus ippiResizeLinear_8u_C3R(const Ipp8u* pSrc, 
+                                      Ipp32s srcStep, 
+                                      Ipp8u* pDst, 
+                                      Ipp32s dstStep, 
+                                      IppiPoint dstOffset, 
+                                      IppiSize dstSize, 
+                                      IppiBorderType border, //TODO 
+                                      Ippi8u* borderValue, //TODO
+                                      IppiResizeSpec_32f* pSpec, 
+                                      Ipp8u* pBuffer /* temporary scratch space */ );
 
