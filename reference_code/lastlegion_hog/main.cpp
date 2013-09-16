@@ -11,8 +11,19 @@ using namespace std;
 
 int main (int argc, char **argv)
 {
-    cv::Mat x;
-    printf("%f \n", foo(1.2345));
+    //cv::Mat x;
+    //printf("%f \n", foo(1.2345));
+
+    //TODO...
+
+    // 1. img = read a 640x480 img into a cv::Mat
+
+    // 2. myHog = hog(img); //from hog.hpp
+
+    // later on...
+    //  add multiscale
+    //  add timers
+    //  revise to match VOC5 HOG configuration (if this seems moderately fast) 
 
     return 0;
 }
