@@ -33,13 +33,12 @@ void demoIppConvolution(){
 Mat downsampleWithIPP(Mat img, int scale){  
     int inWidth = img.cols;  
     int inHeight = img.rows;  
-    int nChannels = img.depth();  
+
+printf("inHeight = %d, inWidth = %d \n", inHeight, inWidth);
  
-    printf("nChannels = %d \n", nChannels);
- 
-    assert(nChannels == 3);  
     assert(img.type() == CV_8UC3);  
-  
+    int nChannels = 3; 
+ 
     int outWidth = round(inWidth * scale);  
     int outHeight = round(inHeight * scale);  
   
