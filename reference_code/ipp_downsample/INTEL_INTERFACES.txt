@@ -1,6 +1,5 @@
 
-
-Mat downsampleWithIPP(Mat img, scale){
+Mat downsampleWithIPP(Mat img, int scale){
     int inWidth = img.cols;
     int inHeight = img.rows;
     int nChannels = img.depth;
@@ -24,7 +23,7 @@ Mat downsampleWithIPP(Mat img, scale){
     int dstStep = outWidth * nChannels;
     IppiPoint dstOffset = {0, 0};
 
-    IppiStatus status = ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_SUPER, &bufsize);  
+    IppiStatus status = ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_LINEAR, &bufsize);  
     if(status != ippStsNoEr)    
         return -1;  
 
