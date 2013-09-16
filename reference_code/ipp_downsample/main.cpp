@@ -1,6 +1,7 @@
 
 #include <opencv2/opencv.hpp>
 #include "ipp.h"
+#include "ippi.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -29,10 +30,10 @@ void demoIppConvolution(){
     forrestWritePgm(outImg, "Lena_ipp.pgm");  
 }
 
-void downsampleWithIPP(Mat img, scale){  
-i    int inWidth = img.cols;  
+Mat downsampleWithIPP(Mat img, int scale){  
+    int inWidth = img.cols;  
     int inHeight = img.rows;  
-    int nChannels = img.depth;  
+    int nChannels = img.depth();  
   
     assert(nChannels == 3);  
     assert(img.type() == CV_8UC3);  
@@ -52,33 +53,28 @@ i    int inWidth = img.cols;
     int srcStep = inWidth * nChannels;  
     int dstStep = outWidth * nChannels;  
     IppiPoint dstOffset = {0, 0};  
-  
-    IppiStatus status = ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_LINEAR, &bufsize); 
-    if(status != ippStsNoEr)  
-        return -1;  
-  
+
+    int bufsize; 
+    IppStatus status = ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_LINEAR, &bufsize); 
     Ipp8u* pBuffer = (Ipp8u*)ippMalloc(bufsize);  
-    if(pBuffer == NULL)  
-        return -1;  
   
-    IppiResizeSpec_32f pspec; //TODO: ippiMalloc this if we have problems  
-  
+    IppiResizeSpec_32f pspec; //TODO: ippiMalloc this if we have problems    
     IppStatus ippiResizeLinearInit_8u_C3R(IppiSize srcSize,  
                                           IppiSize dstSize,  
                                           &pSpec);  
   
     //http://software.intel.com/sites/products/documentation/doclib/ipp_sa/71/ipp_manual/IPPI/ippi_ch12/functn_ResizeLinear.htm 
     //example: https://github.com/albertoruiz/easyVision/blob/master/packages/imagproc/lib/ImagProc/Ipp/auxIpp.c  
-    IppStatus ippiResizeLinear_8u_C3R(const Ipp8u* pSrc,  
-                                      Ipp32s srcStep,  
-                                      Ipp8u* pDst,  
-                                      Ipp32s dstStep,  
-                                      IppiPoint dstOffset,  
-                                      IppiSize dstSize,  
-                                      IppiBorderType border, //TODO ... let's say ippBorderConst or ippBorderRepl  
-                                      Ippi8u* borderValue, //NULL -- as in https://github.com/albertoruiz/easyVision/blob/master/packages/imagproc/lib/ImagProc/Ipp/auxIpp.c  
-                                      IppiResizeSpec_32f* pSpec, //might need to do '&pSpec'  
-                                      Ipp8u* pBuffer /* temporary scratch space */ );  
+    IppStatus ippiResizeLinear_8u_C3R(pSrc,  
+                                      srcStep,  
+                                      pDst,  
+                                      dstStep,  
+                                      dstOffset,  
+                                      dstSize,  
+                                      ippBorderRepl,
+                                      NULL, //borderValue
+                                      &pSpec, //might need to do '&pSpec'  
+                                      pBuffer /* temporary scratch space */ );  
   
     ippiFree(pBuffer);  
   
