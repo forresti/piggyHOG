@@ -34,8 +34,10 @@ Mat downsampleWithIPP(Mat img, int scale){
     int inWidth = img.cols;  
     int inHeight = img.rows;  
     int nChannels = img.depth();  
-  
-    //assert(nChannels == 3);  
+ 
+    printf("nChannels = %d \n", nChannels);
+ 
+    assert(nChannels == 3);  
     assert(img.type() == CV_8UC3);  
   
     int outWidth = round(inWidth * scale);  
@@ -56,6 +58,7 @@ Mat downsampleWithIPP(Mat img, int scale){
 
     int bufsize; 
     IppStatus status = ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_LINEAR, &bufsize); 
+    //IppStatus status = ippiResizeGetBufferSize_8u(srcRect, dstRect, nChannels, IPPI_INTER_LINEAR, &bufsize); 
     Ipp8u* pBuffer = (Ipp8u*)ippMalloc(bufsize);  
 printf("ippiResizeGetBufSize err = %s \n", ippGetStatusString(status));
  
