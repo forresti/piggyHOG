@@ -33,7 +33,7 @@ $(EXENAME) : $(OBJS)
 #
 # Here is where your work will be done
 #
-main.o : main.cpp helpers.h
+main.o : main.cpp helpers.h hog.hpp
 	$(CC) $(CCOPTS) main.cpp
 
 helpers.o : helpers.cpp helpers.h

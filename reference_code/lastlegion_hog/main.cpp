@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include "hog.hpp" //https://github.com/lastlegion/hog
 #include "helpers.h"
 using namespace std;
 
