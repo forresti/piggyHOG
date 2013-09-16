@@ -63,13 +63,13 @@ Mat downsampleWithIPP(Mat img, int scale){
     ippiResizeGetSize_8u(srcSize, dstSize, ippLinear, 0, &specSize, &initSize); 
     //IppiResizeSpec_32f pSpec; //TODO: ippiMalloc this if we have problems    
     IppiResizeSpec_32f* pSpec=(IppiResizeSpec_32f*)ippsMalloc_8u(specSize);
-    status = ippiResizeLinearInit_8u_C3R(srcSize,  
-                                         dstSize,  
-                                         pSpec);  
+    status = ippiResizeLinearInit_8u(srcSize,  
+                                     dstSize,  
+                                     pSpec);  
   
     //http://software.intel.com/sites/products/documentation/doclib/ipp_sa/71/ipp_manual/IPPI/ippi_ch12/functn_ResizeLinear.htm 
     //example: https://github.com/albertoruiz/easyVision/blob/master/packages/imagproc/lib/ImagProc/Ipp/auxIpp.c  
-    IppStatus ippiResizeLinear_8u_C3R(pSrc,  
+    status =  ippiResizeLinear_8u_C3R(pSrc,  
                                       srcStep,  
                                       pDst,  
                                       dstStep,  
