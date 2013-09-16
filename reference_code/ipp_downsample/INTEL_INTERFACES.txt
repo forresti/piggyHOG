@@ -1,6 +1,6 @@
 
 
-<image type> downsampleWithIPP(Mat img, scale){
+Mat downsampleWithIPP(Mat img, scale){
     int inWidth = img.cols;
     int inHeight = img.rows;
     int nChannels = img.depth;
@@ -8,7 +8,6 @@
     assert(nChannels == 3); 
     assert(img.type() == CV_8UC3);
 
-    //output img dims -- similar to what we have in Piotr's imResample()
     int outWidth = round(inWidth * scale);
     int outHeight = round(inHeight * scale);
 
@@ -20,17 +19,20 @@
     IppiRect dstRect = {0, 0, outWidth, outHeight};
     IppiSize srcSize = {inWidth, inHeight};
     IppiSize dstSize = {outWidth, outHeight};
+
+    int srcStep = inWidth * nChannels;
+    int dstStep = outWidth * nChannels;
     IppiPoint dstOffset = {0, 0};
 
     IppiStatus status = ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_SUPER, &bufsize);  
-    if(ippStsNoErr != status)    
+    if(status != ippStsNoEr)    
         return -1;  
 
-    pBuffer = (Ipp8u*)ippMalloc(bufsize);  
-    if(0 == buf)    
+    Ipp8u* pBuffer = (Ipp8u*)ippMalloc(bufsize);  
+    if(pBuffer == NULL)
         return -1;
 
-    IppiResizeSpec_32f pspec;
+    IppiResizeSpec_32f pspec; //TODO: ippiMalloc this if we have problems
 
     IppStatus ippiResizeLinearInit_8u_C3R(IppiSize srcSize, 
                                           IppiSize dstSize, 
@@ -49,3 +51,7 @@
                                       IppiResizeSpec_32f* pSpec, //might need to do '&pSpec'
                                       Ipp8u* pBuffer /* temporary scratch space */ );
 
+    ippiFree(pBuffer);
+
+    return outImg;
+}
