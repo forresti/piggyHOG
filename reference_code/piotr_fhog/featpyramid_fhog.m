@@ -46,7 +46,7 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
 
     % our resize function wants floating point values
     im = double(im);
-    parfor i = 1:interval
+    for i = 1:interval
 
           scale_tic = tic();
         scaled = resize(im, 1/sc^(i-1)); %TODO: use Piotr's imResample()?
