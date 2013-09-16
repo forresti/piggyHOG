@@ -42,14 +42,14 @@
 
 
 
-IppStatus ippiResizeLinear_<mod>(const Ipp8u* pSrc, 
-Ipp32s srcStep, 
-Ipp8u* pDst, 
-Ipp32s dstStep, 
-IppiPoint dstOffset, 
-IppiSize dstSize, 
-IppiBorderType border, 
-Ippi8u* borderValue, 
-IppiResizeSpec_64f* pSpec, 
-Ipp8u* pBuffer);
+    IppStatus ippiResizeLinear_<mod>(const Ipp8u* pSrc, 
+                                     Ipp32s srcStep, 
+                                     Ipp8u* pDst, 
+                                     Ipp32s dstStep, 
+                                     IppiPoint dstOffset, 
+                                     IppiSize dstSize, 
+                                     IppiBorderType border, 
+                                     Ippi8u* borderValue, 
+                                     IppiResizeSpec_64f* pSpec, 
+                                     Ipp8u* pBuffer);
 
