@@ -1,6 +1,20 @@
 
+Ipp8u* pDst
+IppiSize dstRoi
+IppiRect srcRect = { 0, 0, m_roi.width, m_roi.height };
+IppiRect dstRect = { 0, 0, dstRoi.width, dstRoi.height };
 
+//scale factors -- similar to what we have in Piotr's imResample()
+double xFactor = (double)dstRoi.width  / (double)m_roi.width;  //outWidth / inWidth
+double yFactor = (double)dstRoi.height / (double)m_roi.height; //outHeight / inHeight
 
+IppiStatus status = ippiResizeGetBufSize(srcRect, dstRect, m_nchannels, IPPI_INTER_SUPER, &bufsize);  
+if(ippStsNoErr != status)    
+    return -1;  
+
+buf = (Ipp8u*)ippMalloc(bufsize);  
+if(0 == buf)    
+    return -1;
 
 
 //http://software.intel.com/sites/products/documentation/hpc/ipp/ippi/ippi_ch12/functn_ResizeSqrPixel.html
