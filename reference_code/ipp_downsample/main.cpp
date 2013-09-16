@@ -89,16 +89,17 @@ void demoIppConvolution(){
     Mat img = imread("./Lena.pgm"); //OpenCV 8U_C1 image
     Mat outImg = img.clone(); //allocate space for convolution results
 
-    int step = img.cols; //pitch
+    int step = img.cols*3; //pitch
     const Ipp32s kernel[9] = {-1, 0, 1, -1, 0, 1, -1, 0, 1};
     IppiSize kernelSize = {3,3};
     IppiSize dstRoiSize = {img.cols - kernelSize.width + 1, img.rows - kernelSize.height + 1};
     IppiPoint anchor = {2,2};
     int divisor = 1;
 
-    IppStatus status = ippiFilter_8u_C1R((const Ipp8u*)&img.data[0], step,
+    IppStatus status = ippiFilter_8u_C3R((const Ipp8u*)&img.data[0], step,
                                          (Ipp8u*)&outImg.data[0], step, dstRoiSize,
                                          kernel, kernelSize, anchor, divisor);
+    forrestWritePgm(outImg, "Lena_ipp.pgm");  
 }
 
 int main (int argc, char **argv)
