@@ -30,12 +30,10 @@ void demoIppConvolution(){
     forrestWritePgm(outImg, "Lena_ipp.pgm");  
 }
 
-Mat downsampleWithIPP(Mat img, int scale){  
+Mat downsampleWithIPP(Mat img, double scale){  
     int inWidth = img.cols;  
     int inHeight = img.rows;  
 
-printf("inHeight = %d, inWidth = %d \n", inHeight, inWidth);
- 
     assert(img.type() == CV_8UC3);  
     int nChannels = 3; 
  
@@ -72,7 +70,6 @@ printf("ippiResizeGetSize_8u err = %s \n", ippGetStatusString(status));
 printf("ippiResizeLinearInit_8u err = %s \n", ippGetStatusString(status)); //TODO: make a macro for this
     assert(status == ippStsNoErr); 
  
-    //http://software.intel.com/sites/products/documentation/doclib/ipp_sa/71/ipp_manual/IPPI/ippi_ch12/functn_ResizeLinear.htm 
     //example: https://github.com/albertoruiz/easyVision/blob/master/packages/imagproc/lib/ImagProc/Ipp/auxIpp.c  
     status =  ippiResizeLinear_8u_C3R(pSrc,  
                                       srcStep,  
@@ -94,9 +91,9 @@ int main (int argc, char **argv){
     demoIppConvolution();
 
     Mat img = imread("../../images_640x480/carsgraz_001.image.jpg"); //OpenCV 8U_C3 image
-    int scale = 0.75; //arbitrary
-
+    double scale = 0.75; //arbitrary
     Mat img_scaled = downsampleWithIPP(img, scale);    
+    forrestWritePgm(img_scaled, "carsgraz_001.image_ippScaled.pgm");
 
     return 0;
 }
