@@ -40,23 +40,15 @@ Mat downsampleWithIPP(Mat img, double scale){
     int outWidth = round(inWidth * scale);  
     int outHeight = round(inHeight * scale);  
   
-    Mat outImg(outHeight, outWidth, CV_8UC3); //TEST -- col-major for OpenCV 
+    Mat outImg(outHeight, outWidth, CV_8UC3); //col-major for OpenCV 
     Ipp8u* pSrc = (Ipp8u*)&img.data[0];  
     Ipp8u* pDst = (Ipp8u*)&outImg.data[0];  
 
-#if 0 //col-major for IPP
-    IppiRect srcRect = {0, 0, inHeight, inWidth};  
-    IppiRect dstRect = {0, 0, outHeight, outWidth};      
-    IppiSize srcSize = {inHeight, inWidth};  
-    IppiSize dstSize = {outHeight, outWidth};  
-#endif
-
-#if 1 //row-major for IPP
+    //row-major for IPP
     IppiRect srcRect = {0, 0, inWidth, inHeight};  
     IppiRect dstRect = {0, 0, outWidth, outHeight};  
     IppiSize srcSize = {inWidth, inHeight};  
-    IppiSize dstSize = {outWidth, outHeight};  
-#endif
+    IppiSize dstSize = {outWidth, outHeight}; 
 
     int srcStep = inWidth * nChannels;  
     int dstStep = outWidth * nChannels;  
@@ -64,7 +56,6 @@ Mat downsampleWithIPP(Mat img, double scale){
 
     int bufsize; 
     IppStatus status = ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_LINEAR, &bufsize); 
-    //IppStatus status = ippiResizeGetBufferSize_8u(srcRect, dstRect, nChannels, IPPI_INTER_LINEAR, &bufsize); 
     Ipp8u* pBuffer = (Ipp8u*)ippMalloc(bufsize);  
 printf("ippiResizeGetBufSize err = %s \n", ippGetStatusString(status));
  
