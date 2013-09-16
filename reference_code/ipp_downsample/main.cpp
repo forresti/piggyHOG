@@ -60,8 +60,8 @@ Mat downsampleWithIPP(Mat img, int scale){
  
     int specSize; 
     int initSize;
-    ippiResizeGetSize_8u(srcSize, dstSize, ippLinear, 0, &specSize, &initSize); 
-    //IppiResizeSpec_32f pSpec; //TODO: ippiMalloc this if we have problems    
+    status = ippiResizeGetSize_8u(srcSize, dstSize, ippLinear, 0, &specSize, &initSize); 
+printf("ippiResizeGetSize_8u err = %s \n", ippGetStatusString(status));
     IppiResizeSpec_32f* pSpec=(IppiResizeSpec_32f*)ippsMalloc_8u(specSize);
     status = ippiResizeLinearInit_8u(srcSize,  
                                      dstSize,  
