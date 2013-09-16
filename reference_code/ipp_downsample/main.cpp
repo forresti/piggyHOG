@@ -58,14 +58,14 @@ void benchmarkIppConvolution()
     for(int i=0; i<10; i++)
     {
         double execTime = runIppConvolution(imgRows, imgCols, kernelSize, kernelSize, dataType);
-        printf("imgSize = %dx%d,  kernelSize = %d,  execTime = %f \n", imgCols, imgRows, kernelSize, execTime);
+        printf("imgSize = %dx%d,  kernelSize = %d,  execTime = %f ms \n", imgCols, imgRows, kernelSize, execTime);
     }
 
     kernelSize = 4;
     for(int imgSize=256; imgSize<5000; imgSize*=2) //imgSize = imgRows = imgCols
     {
         double execTime = runIppConvolution(imgSize, imgSize, kernelSize, kernelSize, dataType);
-        printf("imgSize = %dx%d,  kernelSize = %d,  execTime = %f \n", imgSize, imgSize, kernelSize, execTime);
+        printf("imgSize = %dx%d,  kernelSize = %d,  execTime = %f ms \n", imgSize, imgSize, kernelSize, execTime);
     }
 
 }

@@ -6,7 +6,7 @@
 #LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/intel/ipp/lib/intel64 #for most libraries
 #LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/intel/composer_xe_2013.1.117/compiler/lib/intel64 #for iomp5
 
-OBJS = main.o  helpers.o
+OBJS = main.o helpers_ipp.o helpers.o
 EXENAME = main
 
 CC = g++
@@ -20,7 +20,7 @@ all : $(EXENAME)
 $(EXENAME) : $(OBJS)
 	$(LINK) -o $(EXENAME) $(OBJS) $(LINKOPTS)
 
-main.o : main.cpp helpers.h
+main.o : main.cpp helpers_ipp.h common/helpers.h
 	$(CC) $(CCOPTS) main.cpp
 
 helpers_ipp.o : helpers_ipp.cpp helpers_ipp.h    
