@@ -1,3 +1,20 @@
 
 
-ippiResizeSqrPixel
+
+
+
+//http://software.intel.com/sites/products/documentation/hpc/ipp/ippi/ippi_ch12/functn_ResizeSqrPixel.html
+IppStatus ippiResizeSqrPixel_<mod> (const Ipp<datatype>* pSrc, 
+                                    IppiSize srcSize, 
+                                    int srcStep, 
+                                    IppiRect srcRoi, 
+                                    Ipp<datatype>* pDst, 
+                                    int dstStep, 
+                                    IppiRect dstRoi, 
+                                    double xFactor, 
+                                    double yFactor, 
+                                    double xShift, 
+                                    double yShift, 
+                                    int interpolation, 
+                                    Ipp8u* pBuffer);
+
