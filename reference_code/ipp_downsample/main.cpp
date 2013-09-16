@@ -89,7 +89,7 @@ Mat downsampleWithIPP(Mat img, int scale){
 int main (int argc, char **argv){
     demoIppConvolution();
 
-    Mat img = imread("./Lena.pgm"); //OpenCV 8U_C3 image
+    Mat img = imread("../../images_640x480/carsgraz_001.image.jpg"); //OpenCV 8U_C3 image
     int scale = 0.75; //arbitrary
 
     Mat img_scaled = downsampleWithIPP(img, scale);    
