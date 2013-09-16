@@ -1,4 +1,3 @@
-
 #include "helpers_ipp.h"
 using namespace std;
 
