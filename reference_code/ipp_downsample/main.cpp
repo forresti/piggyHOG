@@ -57,11 +57,15 @@ Mat downsampleWithIPP(Mat img, int scale){
     int bufsize; 
     IppStatus status = ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_LINEAR, &bufsize); 
     Ipp8u* pBuffer = (Ipp8u*)ippMalloc(bufsize);  
-  
-    IppiResizeSpec_32f pspec; //TODO: ippiMalloc this if we have problems    
-    IppStatus ippiResizeLinearInit_8u_C3R(IppiSize srcSize,  
-                                          IppiSize dstSize,  
-                                          &pSpec);  
+ 
+    int specSize; 
+    int initSize;
+    ippiResizeGetSize_8u(srcSize, dstSize, ippLinear, 0, &specSize, &initSize); 
+    //IppiResizeSpec_32f pSpec; //TODO: ippiMalloc this if we have problems    
+    IppiResizeSpec_32f* pSpec=(IppiResizeSpec_32f*)ippsMalloc_8u(specSize);
+    status = ippiResizeLinearInit_8u_C3R(srcSize,  
+                                         dstSize,  
+                                         pSpec);  
   
     //http://software.intel.com/sites/products/documentation/doclib/ipp_sa/71/ipp_manual/IPPI/ippi_ch12/functn_ResizeLinear.htm 
     //example: https://github.com/albertoruiz/easyVision/blob/master/packages/imagproc/lib/ImagProc/Ipp/auxIpp.c  
@@ -73,7 +77,7 @@ Mat downsampleWithIPP(Mat img, int scale){
                                       dstSize,  
                                       ippBorderRepl,
                                       NULL, //borderValue
-                                      &pSpec, //might need to do '&pSpec'  
+                                      pSpec, //might need to do '&pSpec'  
                                       pBuffer /* temporary scratch space */ );  
   
     ippiFree(pBuffer);  
