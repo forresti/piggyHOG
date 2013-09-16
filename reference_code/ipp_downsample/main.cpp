@@ -66,6 +66,7 @@ Mat downsampleWithIPP(Mat img, int scale){
     status = ippiResizeLinearInit_8u(srcSize,  
                                      dstSize,  
                                      pSpec);  
+printf("ippiResizeLinearInit_8u err = %d \n", status);
     assert(status == ippStsNoErr); 
  
     //http://software.intel.com/sites/products/documentation/doclib/ipp_sa/71/ipp_manual/IPPI/ippi_ch12/functn_ResizeLinear.htm 
