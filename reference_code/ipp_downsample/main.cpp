@@ -66,7 +66,8 @@ Mat downsampleWithIPP(Mat img, int scale){
     status = ippiResizeLinearInit_8u(srcSize,  
                                      dstSize,  
                                      pSpec);  
-  
+    assert(status == ippStsNoErr); 
+ 
     //http://software.intel.com/sites/products/documentation/doclib/ipp_sa/71/ipp_manual/IPPI/ippi_ch12/functn_ResizeLinear.htm 
     //example: https://github.com/albertoruiz/easyVision/blob/master/packages/imagproc/lib/ImagProc/Ipp/auxIpp.c  
     status =  ippiResizeLinear_8u_C3R(pSrc,  
@@ -79,9 +80,8 @@ Mat downsampleWithIPP(Mat img, int scale){
                                       NULL, //borderValue
                                       pSpec, //might need to do '&pSpec'  
                                       pBuffer /* temporary scratch space */ );  
-  
+    assert(status == ippStsNoErr);
     ippiFree(pBuffer);  
-  
     return outImg;  
 }
 
