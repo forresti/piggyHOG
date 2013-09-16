@@ -40,15 +40,22 @@ Mat downsampleWithIPP(Mat img, double scale){
     int outWidth = round(inWidth * scale);  
     int outHeight = round(inHeight * scale);  
   
-    Mat outImg(outWidth, outHeight, CV_8UC3);  
+    Mat outImg(outHeight, outWidth, CV_8UC3);  
     Ipp8u* pSrc = (Ipp8u*)&img.data[0];  
     Ipp8u* pDst = (Ipp8u*)&outImg.data[0];  
-  
+ 
+    IppiRect srcRect = {0, 0, inHeight, inWidth};  
+    IppiRect dstRect = {0, 0, outHeight, outWidth};      
+    IppiSize srcSize = {inHeight, inWidth};  
+    IppiSize dstSize = {outHeight, outWidth};  
+ 
+#if 0
     IppiRect srcRect = {0, 0, inWidth, inHeight};  
     IppiRect dstRect = {0, 0, outWidth, outHeight};  
     IppiSize srcSize = {inWidth, inHeight};  
     IppiSize dstSize = {outWidth, outHeight};  
-  
+#endif
+
     int srcStep = inWidth * nChannels;  
     int dstStep = outWidth * nChannels;  
     IppiPoint dstOffset = {0, 0};  
