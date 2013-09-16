@@ -1,4 +1,3 @@
-
 #include <opencv2/opencv.hpp>
 #include "ipp.h"
 #include "ippi.h"
@@ -10,7 +9,6 @@
 #include "helpers_ipp.h"
 using namespace std;
 using namespace cv;
-
 
 //from my StackOverflow post: http://stackoverflow.com/questions/13465914/using-opencv-mat-images-with-intel-ipp
 void demoIppConvolution(){
@@ -85,7 +83,6 @@ printf("ippiResizeLinearInit_8u err = %s \n", ippGetStatusString(status)); //TOD
     ippiFree(pBuffer);  
     return outImg;  
 }
-
 
 int main (int argc, char **argv){
     demoIppConvolution();
