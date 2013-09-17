@@ -65,25 +65,33 @@ void hogPyramid(Mat img){
 
     int interval = 10;
     float sc = pow(2, 1 / (float)interval);
-    printf("sc = %f \n", sc);
+    //printf("sc = %f \n", sc);
     
-    for(int i=0; i<interval+1; i++){
+    for(int i=0; i<interval; i++){
         float downsampleFactor = 1/pow(sc, i);
         printf("downsampleFactor = %f \n", downsampleFactor);
-
+downsampleWithIPP(img, downsampleFactor); //TODO: catch return images, put them in a vector<Mat>
+downsampleWithIPP(img, downsampleFactor/2);
     }
 }
 
+void downsampleDemo(Mat img){
+    //one downsample
+    double scale = 0.75; //arbitrary
+    Mat img_scaled = downsampleWithIPP(img, scale);    
+    forrestWritePgm(img_scaled, "carsgraz_001.image_ippScaled.pgm");
+}
 
 int main (int argc, char **argv){
     Mat img = imread("../../images_640x480/carsgraz_001.image.jpg"); //OpenCV 8U_C3 image
 
     //one downsample
-    double scale = 0.75; //arbitrary
-    Mat img_scaled = downsampleWithIPP(img, scale);    
-    forrestWritePgm(img_scaled, "carsgraz_001.image_ippScaled.pgm");
+    downsampleDemo(img);
 
+    double start_pyra = read_timer();
     hogPyramid(img);
+    double time_pyra = read_timer() - start_pyra;
+    printf("    downsample image for HOG pyramid in %f ms \n", time_pyra);
 
     return 0;
 }
