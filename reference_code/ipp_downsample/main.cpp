@@ -69,6 +69,7 @@ vector<Mat> downsamplePyramid(Mat img){
 
     #pragma omp parallel for
     for(int i=0; i<interval; i++){
+        printf("omp_get_num_threads = %d \n", omp_get_num_threads());
         float downsampleFactor = 1/pow(sc, i);
         printf("downsampleFactor = %f \n", downsampleFactor);
         imgPyramid[i] = downsampleWithIPP(img, downsampleFactor); //TODO: catch return images, put them in a vector<Mat>
