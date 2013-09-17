@@ -11,11 +11,26 @@
 using namespace std;
 using namespace cv;
 
+//use OpenCV's bilinear filter downsampling
+Mat downsampleWithOpenCV(Mat img, double scale){
+    int inWidth = img.cols;
+    int inHeight = img.rows;
+    assert(img.type() == CV_8UC3);
+    int nChannels = 3;
+
+    int outWidth = round(inWidth * scale);
+    int outHeight = round(inHeight * scale);
+    Mat outImg(outHeight, outWidth, CV_8UC3); //col-major for OpenCV 
+
+    //outImg 'knows' the downsampled dimensions
+    cv::resize(img, outImg); //using default bilinear interpolation (INTER_LINEAR) 
+    return outImg;
+}
+
 //use Intel IPP's bilinear filter downsampling
 Mat downsampleWithIPP(Mat img, double scale){  
     int inWidth = img.cols;  
     int inHeight = img.rows;  
-
     assert(img.type() == CV_8UC3);  
     int nChannels = 3; 
  
@@ -70,14 +85,14 @@ vector<Mat> downsamplePyramid(Mat img){
 
     omp_set_num_threads(5); //TODO: be careful with num threads. on R8, 2-6 threads is good, more is just noisy
 
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for(int i=0; i<interval; i++){
         //printf("omp_get_num_threads = %d \n", omp_get_num_threads());
 
         float downsampleFactor = 1/pow(sc, i);
         //printf("downsampleFactor = %f \n", downsampleFactor);
 
-#if 0 //IPP
+#if 1 //IPP downsample
         imgPyramid[i] = downsampleWithIPP(img, downsampleFactor); 
         imgPyramid[i+interval] = downsampleWithIPP(img, downsampleFactor/2);
         //imgPyramid[i+interval] = downsampleWithIPP(imgPyramid[i], downsampleFactor); //start from already downsampled img, go down an other octave
@@ -90,8 +105,16 @@ vector<Mat> downsamplePyramid(Mat img){
 void downsampleDemo(Mat img){
     //one downsample
     double scale = 0.75; //arbitrary
+
+#if 1 //OpenCV downsample
+    Mat img_scaled = downsampleWithOpenCV(img, scale);
+    forrestWritePgm(img_scaled, "carsgraz_001.image_opencvScaled.pgm");
+#endif
+
+#if 0 //IPP downsample
     Mat img_scaled = downsampleWithIPP(img, scale);    
     forrestWritePgm(img_scaled, "carsgraz_001.image_ippScaled.pgm");
+#endif
 }
 
 int main (int argc, char **argv){
