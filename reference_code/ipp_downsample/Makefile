@@ -10,7 +10,7 @@ OBJS = main.o helpers_ipp.o helpers.o
 EXENAME = main
 
 CC = g++
-CCOPTS = -c -g -O0 `pkg-config opencv --cflags` -I/opt/intel/ipp/include 
+CCOPTS = -c -g -O3 `pkg-config opencv --cflags` -I/opt/intel/ipp/include 
 LINK = g++
 LINKOPTS = `pkg-config opencv --libs` -L/opt/intel/ipp/lib/intel64 -L/opt/intel/composer_xe_2013.1.117/compiler/lib/intel64 -lippi -lipps -lippcore -liomp5 -lpthread -lm
 

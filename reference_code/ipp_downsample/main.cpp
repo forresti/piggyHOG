@@ -1,6 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include "ipp.h"
 #include "ippi.h"
+#include "omp.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -66,12 +67,13 @@ vector<Mat> downsamplePyramid(Mat img){
     float sc = pow(2, 1 / (float)interval);
     vector<Mat> imgPyramid(interval*2); //100% down to 25% of orig size (two octaves, 10 scales per octave)
 
+    #pragma omp parallel for
     for(int i=0; i<interval; i++){
         float downsampleFactor = 1/pow(sc, i);
         printf("downsampleFactor = %f \n", downsampleFactor);
         imgPyramid[i] = downsampleWithIPP(img, downsampleFactor); //TODO: catch return images, put them in a vector<Mat>
-        //imgPyramid[i+interval] = downsampleWithIPP(img, downsampleFactor/2);
-        imgPyramid[i+interval] = downsampleWithIPP(imgPyramid[i], downsampleFactor); //start from already downsampled img, go down an other octave
+        imgPyramid[i+interval] = downsampleWithIPP(img, downsampleFactor/2);
+        //imgPyramid[i+interval] = downsampleWithIPP(imgPyramid[i], downsampleFactor); //start from already downsampled img, go down an other octave
     }
     return imgPyramid;
 }
