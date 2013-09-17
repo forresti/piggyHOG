@@ -107,20 +107,18 @@ vector<Mat> downsamplePyramid(Mat img){
     return imgPyramid;
 }
 
-//TODO: delete downsampleDemo()
+//simple example of using my OpenCV and IPP bilinear filter downsampling wrappers
 void downsampleDemo(Mat img){
     //one downsample
     double scale = 0.75; //arbitrary
 
-#if 1 //OpenCV downsample
+    //OpenCV downsample
     Mat img_scaled = downsampleWithOpenCV(img, scale);
     forrestWritePgm(img_scaled, "carsgraz_001.image_opencvScaled.pgm");
-#endif
 
-#if 0 //IPP downsample
+    //IPP downsample
     Mat img_scaled = downsampleWithIPP(img, scale);    
     forrestWritePgm(img_scaled, "carsgraz_001.image_ippScaled.pgm");
-#endif
 }
 
 int main (int argc, char **argv){
