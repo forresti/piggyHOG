@@ -55,17 +55,35 @@ Mat downsampleWithIPP(Mat img, double scale){
                                       dstSize,  
                                       ippBorderRepl,
                                       NULL, //borderValue
-                                      pSpec, //might need to do '&pSpec'  
+                                      pSpec, //details of our use case 
                                       pBuffer /* temporary scratch space */ ));  
     ippiFree(pBuffer);  
     return outImg;  
 }
 
+void hogPyramid(Mat img){
+
+    int interval = 10;
+    float sc = pow(2, 1/interval);
+
+    for(int i=0; i<interval; i++){
+        float downsampleFactor = 1/pow(sc, i-1);
+        printf("downsampleFactor = %f \n", downsampleFactor);
+
+
+    }
+}
+
+
 int main (int argc, char **argv){
     Mat img = imread("../../images_640x480/carsgraz_001.image.jpg"); //OpenCV 8U_C3 image
+
+    //one downsample
     double scale = 0.75; //arbitrary
     Mat img_scaled = downsampleWithIPP(img, scale);    
     forrestWritePgm(img_scaled, "carsgraz_001.image_ippScaled.pgm");
+
+    hogPyramid(img);
 
     return 0;
 }
