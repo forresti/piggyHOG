@@ -68,18 +68,20 @@ vector<Mat> downsamplePyramid(Mat img){
     float sc = pow(2, 1 / (float)interval);
     vector<Mat> imgPyramid(interval*2); //100% down to 25% of orig size (two octaves, 10 scales per octave)
 
-    //TODO: be careful with num threads. on R8, 2-6 threads is good, more is just noisy
-    omp_set_num_threads(5);
+    omp_set_num_threads(5); //TODO: be careful with num threads. on R8, 2-6 threads is good, more is just noisy
 
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for(int i=0; i<interval; i++){
         //printf("omp_get_num_threads = %d \n", omp_get_num_threads());
 
         float downsampleFactor = 1/pow(sc, i);
         //printf("downsampleFactor = %f \n", downsampleFactor);
+
+#if 0 //IPP
         imgPyramid[i] = downsampleWithIPP(img, downsampleFactor); 
         imgPyramid[i+interval] = downsampleWithIPP(img, downsampleFactor/2);
         //imgPyramid[i+interval] = downsampleWithIPP(imgPyramid[i], downsampleFactor); //start from already downsampled img, go down an other octave
+#endif
     }
     return imgPyramid;
 }
