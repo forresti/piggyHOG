@@ -10,24 +10,6 @@
 using namespace std;
 using namespace cv;
 
-//from my StackOverflow post: http://stackoverflow.com/questions/13465914/using-opencv-mat-images-with-intel-ipp
-void demoIppConvolution(){
-    Mat img = imread("./Lena.pgm"); //OpenCV 8U_C3 image
-    Mat outImg = img.clone(); //allocate space for convolution results
-
-    int step = img.cols*3; //pitch
-    const Ipp32s kernel[9] = {-1, 0, 1, -1, 0, 1, -1, 0, 1};
-    IppiSize kernelSize = {3,3};
-    IppiSize dstRoiSize = {img.cols - kernelSize.width + 1, img.rows - kernelSize.height + 1};
-    IppiPoint anchor = {2,2};
-    int divisor = 1;
-
-    IppStatus status = ippiFilter_8u_C3R((const Ipp8u*)&img.data[0], step,
-                                         (Ipp8u*)&outImg.data[0], step, dstRoiSize,
-                                         kernel, kernelSize, anchor, divisor);
-    forrestWritePgm(outImg, "Lena_ipp.pgm");  
-}
-
 Mat downsampleWithIPP(Mat img, double scale){  
     int inWidth = img.cols;  
     int inHeight = img.rows;  
@@ -59,17 +41,12 @@ Mat downsampleWithIPP(Mat img, double scale){
     int specSize; 
     int initSize;
     CHECK_IPP(ippiResizeGetSize_8u(srcSize, dstSize, ippLinear, 0, &specSize, &initSize)); 
-//printf("ippiResizeGetSize_8u err = %s \n", ippGetStatusString(status));
     IppiResizeSpec_32f* pSpec=(IppiResizeSpec_32f*)ippsMalloc_8u(specSize);
-    //status = ippiResizeLinearInit_8u(srcSize,  
     CHECK_IPP(ippiResizeLinearInit_8u(srcSize,
-                                     dstSize,  
-                                     pSpec));  
-//printf("ippiResizeLinearInit_8u err = %s \n", ippGetStatusString(status)); //TODO: make a macro for this
-    //assert(status == ippStsNoErr); 
+                                      dstSize,  
+                                      pSpec));  
  
     //example: https://github.com/albertoruiz/easyVision/blob/master/packages/imagproc/lib/ImagProc/Ipp/auxIpp.c  
-    //status =  ippiResizeLinear_8u_C3R(pSrc,  
     CHECK_IPP(ippiResizeLinear_8u_C3R(pSrc, 
                                       srcStep,  
                                       pDst,  
@@ -85,8 +62,6 @@ Mat downsampleWithIPP(Mat img, double scale){
 }
 
 int main (int argc, char **argv){
-    demoIppConvolution();
-
     Mat img = imread("../../images_640x480/carsgraz_001.image.jpg"); //OpenCV 8U_C3 image
     double scale = 0.75; //arbitrary
     Mat img_scaled = downsampleWithIPP(img, scale);    
