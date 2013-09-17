@@ -65,11 +65,11 @@ void hogPyramid(Mat img){
 
     int interval = 10;
     float sc = pow(2, 1/interval);
-
+    printf("sc = %f \n", sc);
+    
     for(int i=0; i<interval; i++){
         float downsampleFactor = 1/pow(sc, i-1);
         printf("downsampleFactor = %f \n", downsampleFactor);
-
 
     }
 }
