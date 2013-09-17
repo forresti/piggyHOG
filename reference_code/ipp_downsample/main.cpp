@@ -80,7 +80,6 @@ Mat downsampleWithIPP(Mat img, double scale){
                                       NULL, //borderValue
                                       pSpec, //might need to do '&pSpec'  
                                       pBuffer /* temporary scratch space */ ));  
-    //assert(status == ippStsNoErr);
     ippiFree(pBuffer);  
     return outImg;  
 }
