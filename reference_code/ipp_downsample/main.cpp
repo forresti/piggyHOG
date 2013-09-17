@@ -65,9 +65,7 @@ Mat downsampleWithIPP(Mat img, double scale){
     int initSize;
     CHECK_IPP(ippiResizeGetSize_8u(srcSize, dstSize, ippLinear, 0, &specSize, &initSize)); 
     IppiResizeSpec_32f* pSpec=(IppiResizeSpec_32f*)ippsMalloc_8u(specSize);
-    CHECK_IPP(ippiResizeLinearInit_8u(srcSize,
-                                      dstSize,  
-                                      pSpec));  
+    CHECK_IPP(ippiResizeLinearInit_8u(srcSize, dstSize, pSpec));
  
     //example: https://github.com/albertoruiz/easyVision/blob/master/packages/imagproc/lib/ImagProc/Ipp/auxIpp.c  
     CHECK_IPP(ippiResizeLinear_8u_C3R(pSrc, 
