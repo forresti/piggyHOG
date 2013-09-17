@@ -21,9 +21,17 @@ Mat downsampleWithOpenCV(Mat img, double scale){
     int outWidth = round(inWidth * scale);
     int outHeight = round(inHeight * scale);
     Mat outImg(outHeight, outWidth, CV_8UC3); //col-major for OpenCV 
+    Size outSize = outImg.size();
 
-    //outImg 'knows' the downsampled dimensions
-    cv::resize(img, outImg); //using default bilinear interpolation (INTER_LINEAR) 
+    cv::resize(img, 
+               outImg,
+               outSize,
+               0, //scaleX -- default = dsize.width / src.cols
+               0, //scaleY -- default = dsize.height / src.rows
+               INTER_LINEAR /* use bilinear interpolation */);
+
+
+ //using default bilinear interpolation (INTER_LINEAR) 
     return outImg;
 }
 
