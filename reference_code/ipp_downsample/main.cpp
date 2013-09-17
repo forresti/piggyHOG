@@ -67,18 +67,23 @@ vector<Mat> downsamplePyramid(Mat img){
     float sc = pow(2, 1 / (float)interval);
     vector<Mat> imgPyramid(interval*2); //100% down to 25% of orig size (two octaves, 10 scales per octave)
 
+    //TODO: be careful with num threads. on R8, 2-6 threads is good, more is just noisy
+    omp_set_num_threads(5);
+
     #pragma omp parallel for
     for(int i=0; i<interval; i++){
         printf("omp_get_num_threads = %d \n", omp_get_num_threads());
+
         float downsampleFactor = 1/pow(sc, i);
         printf("downsampleFactor = %f \n", downsampleFactor);
-        imgPyramid[i] = downsampleWithIPP(img, downsampleFactor); //TODO: catch return images, put them in a vector<Mat>
+        imgPyramid[i] = downsampleWithIPP(img, downsampleFactor); 
         imgPyramid[i+interval] = downsampleWithIPP(img, downsampleFactor/2);
         //imgPyramid[i+interval] = downsampleWithIPP(imgPyramid[i], downsampleFactor); //start from already downsampled img, go down an other octave
     }
     return imgPyramid;
 }
 
+//TODO: delete downsampleDemo()
 void downsampleDemo(Mat img){
     //one downsample
     double scale = 0.75; //arbitrary
@@ -97,6 +102,7 @@ int main (int argc, char **argv){
     vector<Mat> imgPyramid = downsamplePyramid(img);
     double time_pyra = read_timer() - start_pyra;
     printf("    downsample image for HOG pyramid in %f ms \n", time_pyra);
+    //TODO: have a function to write imgPyramid out to img files
 
     return 0;
 }
