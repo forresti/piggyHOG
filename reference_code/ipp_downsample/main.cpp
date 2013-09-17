@@ -11,6 +11,7 @@
 using namespace std;
 using namespace cv;
 
+//use Intel IPP's bilinear filter downsampling
 Mat downsampleWithIPP(Mat img, double scale){  
     int inWidth = img.cols;  
     int inHeight = img.rows;  
@@ -72,10 +73,10 @@ vector<Mat> downsamplePyramid(Mat img){
 
     #pragma omp parallel for
     for(int i=0; i<interval; i++){
-        printf("omp_get_num_threads = %d \n", omp_get_num_threads());
+        //printf("omp_get_num_threads = %d \n", omp_get_num_threads());
 
         float downsampleFactor = 1/pow(sc, i);
-        printf("downsampleFactor = %f \n", downsampleFactor);
+        //printf("downsampleFactor = %f \n", downsampleFactor);
         imgPyramid[i] = downsampleWithIPP(img, downsampleFactor); 
         imgPyramid[i+interval] = downsampleWithIPP(img, downsampleFactor/2);
         //imgPyramid[i+interval] = downsampleWithIPP(imgPyramid[i], downsampleFactor); //start from already downsampled img, go down an other octave
