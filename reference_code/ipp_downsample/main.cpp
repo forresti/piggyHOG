@@ -26,12 +26,10 @@ Mat downsampleWithOpenCV(Mat img, double scale){
     cv::resize(img, 
                outImg,
                outSize,
-               0, //scaleX -- default = dsize.width / src.cols
-               0, //scaleY -- default = dsize.height / src.rows
+               0, //scaleX -- default = outSize.width / img.cols
+               0, //scaleY -- default = outSize.height / img.rows
                INTER_LINEAR /* use bilinear interpolation */);
 
-
- //using default bilinear interpolation (INTER_LINEAR) 
     return outImg;
 }
 
