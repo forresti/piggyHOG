@@ -64,7 +64,7 @@ Mat downsampleWithIPP(Mat img, double scale){
 void hogPyramid(Mat img){
 
     int interval = 10;
-    float sc = pow(2, 1/interval);
+    float sc = pow(2, 1 / (float)interval);
     printf("sc = %f \n", sc);
     
     for(int i=0; i<interval; i++){
