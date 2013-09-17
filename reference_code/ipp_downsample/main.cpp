@@ -52,10 +52,12 @@ Mat downsampleWithIPP(Mat img, double scale){
     int dstStep = outWidth * nChannels;  
     IppiPoint dstOffset = {0, 0};  
 
+IppStatus status; //TODO: remove
     int bufsize; 
-    IppStatus status = ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_LINEAR, &bufsize); 
+    //IppStatus status = ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_LINEAR, &bufsize); 
+    CHECK_IPP(ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_LINEAR, &bufsize));
     Ipp8u* pBuffer = (Ipp8u*)ippMalloc(bufsize);  
-printf("ippiResizeGetBufSize err = %s \n", ippGetStatusString(status));
+//printf("ippiResizeGetBufSize err = %s \n", ippGetStatusString(status));
  
     int specSize; 
     int initSize;
