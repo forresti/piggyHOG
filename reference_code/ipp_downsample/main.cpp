@@ -52,26 +52,25 @@ Mat downsampleWithIPP(Mat img, double scale){
     int dstStep = outWidth * nChannels;  
     IppiPoint dstOffset = {0, 0};  
 
-IppStatus status; //TODO: remove
     int bufsize; 
-    //IppStatus status = ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_LINEAR, &bufsize); 
     CHECK_IPP(ippiResizeGetBufSize(srcRect, dstRect, nChannels, IPPI_INTER_LINEAR, &bufsize));
     Ipp8u* pBuffer = (Ipp8u*)ippMalloc(bufsize);  
-//printf("ippiResizeGetBufSize err = %s \n", ippGetStatusString(status));
  
     int specSize; 
     int initSize;
-    status = ippiResizeGetSize_8u(srcSize, dstSize, ippLinear, 0, &specSize, &initSize); 
-printf("ippiResizeGetSize_8u err = %s \n", ippGetStatusString(status));
+    CHECK_IPP(ippiResizeGetSize_8u(srcSize, dstSize, ippLinear, 0, &specSize, &initSize)); 
+//printf("ippiResizeGetSize_8u err = %s \n", ippGetStatusString(status));
     IppiResizeSpec_32f* pSpec=(IppiResizeSpec_32f*)ippsMalloc_8u(specSize);
-    status = ippiResizeLinearInit_8u(srcSize,  
+    //status = ippiResizeLinearInit_8u(srcSize,  
+    CHECK_IPP(ippiResizeLinearInit_8u(srcSize,
                                      dstSize,  
-                                     pSpec);  
-printf("ippiResizeLinearInit_8u err = %s \n", ippGetStatusString(status)); //TODO: make a macro for this
-    assert(status == ippStsNoErr); 
+                                     pSpec));  
+//printf("ippiResizeLinearInit_8u err = %s \n", ippGetStatusString(status)); //TODO: make a macro for this
+    //assert(status == ippStsNoErr); 
  
     //example: https://github.com/albertoruiz/easyVision/blob/master/packages/imagproc/lib/ImagProc/Ipp/auxIpp.c  
-    status =  ippiResizeLinear_8u_C3R(pSrc,  
+    //status =  ippiResizeLinear_8u_C3R(pSrc,  
+    CHECK_IPP(ippiResizeLinear_8u_C3R(pSrc, 
                                       srcStep,  
                                       pDst,  
                                       dstStep,  
@@ -80,8 +79,8 @@ printf("ippiResizeLinearInit_8u err = %s \n", ippGetStatusString(status)); //TOD
                                       ippBorderRepl,
                                       NULL, //borderValue
                                       pSpec, //might need to do '&pSpec'  
-                                      pBuffer /* temporary scratch space */ );  
-    assert(status == ippStsNoErr);
+                                      pBuffer /* temporary scratch space */ ));  
+    //assert(status == ippStsNoErr);
     ippiFree(pBuffer);  
     return outImg;  
 }
