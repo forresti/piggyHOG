@@ -62,7 +62,6 @@ Mat downsampleWithIPP(Mat img, double scale){
 }
 
 vector<Mat> downsamplePyramid(Mat img){
-
     int interval = 10;
     float sc = pow(2, 1 / (float)interval);
     vector<Mat> imgPyramid(interval*2); //100% down to 25% of orig size (two octaves, 10 scales per octave)
@@ -71,7 +70,8 @@ vector<Mat> downsamplePyramid(Mat img){
         float downsampleFactor = 1/pow(sc, i);
         printf("downsampleFactor = %f \n", downsampleFactor);
         imgPyramid[i] = downsampleWithIPP(img, downsampleFactor); //TODO: catch return images, put them in a vector<Mat>
-        imgPyramid[i+interval] = downsampleWithIPP(img, downsampleFactor/2);
+        //imgPyramid[i+interval] = downsampleWithIPP(img, downsampleFactor/2);
+        imgPyramid[i+interval] = downsampleWithIPP(imgPyramid[i], downsampleFactor); //start from already downsampled img, go down an other octave
     }
     return imgPyramid;
 }
