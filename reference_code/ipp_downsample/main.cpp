@@ -92,6 +92,7 @@ int main (int argc, char **argv){
     //one downsample
     downsampleDemo(img);
 
+    //downsample pyramid
     double start_pyra = read_timer();
     vector<Mat> imgPyramid = downsamplePyramid(img);
     double time_pyra = read_timer() - start_pyra;
