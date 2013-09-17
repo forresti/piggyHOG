@@ -98,7 +98,13 @@ vector<Mat> downsamplePyramid(Mat img){
         float downsampleFactor = 1/pow(sc, i);
         //printf("downsampleFactor = %f \n", downsampleFactor);
 
-#if 1 //IPP downsample
+#if 1 //OpenCV downsample
+        imgPyramid[i] = downsampleWithOpenCV(img, downsampleFactor);
+        imgPyramid[i+interval] = downsampleWithOpenCV(img, downsampleFactor/2);          
+        //imgPyramid[i+interval] = downsampleWithIPP(imgPyramid[i], downsampleFactor); //start from already downsampled img, go down an other octave
+#endif
+
+#if 0 //IPP downsample
         imgPyramid[i] = downsampleWithIPP(img, downsampleFactor); 
         imgPyramid[i+interval] = downsampleWithIPP(img, downsampleFactor/2);
         //imgPyramid[i+interval] = downsampleWithIPP(imgPyramid[i], downsampleFactor); //start from already downsampled img, go down an other octave
@@ -111,13 +117,14 @@ vector<Mat> downsamplePyramid(Mat img){
 void downsampleDemo(Mat img){
     //one downsample
     double scale = 0.75; //arbitrary
+    Mat img_scaled;
 
     //OpenCV downsample
-    Mat img_scaled = downsampleWithOpenCV(img, scale);
+    img_scaled = downsampleWithOpenCV(img, scale);
     forrestWritePgm(img_scaled, "carsgraz_001.image_opencvScaled.pgm");
 
     //IPP downsample
-    Mat img_scaled = downsampleWithIPP(img, scale);    
+    img_scaled = downsampleWithIPP(img, scale);    
     forrestWritePgm(img_scaled, "carsgraz_001.image_ippScaled.pgm");
 }
 
