@@ -90,7 +90,6 @@ vector<Mat> downsamplePyramid(Mat img){
     vector<Mat> imgPyramid(interval*2); //100% down to 25% of orig size (two octaves, 10 scales per octave)
 
     omp_set_num_threads(5); //TODO: be careful with num threads. on R8, 2-6 threads is good, more is just noisy
-
     #pragma omp parallel for
     for(int i=0; i<interval; i++){
         //printf("omp_get_num_threads = %d \n", omp_get_num_threads());
