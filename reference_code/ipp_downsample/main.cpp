@@ -118,11 +118,11 @@ void downsampleDemo(Mat img){
 
     //OpenCV downsample
     img_scaled = downsampleWithOpenCV(img, scale);
-    forrestWritePgm(img_scaled, "carsgraz_001.image_opencvScaled.pgm");
+    forrestWritePgm(img_scaled, "carsgraz_001.image_opencvScaled.png");
 
     //IPP downsample
     img_scaled = downsampleWithIPP(img, scale);    
-    forrestWritePgm(img_scaled, "carsgraz_001.image_ippScaled.pgm");
+    forrestWritePgm(img_scaled, "carsgraz_001.image_ippScaled.png");
 }
 
 int main (int argc, char **argv){
