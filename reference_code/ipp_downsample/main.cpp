@@ -61,8 +61,7 @@ Mat downsampleWithIPP(Mat img, double scale){
     return outImg;  
 }
 
-void downsamplePyramid(Mat img){
-
+vector<Mat> downsamplePyramid(Mat img){
 
     int interval = 10;
     float sc = pow(2, 1 / (float)interval);
@@ -74,6 +73,7 @@ void downsamplePyramid(Mat img){
         imgPyramid[i] = downsampleWithIPP(img, downsampleFactor); //TODO: catch return images, put them in a vector<Mat>
         imgPyramid[i+interval] = downsampleWithIPP(img, downsampleFactor/2);
     }
+    return imgPyramid;
 }
 
 void downsampleDemo(Mat img){
@@ -90,7 +90,7 @@ int main (int argc, char **argv){
     downsampleDemo(img);
 
     double start_pyra = read_timer();
-    downsamplePyramid(img);
+    vector<Mat> imgPyramid = downsamplePyramid(img);
     double time_pyra = read_timer() - start_pyra;
     printf("    downsample image for HOG pyramid in %f ms \n", time_pyra);
 
