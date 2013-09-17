@@ -67,8 +67,8 @@ void hogPyramid(Mat img){
     float sc = pow(2, 1 / (float)interval);
     printf("sc = %f \n", sc);
     
-    for(int i=0; i<interval; i++){
-        float downsampleFactor = 1/pow(sc, i-1);
+    for(int i=0; i<interval+1; i++){
+        float downsampleFactor = 1/pow(sc, i);
         printf("downsampleFactor = %f \n", downsampleFactor);
 
     }
