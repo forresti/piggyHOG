@@ -1,0 +1,27 @@
+
+**Stuff to include in makefile for Mex?
+
+compile_mexRunner.sh:
+g++ -c  -I/usr/local/MATLAB/R2012b/extern/include -I/usr/local/MATLAB/R2012b/simulink/include -DMATLAB_MEX_FILE -ansi -D_GNU_SOURCE -I/usr/local/MATLAB/R2012b/extern/include/cpp -I/usr/local/MATLAB/R2012b/extern/include -DGLNXA64 -DGCC  -DMX_COMPAT_32 -g -pg  "mexRunner.cpp"
+
+g++ -g -pg -lgomp -pthread -Wall -ldl -o  "mexRunner"  mexRunner.o CsCascade.o model.o -Wl,-rpath-link,/usr/local/MATLAB/R2012b/bin/glnxa64 -L/usr/local/MATLAB/R2012b/bin/glnxa64 -leng -lmx -lm -lmex -lmat
+
+spliting up compile_mexRunner.sh:
+OBJS = mexRunner.o
+EXENAME = mexRunner
+
+CC = g++
+CCOPTS = -c -g -pg -I/usr/local/MATLAB/R2012b/extern/include -I/usr/local/MATLAB/R2012b/simulink/include -DMATLAB_MEX_FILE -ansi -D_GNU_SOURCE -I/usr/local/MATLAB/R2012b/extern/include/cpp -I/usr/local/MATLAB/R2012b/extern/include -DGLNXA64 -DGCC  -DMX_COMPAT_32  
+LINK = g++
+LINKOPTS = -g -pg -lgomp -pthread -Wall -ldl -Wl,-rpath-link,/usr/local/MATLAB/R2012b/bin/glnxa64 -L/usr/local/MATLAB/R2012b/bin/glnxa64 -leng -lmx -lm -lmex -lmat 
+
+TODO:
+MATLABDIR = /usr/local/MATLAB/R2012b/ #if R8
+MATLABDIR = /Applications/MATLAB_R2012a.app/ #if Forrest's mac laptop
+
+MATLAB_LIBS = /usr/local/MATLAB/R2012b/bin/glnxa64 #if R8
+MATLAB_LIBS = /Applications/MATLAB_R2012a.app/bin/maci64 #if Forrest's mac laptop
+
+
+Do I still want to produce a mexa64/maci64? Or, should I just focus on producing a C++ executable?
+
