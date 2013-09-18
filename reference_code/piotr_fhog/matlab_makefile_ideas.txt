@@ -25,3 +25,10 @@ MATLAB_LIBS = /Applications/MATLAB_R2012a.app/bin/maci64 #if Forrest's mac lapto
 
 Do I still want to produce a mexa64/maci64? Or, should I just focus on producing a C++ executable?
 
+
+FEEDING DATA INTO PIOTR'S CODE FROM C++
+Piotr's code likes col-major input img (I think).
+We can do this in OpenCV:
+    void transpose(const Mat& src, Mat& dst)
+    //dst(i,j) = src(j,i)
+
