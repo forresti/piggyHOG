@@ -13,6 +13,13 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int h = img.rows;
     int w = img.cols;
 
+
+
+
+
+
+  //mGradHist -> fhog
+
     //defaults from fhog.m
     int binSize = 8; 
     int nOrients = 9;
