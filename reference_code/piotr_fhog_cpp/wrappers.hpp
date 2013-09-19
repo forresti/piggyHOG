@@ -6,6 +6,10 @@
 *******************************************************************************/
 #ifndef _WRAPPERS_HPP_
 #define _WRAPPERS_HPP_
+#include <cstddef> //for size_t
+#include <stdlib.h> //for malloc
+//using namespace std;
+
 #ifdef MATLAB_MEX_FILE
 
 // wrapper functions if compiling from Matlab
