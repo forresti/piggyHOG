@@ -1,38 +1,17 @@
-#Author: Forrest Iandola iandola1@illinois.edu
-#Created: 1/24/10
-#Modified: 9/6/12
+#Author: Forrest Iandola forresti@eecs.berkeley.edu
 
-#
-# Object files are listed here
-#
 OBJS = main.o  helpers.o
-
-#
-# Change your program name here
-#
 EXENAME = main
 
-#
-# Recognize these macro assignments (like g++), but leave them alone.
-#
-#CC = nvcc 
 CC = g++
-CCOPTS = -c  -g -pg -O0 `pkg-config opencv --cflags`
-#LINK = nvcc
+CCOPTS = -c  -g -O0 `pkg-config opencv --cflags`
 LINK = g++
-LINKOPTS = -pg `pkg-config opencv --libs`
+LINKOPTS = `pkg-config opencv --libs`
 
 all : $(EXENAME)
-
-#
-# The main compiling step, using all macros.
-#
 $(EXENAME) : $(OBJS)
 	$(LINK) -o $(EXENAME) $(OBJS) $(LINKOPTS)
 
-#
-# Here is where your work will be done
-#
 main.o : main.cpp helpers.h
 	$(CC) $(CCOPTS) main.cpp
 
