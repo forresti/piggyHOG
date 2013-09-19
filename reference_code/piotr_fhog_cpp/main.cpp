@@ -6,19 +6,22 @@
 #include "helpers.h"
 #include "gradientMex.h"
 using namespace std;
+using namespace cv;
 
 //call Piotr Dollar's FHOG extractor, which was originally designed to have a Matlab front-end
 Mat piotr_fhog_wrapper_1img(Mat img){
 
     int h = img.rows;
     int w = img.cols;
+    assert(img.type() == CV_8UC3);
+    int d = 3; //nChannels
+    bool full = true;
+
+  //mGradMag() -> gradMag()
+    //void gradMag( float *I, float *M, float *O, int h, int w, int d, bool full )
 
 
-
-
-
-
-  //mGradHist -> fhog
+  //mGradHist() -> fhog()
 
     //defaults from fhog.m
     int binSize = 8; 
@@ -26,8 +29,8 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int softBin = -1;  
     float clip = 0.2f;
     
-void fhog( float *M, float *O, float *H, int h, int w, int binSize,
-        int nOrients, int softBin, float clip )
+    //void fhog( float *M, float *O, float *H, int h, int w, int binSize,
+    //    int nOrients, int softBin, float clip )
 
 }
 
