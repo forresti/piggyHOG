@@ -34,6 +34,15 @@ Mat piotr_fhog_wrapper_1img(Mat img){
 
 }
 
+void testTranspose(Mat img){
+
+    transpose(img, img);
+    //TODO: print out some pointer locations, before and after. 
+    //See if the transpose actually moves the data, or if it's just a change in indexing logic.
+
+    //forrestWritePgm(img, "transposed.png"); //TODO: #include common/helpers.h
+}
+
 int main (int argc, char **argv)
 {
 //    cv::Mat x;
