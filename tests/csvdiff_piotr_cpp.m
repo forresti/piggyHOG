@@ -32,8 +32,25 @@ function mydiff(experimentalCsv, referenceCsv, h)
 
     display(['    nnz(diff) = ' num2str(nnz(diff))])
     display(['    percent mismatches above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)/resultSize * 100) '%'])
+
+    visualizeHogSum(referenceResult)
+    visualizeHogSum(experimentalResult)
 keyboard
 
+end
+
+%@input one HOG, e.g. referenceResult
+%TODO: input h, w, d ... or, unflatten HOG to h,w,d size first
+function visualizeHogSum(hog)
+    %temporary width, height, depth hard-coded
+    h = 60;
+    w = 80;
+    d = 32;
+
+    hog_3 = reshape(hog, [w h d]);
+    hog_sum = squeeze(sum(hog_3, 3)); %now, size = [h w]
+
+    HeatMap(hog_sum)
 end
 
 
