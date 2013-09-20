@@ -10,7 +10,7 @@ using namespace std;
 using namespace cv;
 
 //input  OpenCV data layout: uchar* [x*d + y*img.cols*d + ch]
-//output Matlab data layout: float* [x*img.rows + y + ch*img.rows*img.cols]
+//output Matlab data layout: float* [x*img.rows + y + ch*img.rows*img.cols] / 255
 float* transpose_opencv_to_matlab(Mat img){
     assert(img.type() == CV_8UC3);
     int h = img.rows; //height
@@ -34,8 +34,6 @@ float* transpose_opencv_to_matlab(Mat img){
 
 //call Piotr Dollar's FHOG extractor, which was originally designed to have a Matlab front-end
 Mat piotr_fhog_wrapper_1img(Mat img){
-
-    //TODO: convert img to CV_32FC3, and divide it by 255. (as in Piotr's demo code ... float with values of 0 to 1)
     int h = img.rows;
     int w = img.cols;
     assert(img.type() == CV_8UC3);
