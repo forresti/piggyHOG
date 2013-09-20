@@ -24,7 +24,7 @@ float* transpose_opencv_to_matlab(Mat img){
     for(int x=0; x<w; x++){
         for(int y=0; y<h; y++){
             for(int ch=0; ch<d; ch++){
-                I[x*w + y + d*w*h] = (float)img_data[x*d + y*w*d + ch] * multiplier;
+                I[x*w + y + d*w*h] = img_data[x*d + y*w*d + ch] * multiplier; //TODO: cast img_data to float?
             }
         }
     }
