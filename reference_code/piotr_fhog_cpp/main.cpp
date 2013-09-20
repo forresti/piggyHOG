@@ -19,14 +19,14 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int d = 3; //nChannels
     bool full = true;
     
-    img.convertTo(img, CV_32FC3); //3-channel float, instead of 3-channel uchar
+    img.convertTo(img, CV_32FC3, 1/255.); //3-channel float, instead of 3-channel uchar
     assert(img.type() == CV_32FC3);
-    float* I = &img.data[0];
+    float* I = (float*)&img.data[0]; //note: without the (float*) cast, the compiler complains about converting uchar* to float*. TODO: debug if necessary.
     float* M = (float*)calloc(0, h * w * sizeof(float)); //Magnitudes (depth=1)
     float* O = (float*)calloc(0, h * w * sizeof(float)); //Orientations
 
   //mGradMag() -> gradMag()
-    //void gradMag( float *I, float *M, float *O, int h, int w, int d, bool full )
+    gradMag(I, M, O, h, w, d, full); //write magnitudes to M and orientations to O
 
     //defaults from fhog.m
     int binSize = 8; 

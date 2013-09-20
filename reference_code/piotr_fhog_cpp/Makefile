@@ -6,7 +6,7 @@ EXENAME = main
 CC = g++
 CCOPTS = -c  -g -O0 `pkg-config opencv --cflags`
 LINK = g++
-LINKOPTS = `pkg-config opencv --libs`
+LINKOPTS = -g `pkg-config opencv --libs`
 
 all : $(EXENAME)
 $(EXENAME) : $(OBJS)
