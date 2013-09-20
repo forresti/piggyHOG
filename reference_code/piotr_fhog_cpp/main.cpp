@@ -14,7 +14,7 @@ using namespace cv;
 //output Matlab data layout: float* [x*img.rows + y + ch*img.rows*img.cols] / 255
 float* transpose_opencv_to_matlab(Mat img){
     assert(img.type() == CV_8UC3);
-    int h = img.rows; //height
+    int h = img.rows; //height -- TODO: rename to imgHeight
     int w = img.cols; //width
     int d = 3; //nChannels
     float multiplier = 1 / 255.0f; //rescale pixels to range [0 to 1]
@@ -73,7 +73,7 @@ void writePyraToCsv(float* hog, int hogHeight, int hogWidth, int hogDepth){
 
 //call Piotr Dollar's FHOG extractor, which was originally designed to have a Matlab front-end
 Mat piotr_fhog_wrapper_1img(Mat img){
-    int h = img.rows;
+    int h = img.rows; //TODO: rename h to imgHeight
     int w = img.cols;
     assert(img.type() == CV_8UC3);
     int d = 3; //nChannels
