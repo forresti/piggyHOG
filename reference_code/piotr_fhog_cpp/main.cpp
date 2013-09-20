@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "helpers_fhog.h"
+#include "common/helpers.h" //CSV file I/O, timers, stuff like that
 #include "gradientMex.h"
 using namespace std;
 using namespace cv;
@@ -60,8 +61,6 @@ Mat piotr_fhog_wrapper_1img(Mat img){
 
   //mGradHist() -> fhog() 
     fhog(M, O, H, h, w, binSize, nOrients, softBin, clip); //bin and normalize gradients, write HOGs to H
-    //void fhog( float *M, float *O, float *H, int h, int w, int binSize,
-    //    int nOrients, int softBin, float clip )
 
     free(I);
     free(O);
