@@ -5,7 +5,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include "helpers.h"
-#include "wrappers.hpp"
 #include "gradientMex.h"
 using namespace std;
 using namespace cv;
@@ -20,8 +19,8 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     assert(img.type() == CV_8UC3);
     int d = 3; //nChannels
     bool full = true;
-    float* M = (float*)cmalloc(0, h * w * sizeof(float)); //Magnitudes (depth=1)
-    float* O = (float*)cmalloc(0, h * w * sizeof(float)); //Orientations
+    float* M = (float*)calloc(0, h * w * sizeof(float)); //Magnitudes (depth=1)
+    float* O = (float*)calloc(0, h * w * sizeof(float)); //Orientations
 //mxCreateMatrix3(h,w,1,mxSINGLE_CLASS,0,(void**)&M);
 //mxCreateMatrix3(h,w,1,mxSINGLE_CLASS,0,(void**)&O);
 
@@ -39,6 +38,8 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     //void fhog( float *M, float *O, float *H, int h, int w, int binSize,
     //    int nOrients, int softBin, float clip )
 
+    Mat result; //dummy
+    return result;
 }
 
 void testTranspose(Mat img){
