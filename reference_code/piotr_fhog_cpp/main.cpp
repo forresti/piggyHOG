@@ -52,27 +52,25 @@ float* transpose_fhog(float* inHog, int hogHeight, int hogWidth, int hogDepth){
     return outHog;
 }
 
+//this just for one HOG right now ... might tweak it to do whole pyra later
 // nRows = 32
 // nCols = width*height
-void writePyraToCsv(HOGPyramid pyramid){
+void writePyraToCsv(float* hog, int hogHeight, int hogWidth, int hogDepth){
+    float* transposedHog = transpose_fhog(hog, hogHeight, hogWidth, hogDepth); 
     //int nlevels = pyramid.levels().size();
-    int nLevels = 1;
-    for(int level = 0; level < nlevels; level++){
-        //printf("writing to CSV: level %d \n", level);
-        const float* raw_hog = pyramid.levels()[level].data()->data();        int width = pyramid.levels()[level].cols();
-        int height = pyramid.levels()[level].rows();
-        int depth = pyramid.NbFeatures;
-        ostringstream fname;
-        fname << "../ffld_results/level" << level << ".csv"; //TODO: get orig img name into the CSV name.
+    int nlevels = 1;
 
-        int nCols = depth; //one descriptor per row
-        int nRows = width*height;
+    for(int level = 0; level < nlevels; level++){
+        ostringstream fname;
+        fname << "piotr_fhog_results/level"  << level << ".csv"; //TODO: get orig img name into the CSV name.
+        int nCols = hogDepth; //one descriptor per row
+        int nRows = hogWidth*hogHeight;
 
         //TODO: also write (depth, width, height) -- in some order -- to the top of the CSV file.
-        writeCsv_2dFloat(raw_hog, nRows, nCols, fname.str());
+        writeCsv_2dFloat(transposedHog, nRows, nCols, fname.str());
     }
+    free(transposedHog);
 }
-
 
 //call Piotr Dollar's FHOG extractor, which was originally designed to have a Matlab front-end
 Mat piotr_fhog_wrapper_1img(Mat img){
@@ -98,14 +96,18 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int nOrients = 9;
     int softBin = -1;  
     float clip = 0.2f;
-    float* H = (float*)calloc(h * w * (nOrients*3 + 5), sizeof(float)); 
+    int hogWidth = w/binSize; //wb in Piotr's code (TODO: play with this)
+    int hogHeight = h/binSize; //hb in Piotr's code
+    int hogDepth = nOrients*3 + 5;
+    float* H = (float*)calloc(hogHeight * hogWidth * hogDepth, sizeof(float)); //TODO: are these dims correct? Should do a "hogH, hogW, hogD?" 
 
   //mGradHist() -> fhog() 
-    fhog(M, O, H, h, w, binSize, nOrients, softBin, clip); //bin and normalize gradients, write HOGs to H
+    fhog(M, O, H, hogHeight, hogWidth, binSize, nOrients, softBin, clip); //bin and normalize gradients, write HOGs to H
 
     free(I);
     free(O);
     free(M);
+    writePyraToCsv(H, hogHeight, hogWidth, hogDepth); //just one HOG, not whole pyra, for now.
 
     //TODO: return H
     Mat result; //dummy
