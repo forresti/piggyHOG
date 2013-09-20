@@ -25,8 +25,6 @@ float* transpose_opencv_to_matlab(Mat img){
         for(int x=0; x<w; x++){
             for(int ch=0; ch<d; ch++){
                 I[x*h + y + ch*w*h] = img_data[x*d + y*w*d + ch] * multiplier; //TODO: cast img_data to float?
-                //I[x*h + y   + ch*w*h] = img_data[y*w*d]; //FIXME: temp for debug -- why does y*w*d cause a segfault?
-                //img.data[y*w*d] = (uchar)0; //TEST -- segfault
             }
         }
     }
@@ -53,7 +51,7 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     float* O = (float*)calloc(0, h * w * sizeof(float)); //Orientations
 
   //mGradMag() -> gradMag()
-    //gradMag(I, M, O, h, w, d, full); //write magnitudes to M and orientations to O
+    gradMag(I, M, O, h, w, d, full); //write magnitudes to M and orientations to O
 
     //defaults from fhog.m
     int binSize = 8; 
@@ -66,8 +64,8 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     //    int nOrients, int softBin, float clip )
 
     //free(I);
-    free(O);
-    free(M);
+    //free(O);
+    //free(M);
 
     Mat result; //dummy
     return result;
