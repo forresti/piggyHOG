@@ -19,6 +19,7 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int d = 3; //nChannels
     bool full = true;
     
+    transpose(img, img); //in-place transpose to col-major to match Piotr's data layout
     img.convertTo(img, CV_32FC3, 1/255.); //3-channel float, instead of 3-channel uchar
     assert(img.type() == CV_32FC3);
     float* I = (float*)&img.data[0]; //note: without the (float*) cast, the compiler complains about converting uchar* to float*. TODO: debug if necessary.
