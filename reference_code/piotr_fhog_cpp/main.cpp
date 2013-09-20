@@ -29,7 +29,6 @@ float* transpose_opencv_to_matlab(Mat img){
             }
         }
     }
-
     return I;
 }
 
@@ -67,7 +66,6 @@ void writePyraToCsv(float* hog, int hogHeight, int hogWidth, int hogDepth){
         int nRows = hogWidth*hogHeight;
 
         //TODO: also write (depth, width, height) -- in some order -- to the top of the CSV file.
-        //writeCsv_2dFloat(hog, nRows, nCols, fname.str());
         writeCsv_2dFloat(transposedHog, nRows, nCols, fname.str());
     }
     free(transposedHog);
