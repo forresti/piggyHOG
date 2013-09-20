@@ -1,6 +1,6 @@
 #Author: Forrest Iandola forresti@eecs.berkeley.edu
 
-OBJS = main.o gradientMex.o helpers.o
+OBJS = main.o gradientMex.o helpers_fhog.o
 EXENAME = main
 
 CC = g++
@@ -12,11 +12,11 @@ all : $(EXENAME)
 $(EXENAME) : $(OBJS)
 	$(LINK) -o $(EXENAME) $(OBJS) $(LINKOPTS)
 
-main.o : main.cpp helpers.h gradientMex.h
+main.o : main.cpp helpers_fhog.h gradientMex.h
 	$(CC) $(CCOPTS) main.cpp
 
-helpers.o : helpers.cpp helpers.h
-	$(CC) $(CCOPTS) helpers.cpp
+helpers_fhog.o : helpers_fhog.cpp helpers_fhog.h
+	$(CC) $(CCOPTS) helpers_fhog.cpp
 
 gradientMex.o : gradientMex.cpp gradientMex.h
 	$(CC) $(CCOPTS) gradientMex.cpp

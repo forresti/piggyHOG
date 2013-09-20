@@ -4,7 +4,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include "helpers.h"
+#include "helpers_fhog.h"
 #include "gradientMex.h"
 using namespace std;
 using namespace cv;
