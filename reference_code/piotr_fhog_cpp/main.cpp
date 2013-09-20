@@ -47,8 +47,8 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     //assert(img.type() == CV_32FC3);
     //float* I = (float*)&img.data[0]; //note: without the (float*) cast, the compiler complains about converting uchar* to float*. TODO: debug if necessary.
     float* I = transpose_opencv_to_matlab(img);
-    float* M = (float*)calloc(0, d * h * w * sizeof(float)); //Magnitudes (depth=1)
-    float* O = (float*)calloc(0, d * h * w * sizeof(float)); //Orientations
+    float* M = (float*)calloc(0, h * w * sizeof(float)); //Magnitudes (depth=1)
+    float* O = (float*)calloc(0, h * w * sizeof(float)); //Orientations
 
   //mGradMag() -> gradMag()
     gradMag(I, M, O, h, w, d, full); //write magnitudes to M and orientations to O
