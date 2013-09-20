@@ -9,6 +9,29 @@
 using namespace std;
 using namespace cv;
 
+//input  OpenCV data layout: uchar* [x*d + y*img.cols*d + ch]
+//output Matlab data layout: float* [x*img.rows + y + ch*img.rows*img.cols]
+float* transpose_opencv_to_matlab(Mat img){
+    assert(img.type() == CV_8UC3);
+    int h = img.rows; //height
+    int w = img.cols; //width
+    int d = 3; //nChannels
+    float multiplier = 1 / 255.0f; //rescale pixels to range [0 to 1]
+
+    uchar* img_data = &img_data[0];
+    float* I = (float*)malloc(h * w * d * sizeof(float)); //img transposed to Matlab data layout. (TODO: pad for SSE?)
+
+    for(int x=0; x<w; x++){
+        for(int y=0; y<h; y++){
+            for(int ch=0; ch<d; ch++){
+                I[x*w + y + d*w*h] = (float)img_data[x*d + y*w*d + ch] * multiplier;
+            }
+        }
+    }
+
+    return I;
+}
+
 //call Piotr Dollar's FHOG extractor, which was originally designed to have a Matlab front-end
 Mat piotr_fhog_wrapper_1img(Mat img){
 
@@ -19,15 +42,16 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int d = 3; //nChannels
     bool full = true;
     
-    transpose(img, img); //in-place transpose to col-major to match Piotr's data layout
-    img.convertTo(img, CV_32FC3, 1/255.); //3-channel float, instead of 3-channel uchar
-    assert(img.type() == CV_32FC3);
-    float* I = (float*)&img.data[0]; //note: without the (float*) cast, the compiler complains about converting uchar* to float*. TODO: debug if necessary.
+    //transpose(img, img); //in-place transpose to col-major to match Piotr's data layout
+    //img.convertTo(img, CV_32FC3, 1/255.); //3-channel float, instead of 3-channel uchar
+    //assert(img.type() == CV_32FC3);
+    //float* I = (float*)&img.data[0]; //note: without the (float*) cast, the compiler complains about converting uchar* to float*. TODO: debug if necessary.
+    float* I = transpose_opencv_to_matlab(img);
     float* M = (float*)calloc(0, h * w * sizeof(float)); //Magnitudes (depth=1)
     float* O = (float*)calloc(0, h * w * sizeof(float)); //Orientations
 
   //mGradMag() -> gradMag()
-    gradMag(I, M, O, h, w, d, full); //write magnitudes to M and orientations to O
+    //gradMag(I, M, O, h, w, d, full); //write magnitudes to M and orientations to O
 
     //defaults from fhog.m
     int binSize = 8; 
@@ -38,6 +62,11 @@ Mat piotr_fhog_wrapper_1img(Mat img){
   //mGradHist() -> fhog() 
     //void fhog( float *M, float *O, float *H, int h, int w, int binSize,
     //    int nOrients, int softBin, float clip )
+
+
+    //free(I);
+    free(O);
+    free(M);
 
     Mat result; //dummy
     return result;
