@@ -63,7 +63,6 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     //void fhog( float *M, float *O, float *H, int h, int w, int binSize,
     //    int nOrients, int softBin, float clip )
 
-
     //free(I);
     free(O);
     free(M);
@@ -73,7 +72,6 @@ Mat piotr_fhog_wrapper_1img(Mat img){
 }
 
 void testTranspose(Mat img){
-
     transpose(img, img);
     //TODO: print out some pointer locations, before and after. 
     //See if the transpose actually moves the data, or if it's just a change in indexing logic.
@@ -84,9 +82,7 @@ void testTranspose(Mat img){
 int main (int argc, char **argv)
 {
     Mat img = imread("../../images_640x480/carsgraz_001.image.jpg");
-
     Mat hog = piotr_fhog_wrapper_1img(img); //just for original image scale, for now
-
 
     return 0;
 }
