@@ -56,8 +56,10 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int nOrients = 9;
     int softBin = -1;  
     float clip = 0.2f;
-   
+    float* H = (float*)calloc(h * w * (nOrients*3 + 5), sizeof(float)); 
+
   //mGradHist() -> fhog() 
+    fhog(M, O, H, h, w, binSize, nOrients, softBin, clip); //bin and normalize gradients, write HOGs to H
     //void fhog( float *M, float *O, float *H, int h, int w, int binSize,
     //    int nOrients, int softBin, float clip )
 
@@ -65,6 +67,7 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     free(O);
     free(M);
 
+    //TODO: return H
     Mat result; //dummy
     return result;
 }
