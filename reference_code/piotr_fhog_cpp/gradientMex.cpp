@@ -85,7 +85,7 @@ void gradMag( float *I, float *M, float *O, int h, int w, int d, bool full ) {
             if(O) _Gx[y] = MUL( MUL(_Gx[y],_m), SET(acMult) );
             if(O) _Gx[y] = XOR( _Gx[y], AND(_Gy[y], SET(-0.f)) );
         };
-        memcpy( M+x*h, M2, h*sizeof(float) );
+        //memcpy( M+x*h, M2, h*sizeof(float) );
         // compute and store gradient orientation (O) via table lookup
         if( O!=0 ) for( y=0; y<h; y++ ) O[x*h+y] = acost[(int)Gx[y]];
         if( O!=0 && full ) {
