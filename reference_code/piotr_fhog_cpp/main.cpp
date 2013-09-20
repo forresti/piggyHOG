@@ -25,8 +25,7 @@ float* transpose_opencv_to_matlab(Mat img){
         for(int y=0; y<h; y++){
             for(int ch=0; ch<d; ch++){
                 //I[x*h + y + ch*w*h] = img_data[x*d + y*w*d + ch] * multiplier; //TODO: cast img_data to float?
-                //I[x*w   + ch*w*h] = img_data[x*d    + ch];
-                 I[x*h + y   + ch*w*h] = img_data[y*w*d + ch];
+                I[x*h + y   + ch*w*h] = img_data[x*d + y*w + ch]; //temp for debug -- why does y*w*d cause a segfault?
             }
         }
     }
