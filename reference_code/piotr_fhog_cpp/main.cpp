@@ -20,6 +20,8 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     bool full = true;
     
     img.convertTo(img, CV_32FC3); //3-channel float, instead of 3-channel uchar
+    assert(img.type() == CV_32FC3);
+    float* I = &img.data[0];
     float* M = (float*)calloc(0, h * w * sizeof(float)); //Magnitudes (depth=1)
     float* O = (float*)calloc(0, h * w * sizeof(float)); //Orientations
 
