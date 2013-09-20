@@ -104,12 +104,12 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
     for i = 1:pyra.num_levels
         % add 1 to padding because feature generation deletes a 1-cell
         % wide border around the feature map
-%        pyra.feat{i} = padarray(pyra.feat{i}, [pady+1 padx+1 0], 0);
+        pyra.feat{i} = padarray(pyra.feat{i}, [pady+1 padx+1 0], 0);
         % write boundary occlusion feature
-%        pyra.feat{i}(1:pady+1, :, td) = 1;
-%        pyra.feat{i}(end-pady:end, :, td) = 1;
-%        pyra.feat{i}(:, 1:padx+1, td) = 1;
-%        pyra.feat{i}(:, end-padx:end, td) = 1;
+        pyra.feat{i}(1:pady+1, :, td) = 1;
+        pyra.feat{i}(end-pady:end, :, td) = 1;
+        pyra.feat{i}(:, 1:padx+1, td) = 1;
+        pyra.feat{i}(:, end-padx:end, td) = 1;
     end
     pyra.valid_levels = true(pyra.num_levels, 1);
     pyra.padx = padx;

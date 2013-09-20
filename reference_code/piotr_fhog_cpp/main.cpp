@@ -93,7 +93,7 @@ Mat piotr_fhog_wrapper_1img(Mat img){
 //TODO: write M and O to CSV for debugging
 
     //defaults from fhog.m
-    int binSize = 8; 
+    int binSize = 4; 
     int nOrients = 9;
     int softBin = -1;  
     float clip = 0.2f;
