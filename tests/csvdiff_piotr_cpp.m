@@ -1,7 +1,7 @@
 function csvdiff()
     %for h=1:10:41
     %for h=1:41
-    for h=11:11
+    for h=1:1
         %experimentalCsv = ['./ffld_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
 
         experimentalCsv = ['piotr_fhog_cpp_results/level0.csv']; %just doing 1 level at the moment ... corresponds to 'level 11' in pyramid 
