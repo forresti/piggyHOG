@@ -13,20 +13,18 @@ using namespace cv;
 Mat piotr_fhog_wrapper_1img(Mat img){
 
     //TODO: convert img to CV_32FC3, and divide it by 255. (as in Piotr's demo code ... float with values of 0 to 1)
-
     int h = img.rows;
     int w = img.cols;
     assert(img.type() == CV_8UC3);
     int d = 3; //nChannels
     bool full = true;
+    
+    img.convertTo(img, CV_32FC3); //3-channel float, instead of 3-channel uchar
     float* M = (float*)calloc(0, h * w * sizeof(float)); //Magnitudes (depth=1)
     float* O = (float*)calloc(0, h * w * sizeof(float)); //Orientations
-//mxCreateMatrix3(h,w,1,mxSINGLE_CLASS,0,(void**)&M);
-//mxCreateMatrix3(h,w,1,mxSINGLE_CLASS,0,(void**)&O);
 
   //mGradMag() -> gradMag()
     //void gradMag( float *I, float *M, float *O, int h, int w, int d, bool full )
-
 
     //defaults from fhog.m
     int binSize = 8; 
