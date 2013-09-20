@@ -33,15 +33,15 @@ function mydiff(experimentalCsv, referenceCsv, h)
     display(['    nnz(diff) = ' num2str(nnz(diff))])
     display(['    percent mismatches above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)/resultSize * 100) '%'])
 
-    visualizeHogSum(referenceResult)
-    visualizeHogSum(experimentalResult)
+    ref_sum = visualizeHogSum(referenceResult);
+    exp_sum = visualizeHogSum(experimentalResult);
 keyboard
 
 end
 
 %@input one HOG, e.g. referenceResult
 %TODO: input h, w, d ... or, unflatten HOG to h,w,d size first
-function visualizeHogSum(hog)
+function hog_sum = visualizeHogSum(hog)
     %temporary width, height, depth hard-coded
     h = 60;
     w = 80;
