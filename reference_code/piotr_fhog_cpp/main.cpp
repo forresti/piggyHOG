@@ -90,6 +90,8 @@ Mat piotr_fhog_wrapper_1img(Mat img){
   //mGradMag() -> gradMag()
     gradMag(I, M, O, h, w, d, full); //write magnitudes to M and orientations to O
 
+//TODO: write M and O to CSV for debugging
+
     //defaults from fhog.m
     int binSize = 8; 
     int nOrients = 9;
@@ -99,6 +101,8 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int hogHeight = h/binSize; //hb in Piotr's code
     int hogDepth = nOrients*3 + 5;
     float* H = (float*)calloc(hogHeight * hogWidth * hogDepth, sizeof(float)); 
+
+printf("h = %d, w = %d, hogHeight = %d, hogWidth = %d \n", h, w, hogHeight, hogWidth);
 
   //mGradHist() -> fhog()
     //note: fhog internally calculates hogWidth and hogHeight, so we pass the image's height and w into fhog. 

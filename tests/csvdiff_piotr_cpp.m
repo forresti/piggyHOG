@@ -18,7 +18,7 @@ function mydiff(experimentalCsv, referenceCsv, h)
     %experimentalResult = experimentalResult(2:end, :); %remove header (which shows dims)
 
     thresh = 0.1;
-    diff = abs(experimentalResult - referenceResult)
+    diff = abs(experimentalResult - referenceResult);
     [inHeight_voc5 inWidth_voc5] = size(referenceResult);
     [inHeight inWidth] = size(experimentalResult);
 
@@ -32,6 +32,8 @@ function mydiff(experimentalCsv, referenceCsv, h)
 
     display(['    nnz(diff) = ' num2str(nnz(diff))])
     display(['    percent mismatches above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)/resultSize * 100) '%'])
+keyboard
+
 end
 
 
