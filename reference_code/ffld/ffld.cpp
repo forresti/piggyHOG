@@ -47,8 +47,7 @@ CSimpleOpt::SOption SOptions[] =
 	SO_END_OF_OPTIONS
 };
 
-void showUsage()
-{
+void showUsage(){
 	cout << "Usage: test [options] image.jpg, or\n       test [options] image_set.txt\n\n"
 			"Options:\n"
 			"  -h,--help               Display this information\n"
@@ -127,8 +126,7 @@ void printHogSizes(HOGPyramid pyramid);
 void writePyraToCsv(HOGPyramid pyramid);
 
 // Test a mixture model (compute a ROC curve)
-int main(int argc, char * argv[])
-{
+int main(int argc, char * argv[]){
 	// Default parameters
     string file;
 	int padding = 12;

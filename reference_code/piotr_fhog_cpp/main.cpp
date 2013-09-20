@@ -33,6 +33,47 @@ float* transpose_opencv_to_matlab(Mat img){
     return I;
 }
 
+//TODO: test this function
+// @input dims:  (y, x, d) = [x*hogHeight + y + d*hogWidth*hogHeight] 
+// @output dims: (d, x, y) = [x*hogDepth + y*hogWidth*hogDepth + d] -- same as FFLD.
+float* transpose_fhog(float* inHog, int hogHeight, int hogWidth, int hogDepth){
+    
+    float* outHog = (float*)malloc(hogHeight * hogWidth * hogDepth * sizeof(float)); //TODO: padding for SSE?
+    
+    //TODO: reorder loops for speed?
+    for(int y=0; y<hogHeight; y++){
+        for(int x=0; x<hogWidth; x++){
+            for(int d=0; d<hogDepth; d++){
+                outHog[x*hogDepth + y*hogWidth*hogDepth + d] = inHog[x*hogHeight + y + d*hogWidth*hogHeight];
+
+            }
+        }
+    }
+    return outHog;
+}
+
+// nRows = 32
+// nCols = width*height
+void writePyraToCsv(HOGPyramid pyramid){
+    //int nlevels = pyramid.levels().size();
+    int nLevels = 1;
+    for(int level = 0; level < nlevels; level++){
+        //printf("writing to CSV: level %d \n", level);
+        const float* raw_hog = pyramid.levels()[level].data()->data();        int width = pyramid.levels()[level].cols();
+        int height = pyramid.levels()[level].rows();
+        int depth = pyramid.NbFeatures;
+        ostringstream fname;
+        fname << "../ffld_results/level" << level << ".csv"; //TODO: get orig img name into the CSV name.
+
+        int nCols = depth; //one descriptor per row
+        int nRows = width*height;
+
+        //TODO: also write (depth, width, height) -- in some order -- to the top of the CSV file.
+        writeCsv_2dFloat(raw_hog, nRows, nCols, fname.str());
+    }
+}
+
+
 //call Piotr Dollar's FHOG extractor, which was originally designed to have a Matlab front-end
 Mat piotr_fhog_wrapper_1img(Mat img){
     int h = img.rows;
@@ -79,10 +120,10 @@ void testTranspose(Mat img){
     //forrestWritePgm(img, "transposed.png"); //TODO: #include common/helpers.h
 }
 
-int main (int argc, char **argv)
-{
+int main (int argc, char **argv){
     Mat img = imread("../../images_640x480/carsgraz_001.image.jpg");
     Mat hog = piotr_fhog_wrapper_1img(img); //just for original image scale, for now
 
     return 0;
 }
+
