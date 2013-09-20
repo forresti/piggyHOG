@@ -30,9 +30,12 @@ function pyra = time_extract_hog(img_name, model, hogMethod)
     if(strcmp(hogMethod, 'voc5') == 1)
         pyra = featpyramid(double(im), model);
     elseif(strcmp(hogMethod, 'piotr') == 1)
-        %TODO: model.padx--;
-        %      model.pady--;
-        pyra = featpyramid_fhog(single(im), model);
+        %pyra = featpyramid_fhog(single(im), model);
+
+        %TEMP EXPERIMENT -- try no padding, to see if we match C++ Piotr code with no padding
+        padx=0;
+        pady=0;
+        pyra = featpyramid_fhog(single(im), model, padx, pady);
     end
     tF = toc(th);
     fprintf('  --> HOG pyramid extraction took %f seconds\n', tF);

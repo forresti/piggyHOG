@@ -61,7 +61,7 @@ void writePyraToCsv(float* hog, int hogHeight, int hogWidth, int hogDepth){
 
     for(int level = 0; level < nlevels; level++){
         ostringstream fname;
-        fname << "piotr_fhog_results/level"  << level << ".csv"; //TODO: get orig img name into the CSV name.
+        fname << "piotr_fhog_cpp_results/level"  << level << ".csv"; //TODO: get orig img name into the CSV name.
         int nCols = hogDepth; //one descriptor per row
         int nRows = hogWidth*hogHeight;
 
@@ -98,7 +98,7 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int hogWidth = w/binSize; //wb in Piotr's code (TODO: play with this)
     int hogHeight = h/binSize; //hb in Piotr's code
     int hogDepth = nOrients*3 + 5;
-    float* H = (float*)calloc(hogHeight * hogWidth * hogDepth, sizeof(float)); //TODO: are these dims correct? Should do a "hogH, hogW, hogD?" 
+    float* H = (float*)calloc(hogHeight * hogWidth * hogDepth, sizeof(float)); 
 
   //mGradHist() -> fhog()
     //note: fhog internally calculates hogWidth and hogHeight, so we pass the image's height and w into fhog. 
@@ -119,7 +119,7 @@ void testTranspose(Mat img){
     //TODO: print out some pointer locations, before and after. 
     //See if the transpose actually moves the data, or if it's just a change in indexing logic.
 
-    //forrestWritePgm(img, "transposed.png"); //TODO: #include common/helpers.h
+    //forrestWritePgm(img, "transposed.png"); 
 }
 
 int main (int argc, char **argv){
