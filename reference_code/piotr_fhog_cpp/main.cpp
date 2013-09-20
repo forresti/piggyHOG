@@ -61,9 +61,9 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     //void fhog( float *M, float *O, float *H, int h, int w, int binSize,
     //    int nOrients, int softBin, float clip )
 
-    //free(I);
-    //free(O);
-    //free(M);
+    free(I);
+    free(O);
+    free(M);
 
     Mat result; //dummy
     return result;
