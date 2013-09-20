@@ -3,7 +3,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 #include "helpers.h"
+#include "wrappers.hpp"
 #include "gradientMex.h"
 using namespace std;
 using namespace cv;
@@ -11,24 +13,29 @@ using namespace cv;
 //call Piotr Dollar's FHOG extractor, which was originally designed to have a Matlab front-end
 Mat piotr_fhog_wrapper_1img(Mat img){
 
+    //TODO: convert img to CV_32FC3, and divide it by 255. (as in Piotr's demo code ... float with values of 0 to 1)
+
     int h = img.rows;
     int w = img.cols;
     assert(img.type() == CV_8UC3);
     int d = 3; //nChannels
     bool full = true;
+    float* M = (float*)cmalloc(0, h * w * sizeof(float)); //Magnitudes (depth=1)
+    float* O = (float*)cmalloc(0, h * w * sizeof(float)); //Orientations
+//mxCreateMatrix3(h,w,1,mxSINGLE_CLASS,0,(void**)&M);
+//mxCreateMatrix3(h,w,1,mxSINGLE_CLASS,0,(void**)&O);
 
   //mGradMag() -> gradMag()
     //void gradMag( float *I, float *M, float *O, int h, int w, int d, bool full )
 
-
-  //mGradHist() -> fhog()
 
     //defaults from fhog.m
     int binSize = 8; 
     int nOrients = 9;
     int softBin = -1;  
     float clip = 0.2f;
-    
+   
+  //mGradHist() -> fhog() 
     //void fhog( float *M, float *O, float *H, int h, int w, int binSize,
     //    int nOrients, int softBin, float clip )
 
@@ -45,10 +52,6 @@ void testTranspose(Mat img){
 
 int main (int argc, char **argv)
 {
-//    cv::Mat x;
-//    printf("%f \n", foo(1.2345));
-
-
     Mat img = imread("../../images_640x480/carsgraz_001.image.jpg");
 
     Mat hog = piotr_fhog_wrapper_1img(img); //just for original image scale, for now
