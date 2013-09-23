@@ -100,6 +100,11 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int hogDepth = nOrients*3 + 5;
     float* H = (float*)calloc(hogHeight * hogWidth * hogDepth, sizeof(float)); //TODO: are these dims correct? Should do a "hogH, hogW, hogD?" 
 
+//BEGIN DEBUG
+    //Mat magnitudes(h, w, CV_32FC1, M);
+
+//END DEBUG
+
   //mGradHist() -> fhog()
     //note: fhog internally calculates hogWidth and hogHeight, so we pass the image's height and w into fhog. 
     fhog(M, O, H, h, w, binSize, nOrients, softBin, clip); //bin and normalize gradients, write HOGs to H
