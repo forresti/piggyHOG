@@ -61,7 +61,7 @@ void writePyraToCsv(float* hog, int hogHeight, int hogWidth, int hogDepth){
 
     for(int level = 0; level < nlevels; level++){
         ostringstream fname;
-        fname << "piotr_cpp_results/level"  << level << ".csv"; //TODO: get orig img name into the CSV name.
+        fname << "piotr_fhog_cpp_results/level"  << level << ".csv"; //TODO: get orig img name into the CSV name.
         int nCols = hogDepth; //one descriptor per row
         int nRows = hogWidth*hogHeight;
 
