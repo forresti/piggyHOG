@@ -71,6 +71,28 @@ void writePyraToCsv(float* hog, int hogHeight, int hogWidth, int hogDepth){
     free(transposedHog);
 }
 
+//use OpenCV's bilinear filter downsampling
+Mat downsampleWithOpenCV(Mat img, double scale){
+    int inWidth = img.cols;
+    int inHeight = img.rows;
+    assert(img.type() == CV_8UC3);
+    int nChannels = 3;
+
+    int outWidth = round(inWidth * scale);
+    int outHeight = round(inHeight * scale);
+    Mat outImg(outHeight, outWidth, CV_8UC3); //col-major for OpenCV 
+    Size outSize = outImg.size();
+
+    cv::resize(img,
+               outImg,
+               outSize,
+               0, //scaleX -- default = outSize.width / img.cols
+               0, //scaleY -- default = outSize.height / img.rows
+               INTER_LINEAR /* use bilinear interpolation */);
+
+    return outImg;
+}
+
 //save intermediate results to jpg files
 void output_magnitude_orientation_imgs(float* M, float* O, int h, int w){
     Mat magnitudes(w, h, CV_32FC1, M); //height and width reversed, because Piotr's data is col major
@@ -99,7 +121,7 @@ Mat piotr_fhog_wrapper_1img(Mat img){
   //mGradMag() -> gradMag()
     gradMag(I, M, O, h, w, d, full); //write magnitudes to M and orientations to O
 
-    output_magnitude_orientation_imgs(M, O, h, w); //TEMP -- for debugging. save intermediate results to jpg files
+    //output_magnitude_orientation_imgs(M, O, h, w); //TEMP -- for debugging. save intermediate results to jpg files
 
     //defaults from fhog.m
     int binSize = 8; 
@@ -118,25 +140,39 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     free(I);
     free(O);
     free(M);
-    writePyraToCsv(H, hogHeight, hogWidth, hogDepth); //just one HOG, not whole pyra, for now.
+    //writePyraToCsv(H, hogHeight, hogWidth, hogDepth); //just one HOG, not whole pyra, for now.
 
     //TODO: return H
     Mat result; //dummy
     return result;
 }
 
-void testTranspose(Mat img){
-    transpose(img, img);
-    //TODO: print out some pointer locations, before and after. 
-    //See if the transpose actually moves the data, or if it's just a change in indexing logic.
 
-    //forrestWritePgm(img, "transposed.png"); 
-}
 
 int main (int argc, char **argv){
     Mat img = imread("../../images_640x480/carsgraz_001.image.jpg");
-    Mat hog = piotr_fhog_wrapper_1img(img); //just for original image scale, for now
 
+    //just do HOG on orig img
+    //Mat hog = piotr_fhog_wrapper_1img(img); //just for original image scale, for now
+
+    //HOG pyramid
+    int interval = 10;
+    float sc = pow(2, 1 / (float)interval);
+    vector<Mat> imgPyramid(interval*2);
+
+    //#pragma omp parallel for
+    //for(int i=0; i<interval; i++)
+    int i=0;
+    {
+    
+        float downsampleFactor = 1/pow(sc, i);
+
+        imgPyramid[i] = downsampleWithOpenCV(img, downsampleFactor);
+        imgPyramid[i+interval] = downsampleWithOpenCV(img, downsampleFactor/2);
+
+        piotr_fhog_wrapper_1img(imgPyramid[i]); //TODO: catch outputs. (need to design a 'pyramid' data struct)
+        piotr_fhog_wrapper_1img(imgPyramid[i+interval]); 
+    }
     return 0;
 }
 
