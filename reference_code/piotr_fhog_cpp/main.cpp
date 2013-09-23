@@ -71,6 +71,19 @@ void writePyraToCsv(float* hog, int hogHeight, int hogWidth, int hogDepth){
     free(transposedHog);
 }
 
+//save intermediate results to jpg files
+void output_magnitude_orientation_imgs(float* M, float* O, int h, int w){
+    Mat magnitudes(w, h, CV_32FC1, M); //height and width reversed, because Piotr's data is col major
+    transpose(magnitudes, magnitudes);
+    magnitudes.convertTo(magnitudes, CV_8UC1, 255.);
+    imwrite("piotr_magnitudes_cpp.jpg", magnitudes);
+
+    Mat orientations(w, h, CV_32FC1, O); //height and width reversed, because Piotr's data is col major
+    transpose(orientations, orientations);
+    orientations.convertTo(orientations, CV_8UC1, 255.);
+    imwrite("piotr_orientations_cpp.jpg", orientations);
+}
+
 //call Piotr Dollar's FHOG extractor, which was originally designed to have a Matlab front-end
 Mat piotr_fhog_wrapper_1img(Mat img){
     int h = img.rows;
@@ -100,14 +113,7 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int hogDepth = nOrients*3 + 5;
     float* H = (float*)calloc(hogHeight * hogWidth * hogDepth, sizeof(float)); //TODO: are these dims correct? Should do a "hogH, hogW, hogD?" 
 
-//BEGIN DEBUG
-    Mat magnitudes(w, h, CV_32FC1, M); //height and width reversed, because Piotr's data is col major
-    transpose(magnitudes, magnitudes);
-    magnitudes.convertTo(magnitudes, CV_8UC1, 255.);
-    
-    imwrite("piotr_magnitudes_cpp.jpg", magnitudes);
-
-//END DEBUG
+    output_magnitude_orientation_imgs(M, O, h, w); //TEMP -- for debugging. save intermediate results to jpg files
 
   //mGradHist() -> fhog()
     //note: fhog internally calculates hogWidth and hogHeight, so we pass the image's height and w into fhog. 
