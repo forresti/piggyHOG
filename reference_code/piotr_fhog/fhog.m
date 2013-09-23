@@ -66,8 +66,8 @@ if( nargin<5 ), crop=0; end
 softBin = -1; useHog = 2; b = binSize;
 [M,O] = gradientMag( I,0,0,0,1 );
 
-imwrite(M, 'piotr_magnitudes.jpg') %Forrest test
-imwrite(O, 'piotr_orientations.jpg') %Forrest test
+%imwrite(M, 'piotr_magnitudes.jpg') %Forrest test
+%imwrite(O, 'piotr_orientations.jpg') %Forrest test
 
 H = gradientHist(M,O,binSize,nOrients,softBin,useHog,clip);
 if( crop ), e=mod(size(I),b)<b/2; H=H(2:end-e(1),2:end-e(2),:); end
