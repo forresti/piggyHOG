@@ -171,7 +171,7 @@ int main (int argc, char **argv){
         imgPyramid[i+interval] = downsampleWithOpenCV(img, downsampleFactor/2);
 
         piotr_fhog_wrapper_1img(imgPyramid[i]); //TODO: catch outputs. (need to design a 'pyramid' data struct)
-        piotr_fhog_wrapper_1img(imgPyramid[i+interval]); 
+        //piotr_fhog_wrapper_1img(imgPyramid[i+interval]); 
     }
     return 0;
 }
