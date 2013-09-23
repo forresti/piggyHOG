@@ -92,11 +92,7 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int d = 3; //nChannels
     bool full = true;
     
-    //transpose(img, img); //in-place transpose to col-major to match Piotr's data layout
-    //img.convertTo(img, CV_32FC3, 1/255.); //3-channel float, instead of 3-channel uchar
-    //assert(img.type() == CV_32FC3);
-    //float* I = (float*)&img.data[0]; //note: without the (float*) cast, the compiler complains about converting uchar* to float*. TODO: debug if necessary.
-    float* I = transpose_opencv_to_matlab(img);
+    float* I = transpose_opencv_to_matlab(img); //later on, if I change the data layout and use 32F opencv images, I can just do &img.data[0]
     float* M = (float*)calloc(h * w, sizeof(float)); //Magnitudes (depth=1)
     float* O = (float*)calloc(h * w, sizeof(float)); //Orientations
 
