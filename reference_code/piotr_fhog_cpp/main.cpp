@@ -159,8 +159,8 @@ int main (int argc, char **argv){
     int interval = 10;
     float sc = pow(2, 1 / (float)interval);
     vector<Mat> imgPyramid(interval*2);
-double start_hog = read_timer();
-    #pragma omp parallel for
+
+    //#pragma omp parallel for
     for(int i=0; i<interval; i++)
     {
         float downsampleFactor = 1/pow(sc, i);
@@ -171,8 +171,7 @@ double start_hog = read_timer();
         piotr_fhog_wrapper_1img(imgPyramid[i]); //TODO: catch outputs. (need to design a 'pyramid' data struct)
         piotr_fhog_wrapper_1img(imgPyramid[i+interval]); 
     }
-double time_hog = read_timer() - start_hog;
-printf("time_hog = %f \n", time_hog);
+
     return 0;
 }
 
