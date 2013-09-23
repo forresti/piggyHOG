@@ -128,8 +128,8 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int nOrients = 9;
     int softBin = -1;  
     float clip = 0.2f;
-    int hogWidth = w/binSize; //wb in Piotr's code (TODO: play with this)
-    int hogHeight = h/binSize; //hb in Piotr's code
+    int hogWidth = round( (float)w / (float)binSize); //wb in Piotr's code (TODO: play with this)
+    int hogHeight = round( (float)h / (float)binSize); //hb in Piotr's code
     int hogDepth = nOrients*3 + 5;
     float* H = (float*)calloc(hogHeight * hogWidth * hogDepth, sizeof(float)); 
 
@@ -161,8 +161,7 @@ int main (int argc, char **argv){
     vector<Mat> imgPyramid(interval*2);
 
     //#pragma omp parallel for
-    //for(int i=0; i<interval; i++)
-    int i=4;
+    for(int i=0; i<interval; i++)
     {
     
         float downsampleFactor = 1/pow(sc, i);
@@ -171,7 +170,7 @@ int main (int argc, char **argv){
         imgPyramid[i+interval] = downsampleWithOpenCV(img, downsampleFactor/2);
 
         piotr_fhog_wrapper_1img(imgPyramid[i]); //TODO: catch outputs. (need to design a 'pyramid' data struct)
-        //piotr_fhog_wrapper_1img(imgPyramid[i+interval]); 
+        piotr_fhog_wrapper_1img(imgPyramid[i+interval]); 
     }
     return 0;
 }
