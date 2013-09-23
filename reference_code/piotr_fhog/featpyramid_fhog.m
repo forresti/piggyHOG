@@ -18,7 +18,6 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
     %                   Feature map computed at exactly half the 
     %                   resolution of pyra.feat{i}
 
-
     [h w d] = size(im);
     im=imResample(single(im)/255,[h w]); %from Piotr's codebase
     hog_time = 0;
