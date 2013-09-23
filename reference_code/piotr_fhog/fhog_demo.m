@@ -1,5 +1,5 @@
 
-im = imread('../../images_640x480/carsgraz_001.image.png');
+im = imread('../../images_640x480/carsgraz_001.image.jpg');
 
 
 nRuns = 100;
