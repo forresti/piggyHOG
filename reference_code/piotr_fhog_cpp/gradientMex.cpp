@@ -329,7 +329,11 @@ void fhog( float *M, float *O, float *H, int h, int w, int binSize,
     hogChannels( H+nbo*2, R2, N, hb, wb, nOrients*1, clip, 1 );
     hogChannels( H+nbo*3, R1, N, hb, wb, nOrients*2, clip, 2 );
     //wrFree(N); mxFree(R1); wrFree(R2); //Piotr's off-the-shelf
-    //wrFree(N); wrFree(R1); wrFree(R2); //Forrest -- got rid of mxFree
+
+    //Forrest -- got rid of mxFree
+    wrFree(N); 
+    wrFree(R1); 
+    wrFree(R2); 
 }
 
 /******************************************************************************/
