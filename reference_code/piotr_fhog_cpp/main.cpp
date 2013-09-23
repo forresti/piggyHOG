@@ -71,6 +71,19 @@ void writePyraToCsv(float* hog, int hogHeight, int hogWidth, int hogDepth){
     free(transposedHog);
 }
 
+//save intermediate results to jpg files
+void output_magnitude_orientation_imgs(float* M, float* O, int h, int w){
+    Mat magnitudes(w, h, CV_32FC1, M); //height and width reversed, because Piotr's data is col major
+    transpose(magnitudes, magnitudes);
+    magnitudes.convertTo(magnitudes, CV_8UC1, 255.);
+    imwrite("piotr_magnitudes_cpp.jpg", magnitudes);
+
+    Mat orientations(w, h, CV_32FC1, O); //height and width reversed, because Piotr's data is col major
+    transpose(orientations, orientations);
+    orientations.convertTo(orientations, CV_8UC1, 255.);
+    imwrite("piotr_orientations_cpp.jpg", orientations);
+}
+
 //call Piotr Dollar's FHOG extractor, which was originally designed to have a Matlab front-end
 Mat piotr_fhog_wrapper_1img(Mat img){
     int h = img.rows; //TODO: rename h to imgHeight
@@ -79,11 +92,7 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int d = 3; //nChannels
     bool full = true;
     
-    //transpose(img, img); //in-place transpose to col-major to match Piotr's data layout
-    //img.convertTo(img, CV_32FC3, 1/255.); //3-channel float, instead of 3-channel uchar
-    //assert(img.type() == CV_32FC3);
-    //float* I = (float*)&img.data[0]; //note: without the (float*) cast, the compiler complains about converting uchar* to float*. TODO: debug if necessary.
-    float* I = transpose_opencv_to_matlab(img);
+    float* I = transpose_opencv_to_matlab(img); //later on, if I change the data layout and use 32F opencv images, I can just do &img.data[0]
     float* M = (float*)calloc(h * w, sizeof(float)); //Magnitudes (depth=1)
     float* O = (float*)calloc(h * w, sizeof(float)); //Orientations
 
@@ -101,6 +110,8 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int hogHeight = h/binSize; //hb in Piotr's code
     int hogDepth = nOrients*3 + 5;
     float* H = (float*)calloc(hogHeight * hogWidth * hogDepth, sizeof(float)); 
+
+    output_magnitude_orientation_imgs(M, O, h, w); //TEMP -- for debugging. save intermediate results to jpg files
 
   //mGradHist() -> fhog()
     //note: fhog internally calculates hogWidth and hogHeight, so we pass the image's height and w into fhog. 
