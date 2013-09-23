@@ -1,7 +1,7 @@
 function csvdiff()
     %for h=1:10:41
     %for h=1:41
-    for h=1:1
+    for h=11:11
         %experimentalCsv = ['./ffld_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
 
         experimentalCsv = ['piotr_fhog_cpp_results/level0.csv']; %just doing 1 level at the moment ... corresponds to 'level 11' in pyramid 
@@ -33,8 +33,8 @@ function mydiff(experimentalCsv, referenceCsv, h)
     display(['    nnz(diff) = ' num2str(nnz(diff))])
     display(['    percent mismatches above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)/resultSize * 100) '%'])
 
-    ref_sum = visualizeHogSum(referenceResult);
-    exp_sum = visualizeHogSum(experimentalResult);
+    %ref_sum = visualizeHogSum(referenceResult);
+    %exp_sum = visualizeHogSum(experimentalResult);
 keyboard
 
 end
