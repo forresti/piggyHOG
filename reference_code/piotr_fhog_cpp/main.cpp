@@ -162,7 +162,7 @@ int main (int argc, char **argv){
 
     //#pragma omp parallel for
     //for(int i=0; i<interval; i++)
-    int i=0;
+    for(int i=0; i<5; i++)
     {
     
         float downsampleFactor = 1/pow(sc, i);
