@@ -11,7 +11,7 @@ function matlab_features_test(hogMethod)
         error('unknown HOG extraction method. use hogMethod={voc5 or piotr}')
     end
 
-    curr_img = 'images_640x480/carsgraz_001.image.png';
+    curr_img = 'images_640x480/carsgraz_001.image.jpg';
 
     load('VOC2007/car_final'); %load 'model' structure
     pyra = time_extract_hog(curr_img, model, hogMethod);
