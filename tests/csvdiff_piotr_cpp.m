@@ -33,9 +33,9 @@ function mydiff(experimentalCsv, referenceCsv, h)
     display(['    nnz(diff) = ' num2str(nnz(diff))])
     display(['    percent mismatches above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)/resultSize * 100) '%'])
 
-    %ref_sum = visualizeHogSum(referenceResult);
-    %exp_sum = visualizeHogSum(experimentalResult);
-keyboard
+    ref_sum = visualizeHogSum(referenceResult);
+    exp_sum = visualizeHogSum(experimentalResult);
+%keyboard
 
 end
 
