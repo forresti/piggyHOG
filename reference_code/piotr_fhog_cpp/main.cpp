@@ -10,6 +10,9 @@
 using namespace std;
 using namespace cv;
 
+double time_transpose;
+
+
 //input  OpenCV data layout: uchar* [x*d + y*img.cols*d + ch]
 //output Matlab data layout: float* [x*img.rows + y + ch*img.rows*img.cols] / 255
 float* transpose_opencv_to_matlab(Mat img){
@@ -114,7 +117,10 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     int d = 3; //nChannels
     bool full = true;
     
+    double start_transpose = read_timer();
     float* I = transpose_opencv_to_matlab(img); //later on, if I change the data layout and use 32F opencv images, I can just do &img.data[0]
+    time_transpose += read_timer() - start_transpose;
+
     float* M = (float*)calloc(h * w, sizeof(float)); //Magnitudes (depth=1)
     float* O = (float*)calloc(h * w, sizeof(float)); //Orientations
 
@@ -150,6 +156,8 @@ Mat piotr_fhog_wrapper_1img(Mat img){
 
 
 int main (int argc, char **argv){
+    time_transpose = 0;
+
     Mat img = imread("../../images_640x480/carsgraz_001.image.jpg");
 
     //just do HOG on orig img
@@ -171,6 +179,8 @@ int main (int argc, char **argv){
         piotr_fhog_wrapper_1img(imgPyramid[i]); //TODO: catch outputs. (need to design a 'pyramid' data struct)
         piotr_fhog_wrapper_1img(imgPyramid[i+interval]); 
     }
+
+    printf("transpose matlab -> C layout in = %f \n", time_transpose);
 
     return 0;
 }
