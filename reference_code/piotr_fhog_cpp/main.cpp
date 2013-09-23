@@ -101,7 +101,7 @@ Mat piotr_fhog_wrapper_1img(Mat img){
     float* H = (float*)calloc(hogHeight * hogWidth * hogDepth, sizeof(float)); //TODO: are these dims correct? Should do a "hogH, hogW, hogD?" 
 
 //BEGIN DEBUG
-    Mat magnitudes(h, w, CV_32FC1, M);
+    Mat magnitudes(w, h, CV_32FC1, M);
     magnitudes.convertTo(magnitudes, CV_8UC1, 255.);
     imwrite("piotr_magnitudes_cpp.jpg", magnitudes);
 
