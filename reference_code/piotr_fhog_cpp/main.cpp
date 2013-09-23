@@ -102,7 +102,8 @@ Mat piotr_fhog_wrapper_1img(Mat img){
 
 //BEGIN DEBUG
     Mat magnitudes(h, w, CV_32FC1, M);
-    imwrite("piotr_magnitudes_cpp.png", magnitudes);
+    magnitudes.convertTo(magnitudes, CV_8UC1, 255.);
+    imwrite("piotr_magnitudes_cpp.jpg", magnitudes);
 
 //END DEBUG
 
