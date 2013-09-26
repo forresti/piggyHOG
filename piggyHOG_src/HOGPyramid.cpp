@@ -517,6 +517,8 @@ void HOGPyramid::Hog(const uint8_t * bits, int width, int height, int depth, Lev
 }
 #endif
 
+// UNINTERESTING STUFF BELOW THIS LINE (carryover from FFLD)
+
 void HOGPyramid::Convolve(const Level & x, const Level & y, Matrix & z)
 {
 	// Nothing to do if x is smaller than y
