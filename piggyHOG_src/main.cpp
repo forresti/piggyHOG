@@ -190,7 +190,7 @@ void writePyraToCsv(HOGPyramid pyramid){
         int height = pyramid.levels()[level].rows();
         int depth = pyramid.NbFeatures;
         ostringstream fname;
-        fname << "../ffld_results/level" << level << ".csv"; //TODO: get orig img name into the CSV name.
+        fname << "../piggyHOG_results/level" << level << ".csv"; //TODO: get orig img name into the CSV name.
     
         int nCols = depth; //one descriptor per row
         int nRows = width*height;
