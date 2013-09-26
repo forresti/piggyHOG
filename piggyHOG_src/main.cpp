@@ -10,7 +10,6 @@ using namespace std;
 int main (int argc, char **argv)
 {
     cv::Mat x;
-    printf("%f \n", foo(1.2345));
 
     return 0;
 }
