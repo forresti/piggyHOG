@@ -1,14 +1,14 @@
 CXX = g++
 CFLAGS = -g -fopenmp -O3 -fPIC -I/usr/local/include/ -I../eigen -I.. #-DFFLD_HOGPYRAMID_FELZENSZWALB_FEATURES  
 LDLIBS = -g -lgomp -ljpeg 
-OBJS = HOGPyramid.o JPEGImage.o helpers.o ffld.o
-all:	ffld 
+OBJS = HOGPyramid.o JPEGImage.o helpers.o main.o
+all:	main 
 
-ffld: $(OBJS) 
-	$(CXX) -o ffld $(OBJS) $(LDLIBS)
+main: $(OBJS) 
+	$(CXX) -o main $(OBJS) $(LDLIBS)
 
-ffld.o: ../ffld.cpp ../HOGPyramid.h ../JPEGImage.h ../common/helpers.h
-	$(CXX) $(CFLAGS) -c ../ffld.cpp
+main.o: ../main.cpp ../HOGPyramid.h ../JPEGImage.h ../common/helpers.h
+	$(CXX) $(CFLAGS) -c ../main.cpp
 
 HOGPyramid.o:	../HOGPyramid.cpp ../HOGPyramid.h ../JPEGImage.h
 	$(CXX) $(CFLAGS) -c ../HOGPyramid.cpp 
