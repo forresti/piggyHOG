@@ -53,7 +53,7 @@ pady_(0), interval_(0)
 HOGPyramid::HOGPyramid(const JPEGImage & image, int padx, int pady, int interval) : padx_(0),
 pady_(0), interval_(0)
 {
-    ATAN2_TABLE[0][0] = 0; //test    
+    //ATAN2_TABLE[0][0] = 0; //test    
 
 	if (image.empty() || (padx < 1) || (pady < 1) || (interval < 1))
 		return;
@@ -96,7 +96,8 @@ pady_(0), interval_(0)
 
 
 //precompute tangent table, store the results in the ATAN2_TABLE[][] class variable
-void HOGPyramid::precompute_atan_table(){
+//void HOGPyramid::precompute_atan_table()
+//{
 	// Table of all the possible tangents (1MB)
 
     //int tmp = HOGPyramid::_pady; //dummy test...that fails?!
@@ -121,7 +122,7 @@ void HOGPyramid::precompute_atan_table(){
 		}
 	}
 #endif
-}
+//}
 
 namespace FFLD
 {
@@ -161,8 +162,27 @@ template <class Matrix, int CellSize>
 void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 					 int cellSize)
 {
+    Scalar ATAN2_TABLE[512][512] = {{0}};
 
-	//while (ATAN2_TABLE[510][510] == 0);
+	// Fill the atan2 table
+#pragma omp critical
+	if (ATAN2_TABLE[0][0] == 0) {
+		for (int dy = -255; dy <= 255; ++dy) {
+			for (int dx = -255; dx <= 255; ++dx) {
+				// Angle in the range [-pi, pi]
+				double angle = atan2(static_cast<double>(dy), static_cast<double>(dx));
+				
+				// Convert it to the range [9.0, 27.0]
+				angle = angle * (9.0 / M_PI) + 18.0;
+				
+				// Convert it to the range [0, 18)
+				if (angle >= 18.0)
+					angle -= 18.0;
+				ATAN2_TABLE[dy + 255][dx + 255] = max(angle, 0.0); //ATAN2_TABLE[][] is a HOGPyramid class variable
+			}
+		}
+	}
+	while (ATAN2_TABLE[510][510] == 0);
 	
 	// Get all the image members
 	const int width = image.width();

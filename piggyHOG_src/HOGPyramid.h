@@ -157,9 +157,10 @@ private:
 	// Computes the 2D convolution of a pyramid level with sparse labels
 	static void Convolve(const Level & x, const SparseMatrix & z, Level & y);
 
-    void precompute_atan_table();	
+    //static void precompute_atan_table();	
 
-    Scalar ATAN2_TABLE[512][512];
+    //float ATAN2_TABLE;
+    //Scalar ATAN2_TABLE[512][512];
 	int padx_;
 	int pady_;
 	int interval_;
