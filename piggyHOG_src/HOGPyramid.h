@@ -46,11 +46,7 @@ public:
 	static const int NbFeatures = 32;
 	
 	/// Type of a scalar value.
-#ifndef FFLD_HOGPYRAMID_DOUBLE
 	typedef float Scalar;
-#else
-	typedef double Scalar;
-#endif
 	
 	/// Type of a matrix.
 	typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Matrix;

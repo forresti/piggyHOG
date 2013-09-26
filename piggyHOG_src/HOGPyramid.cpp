@@ -532,11 +532,8 @@ void HOGPyramid::Convolve(const Level & x, const Level & y, Matrix & z)
 			const Map<const Matrix, Aligned, OuterStride<NbFeatures> >
 				mapx(reinterpret_cast<const Scalar *>(x.row(i + j).data()), z.cols(),
 					 y.cols() * NbFeatures);
-#ifndef FFLD_HOGPYRAMID_DOUBLE
+
 			const Map<const RowVectorXf, Aligned>
-#else
-			const Map<const RowVectorXd, Aligned>
-#endif
 				mapy(reinterpret_cast<const Scalar *>(y.row(j).data()), y.cols() * NbFeatures);
 			
 			z.row(i).noalias() += mapy * mapx.transpose();
@@ -563,19 +560,11 @@ void HOGPyramid::Convolve(const Level & x, const Level & y, SparseMatrix & z)
 			Scalar dot = 0;
 			
 			for (int j = 0; j < y.rows(); ++j) {
-#ifndef FFLD_HOGPYRAMID_DOUBLE
 				const Map<const RowVectorXf, Aligned>
-#else
-				const Map<const RowVectorXd, Aligned>
-#endif
 					mapx(reinterpret_cast<const Scalar *>(x.row(i + j).data() + it.col()),
 						 y.cols() * NbFeatures);
 				
-#ifndef FFLD_HOGPYRAMID_DOUBLE
 				const Map<const RowVectorXf, Aligned>
-#else
-				const Map<const RowVectorXd, Aligned>
-#endif
 					mapy(reinterpret_cast<const Scalar *>(y.row(j).data()), y.cols() * NbFeatures);
 				
 				dot += mapx.dot(mapy);
@@ -604,11 +593,7 @@ void HOGPyramid::Convolve(const Level & x, const Matrix & z, Level & y)
 				mapx(reinterpret_cast<const Scalar *>(x.row(i + j).data()), z.cols(),
 					 y.cols() * NbFeatures);
 			
-#ifndef FFLD_HOGPYRAMID_DOUBLE
 			Map<RowVectorXf, Aligned>
-#else
-			Map<RowVectorXd, Aligned>
-#endif
 				mapy(reinterpret_cast<Scalar *>(y.row(j).data()), y.cols() * NbFeatures);
 			
 			mapy.noalias() += z.row(i) * mapx;
