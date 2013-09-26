@@ -2,9 +2,9 @@ OBJS = main.o  helpers.o PgHog.o
 EXENAME = main
 
 CC = g++
-CCOPTS = -c  -g -pg -O3 `pkg-config opencv --cflags`
+CCOPTS = -c  -g -O3 `pkg-config opencv --cflags`
 LINK = g++
-LINKOPTS = -pg `pkg-config opencv --libs`
+LINKOPTS = `pkg-config opencv --libs`
 
 all : $(EXENAME)
 $(EXENAME) : $(OBJS)
