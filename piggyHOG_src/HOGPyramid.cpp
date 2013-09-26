@@ -110,15 +110,6 @@ pady_(0), interval_(0)
 #endif
 	}
 	
-    #if 0 //Forrest's debug statements
-    //print (using C++ 0-indexing, not Matlab 1-indexing)
-    for(i=0; i<maxScale+1; i++){
-        printf("scales[%d] = %f \n", i, scales[i]);
-        printf("    image.width() * scales[%d] = %f \n", i, image.width() * scales[i]);
-    }
-    printf("image.width()=%d, image.height()=%d \n", image.width(), image.height());
-    #endif
-
 	// Add padding
 #ifdef FFLD_HOGPYRAMID_FELZENSZWALB_FEATURES
 	for (int i = 0; i <= maxScale; ++i) {
@@ -137,137 +128,6 @@ pady_(0), interval_(0)
 #endif
 }
 
-int HOGPyramid::padx() const
-{
-	return padx_;
-}
-
-int HOGPyramid::pady() const
-{
-	return pady_;
-}
-
-int HOGPyramid::interval() const
-{
-	return interval_;
-}
-
-const vector<HOGPyramid::Level> & HOGPyramid::levels() const
-{
-	return levels_;
-}
-
-bool HOGPyramid::empty() const
-{
-	return levels().empty();
-}
-
-void HOGPyramid::convolve(const Level & filter, vector<Matrix> & convolutions) const
-{
-	// Resize convolutions to hold # levels
-	convolutions.resize(levels_.size());
-	
-	// For each level
-	int i;
-#pragma omp parallel for private(i)
-	for (i = 0; i < levels_.size(); ++i)
-		Convolve(levels_[i], filter, convolutions[i]);
-}
-
-void HOGPyramid::convolve(const Level & filter, vector<SparseMatrix> & convolutions) const
-{
-	// Resize convolutions to hold # levels
-	convolutions.resize(levels_.size());
-	
-	// For each level
-	int i;
-#pragma omp parallel for private(i)
-	for (i = 0; i < levels_.size(); ++i)
-		Convolve(levels_[i], filter, convolutions[i]);
-}
-
-void HOGPyramid::convolve(const vector<Matrix> & labels, Level & sum) const
-{
-	// Nothing to do if the levels or the labels are empty
-	if (empty() || labels.empty()) {
-		sum = Level();
-		return;
-	}
-	
-	// Resize sum to the filter size
-	sum = Level::Constant(levels_[0].rows() - labels[0].rows() + 1,
-						  levels_[0].cols() - labels[0].cols() + 1, Cell::Zero());
-	
-	// For each level
-	int i;
-#pragma omp parallel for private(i)
-	for (i = 0; i < min(levels_.size(), labels.size()); ++i) {
-		Level tmp;
-		Convolve(levels_[i], labels[i], tmp);
-		
-		if (tmp.size())
-#pragma omp critical
-			sum += tmp;
-	}
-}
-
-void HOGPyramid::convolve(const vector<SparseMatrix> & labels, Level & sum) const
-{
-	// Nothing to do if the levels or the labels are empty
-	if (empty() || labels.empty()) {
-		sum = Level();
-		return;
-	}
-	
-	// Resize sum to the filter size
-	sum = Level::Constant(levels_[0].rows() - labels[0].rows() + 1,
-						  levels_[0].cols() - labels[0].cols() + 1, Cell::Zero());
-	
-	// For each level
-	int i;
-#pragma omp parallel for private(i)
-	for (i = 0; i < min(levels_.size(), labels.size()); ++i) {
-		Level tmp;
-		Convolve(levels_[i], labels[i], tmp);
-		
-		if (tmp.size())
-#pragma omp critical
-			sum += tmp;
-	}
-}
-
-Map<HOGPyramid::Matrix, Aligned> HOGPyramid::Convert(Level & level)
-{
-	return Map<Matrix, Aligned>(level.data()->data(), level.rows(),
-											  level.cols() * NbFeatures);
-}
-
-Map<const HOGPyramid::Matrix, Aligned> HOGPyramid::Convert(const Level & level)
-{
-	return Map<const Matrix, Aligned>(level.data()->data(), level.rows(),
-													level.cols() * NbFeatures);
-}
-
-FFLD::HOGPyramid::Level HOGPyramid::Flip(const HOGPyramid::Level & filter)
-{
-	// Symmetric features
-	const int symmetry[NbFeatures] = {
-		9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 17, 16, 15, 14, 13, 12, 11, 10, // Contrast-sensitive
-		18, 26, 25, 24, 23, 22, 21, 20, 19, // Contrast-insensitive
-		28, 27, 30, 29, // Texture
-		31 // Truncation
-	};
-	
-	// Symmetric filter
-	HOGPyramid::Level result(filter.rows(), filter.cols());
-	
-	for (int y = 0; y < filter.rows(); ++y)
-		for (int x = 0; x < filter.cols(); ++x)
-			for (int i = 0; i < NbFeatures; ++i)
-				result(y, x)(i) = filter(y, filter.cols() - 1 - x)(symmetry[i]);
-	
-	return result;
-}
 
 #ifndef FFLD_HOGPYRAMID_FELZENSZWALB_FEATURES
 namespace FFLD
@@ -481,7 +341,7 @@ void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 		}
 	}
 }
-#else
+#else //FELZ_..._FEATURES is disabled. Use a more precise copy of Ross's code
 void HOGPyramid::Hog(const uint8_t * bits, int width, int height, int depth, Level & level,
 					 int cellSize)
 {
@@ -778,3 +638,137 @@ void HOGPyramid::Convolve(const Level & x, const SparseMatrix & z, Level & y)
 			mapy.noalias() += it.value() * mapx.block(i, it.col() * NbFeatures,
 													  mapy.rows(), mapy.cols());
 }
+
+void HOGPyramid::convolve(const Level & filter, vector<Matrix> & convolutions) const
+{
+	// Resize convolutions to hold # levels
+	convolutions.resize(levels_.size());
+	
+	// For each level
+	int i;
+#pragma omp parallel for private(i)
+	for (i = 0; i < levels_.size(); ++i)
+		Convolve(levels_[i], filter, convolutions[i]);
+}
+
+void HOGPyramid::convolve(const Level & filter, vector<SparseMatrix> & convolutions) const
+{
+	// Resize convolutions to hold # levels
+	convolutions.resize(levels_.size());
+	
+	// For each level
+	int i;
+#pragma omp parallel for private(i)
+	for (i = 0; i < levels_.size(); ++i)
+		Convolve(levels_[i], filter, convolutions[i]);
+}
+
+void HOGPyramid::convolve(const vector<Matrix> & labels, Level & sum) const
+{
+	// Nothing to do if the levels or the labels are empty
+	if (empty() || labels.empty()) {
+		sum = Level();
+		return;
+	}
+	
+	// Resize sum to the filter size
+	sum = Level::Constant(levels_[0].rows() - labels[0].rows() + 1,
+						  levels_[0].cols() - labels[0].cols() + 1, Cell::Zero());
+	
+	// For each level
+	int i;
+#pragma omp parallel for private(i)
+	for (i = 0; i < min(levels_.size(), labels.size()); ++i) {
+		Level tmp;
+		Convolve(levels_[i], labels[i], tmp);
+		
+		if (tmp.size())
+#pragma omp critical
+			sum += tmp;
+	}
+}
+
+void HOGPyramid::convolve(const vector<SparseMatrix> & labels, Level & sum) const
+{
+	// Nothing to do if the levels or the labels are empty
+	if (empty() || labels.empty()) {
+		sum = Level();
+		return;
+	}
+	
+	// Resize sum to the filter size
+	sum = Level::Constant(levels_[0].rows() - labels[0].rows() + 1,
+						  levels_[0].cols() - labels[0].cols() + 1, Cell::Zero());
+	
+	// For each level
+	int i;
+#pragma omp parallel for private(i)
+	for (i = 0; i < min(levels_.size(), labels.size()); ++i) {
+		Level tmp;
+		Convolve(levels_[i], labels[i], tmp);
+		
+		if (tmp.size())
+#pragma omp critical
+			sum += tmp;
+	}
+}
+
+Map<HOGPyramid::Matrix, Aligned> HOGPyramid::Convert(Level & level)
+{
+	return Map<Matrix, Aligned>(level.data()->data(), level.rows(),
+											  level.cols() * NbFeatures);
+}
+
+Map<const HOGPyramid::Matrix, Aligned> HOGPyramid::Convert(const Level & level)
+{
+	return Map<const Matrix, Aligned>(level.data()->data(), level.rows(),
+													level.cols() * NbFeatures);
+}
+
+FFLD::HOGPyramid::Level HOGPyramid::Flip(const HOGPyramid::Level & filter)
+{
+	// Symmetric features
+	const int symmetry[NbFeatures] = {
+		9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 17, 16, 15, 14, 13, 12, 11, 10, // Contrast-sensitive
+		18, 26, 25, 24, 23, 22, 21, 20, 19, // Contrast-insensitive
+		28, 27, 30, 29, // Texture
+		31 // Truncation
+	};
+	
+	// Symmetric filter
+	HOGPyramid::Level result(filter.rows(), filter.cols());
+	
+	for (int y = 0; y < filter.rows(); ++y)
+		for (int x = 0; x < filter.cols(); ++x)
+			for (int i = 0; i < NbFeatures; ++i)
+				result(y, x)(i) = filter(y, filter.cols() - 1 - x)(symmetry[i]);
+	
+	return result;
+}
+
+int HOGPyramid::padx() const
+{
+	return padx_;
+}
+
+int HOGPyramid::pady() const
+{
+	return pady_;
+}
+
+int HOGPyramid::interval() const
+{
+	return interval_;
+}
+
+const vector<HOGPyramid::Level> & HOGPyramid::levels() const
+{
+	return levels_;
+}
+
+bool HOGPyramid::empty() const
+{
+	return levels().empty();
+}
+
+
