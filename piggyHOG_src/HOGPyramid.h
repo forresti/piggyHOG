@@ -137,7 +137,7 @@ public:
 	/// Returns the flipped version (horizontally) of a filter.
 	static HOGPyramid::Level Flip(const HOGPyramid::Level & filter);
 	
-//private:
+private:
 	// Efficiently computes Histogram of Oriented Gradient (HOG) features
 	// Code to compute HOG features as described in "Object Detection with Discriminatively Trained
 	// Part Based Models" by Felzenszwalb, Girshick, McAllester and Ramanan, PAMI10
@@ -157,9 +157,9 @@ public:
 	// Computes the 2D convolution of a pyramid level with sparse labels
 	static void Convolve(const Level & x, const SparseMatrix & z, Level & y);
 
-    void HOGPyramid::precompute_atan_table();	
+    void precompute_atan_table();	
 
-    static Scalar ATAN2_TABLE[512][512];
+    Scalar ATAN2_TABLE[512][512];
 	int padx_;
 	int pady_;
 	int interval_;

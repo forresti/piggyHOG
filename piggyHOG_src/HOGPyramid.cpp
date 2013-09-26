@@ -53,6 +53,8 @@ pady_(0), interval_(0)
 HOGPyramid::HOGPyramid(const JPEGImage & image, int padx, int pady, int interval) : padx_(0),
 pady_(0), interval_(0)
 {
+    ATAN2_TABLE[0][0] = 0; //test    
+
 	if (image.empty() || (padx < 1) || (pady < 1) || (interval < 1))
 		return;
 	
@@ -97,7 +99,7 @@ pady_(0), interval_(0)
 void HOGPyramid::precompute_atan_table(){
 	// Table of all the possible tangents (1MB)
 
-    int tmp = HOGPyramid::_pady; //dummy test...that fails?!
+    //int tmp = HOGPyramid::_pady; //dummy test...that fails?!
 
 #if 0	
 	// Fill the atan2 table
