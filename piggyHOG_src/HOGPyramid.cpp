@@ -162,7 +162,7 @@ template <class Matrix, int CellSize>
 void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 					 int cellSize)
 {
-    Scalar ATAN2_TABLE[512][512] = {{0}};
+    static Scalar ATAN2_TABLE[512][512] = {{0}};
 
 	// Fill the atan2 table
 #pragma omp critical
