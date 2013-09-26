@@ -97,7 +97,7 @@ pady_(0), interval_(0)
 void HOGPyramid::precompute_atan_table(){
 	// Table of all the possible tangents (1MB)
 
-    int tmp = HOGPyramid::_pady;
+    int tmp = HOGPyramid::_pady; //dummy test...that fails?!
 
 #if 0	
 	// Fill the atan2 table
