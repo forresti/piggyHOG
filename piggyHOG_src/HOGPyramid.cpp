@@ -148,8 +148,8 @@ void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 				// Convert it to the range [0, 18)
 				if (angle >= 18.0)
 					angle -= 18.0;
-				
-				ATAN2_TABLE[dy + 255][dx + 255] = max(angle, 0.0);
+				ATAN2_TABLE[dy + 255][dx + 255] = 1.0f; //test
+				//ATAN2_TABLE[dy + 255][dx + 255] = max(angle, 0.0);
 			}
 		}
 	}
