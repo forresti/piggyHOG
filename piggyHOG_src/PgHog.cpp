@@ -1,6 +1,7 @@
 
-#include "PgHOG.h"
+#include "PgHog.h"
 using namespace std;
+using namespace cv;
 
 float foo(float f)
 {

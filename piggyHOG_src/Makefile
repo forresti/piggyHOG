@@ -1,4 +1,4 @@
-OBJS = main.o  helpers.o PgHOG.o
+OBJS = main.o  helpers.o PgHog.o
 EXENAME = main
 
 CC = g++
@@ -10,11 +10,11 @@ all : $(EXENAME)
 $(EXENAME) : $(OBJS)
 	$(LINK) -o $(EXENAME) $(OBJS) $(LINKOPTS)
 
-main.o : main.cpp PgHOG.h common/helpers.h 
+main.o : main.cpp PgHog.h common/helpers.h 
 	$(CC) $(CCOPTS) main.cpp
 
-PgHOG.o : PgHOG.cpp PgHOG.h
-	$(CC) $(CCOPTS) PgHOG.cpp
+PgHog.o : PgHog.cpp PgHog.h PgHogContainer.h
+	$(CC) $(CCOPTS) PgHog.cpp
 
 helpers.o: ../common/helpers.cpp ../common/helpers.h
 	$(CXX) $(CFLAGS) -c ../common/helpers.cpp
