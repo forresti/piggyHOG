@@ -77,7 +77,6 @@ pady_(0), interval_(0)
 		JPEGImage scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
 		
 		// First octave at twice the image resolution
-#ifndef FFLD_HOGPYRAMID_FELZENSZWALB_FEATURES
 		Hog(scaled, levels_[i], padx, pady, 4);
 		
 		// Second octave at the original resolution
@@ -90,46 +89,9 @@ pady_(0), interval_(0)
 			scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
 			Hog(scaled, levels_[i + j * interval], padx, pady, 8);
 		}
-#else
-		Hog(scaled.scanLine(0), scaled.width(), scaled.height(), scaled.depth(), levels_[i], 4);
-
-		// Second octave at the original resolution
-		if (i + interval <= maxScale)
-			Hog(scaled.scanLine(0), scaled.width(), scaled.height(), scaled.depth(),
-				levels_[i + interval], 8);
-        //scales[i + interval] = scale;
-
-		// Remaining octaves
-		for (int j = 2; i + j * interval <= maxScale; ++j) {
-			scale *= 0.5;
-			scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
-			Hog(scaled.scanLine(0), scaled.width(), scaled.height(), scaled.depth(),
-				levels_[i + j * interval], 8);
-           //scales[i + j*interval] = scale;
-		}
-#endif
 	}
-	
-	// Add padding
-#ifdef FFLD_HOGPYRAMID_FELZENSZWALB_FEATURES
-	for (int i = 0; i <= maxScale; ++i) {
-		Level tmp = Level::Constant(levels_[i].rows() + (pady + 1) * 2,
-									levels_[i].cols() + (padx + 1) * 2, Cell::Zero());
-		
-		// Set the last feature to 1
-		for (int y = 0; y < tmp.rows(); ++y)
-			for (int x = 0; x < tmp.cols(); ++x)
-				tmp(y, x)(31) = 1;
-		
-		tmp.block(pady + 1, padx + 1, levels_[i].rows(), levels_[i].cols()) = levels_[i];
-		
-		levels_[i].swap(tmp);
-	}
-#endif
 }
 
-
-#ifndef FFLD_HOGPYRAMID_FELZENSZWALB_FEATURES
 namespace FFLD
 {
 namespace detail
@@ -341,181 +303,6 @@ void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 		}
 	}
 }
-#else //FELZ_..._FEATURES is disabled. Use a more precise copy of Ross's code
-void HOGPyramid::Hog(const uint8_t * bits, int width, int height, int depth, Level & level,
-					 int cellSize)
-{
-	// Adapted from voc-release4.01/features.cc
-	const Scalar EPS = 0.0001;
-	
-	const Scalar UU[9] = {
-		1.0000, 0.9397, 0.7660, 0.5000, 0.1736,-0.1736,-0.5000,-0.7660,-0.9397
-	};
-	
-	const Scalar VV[9] = {
-		0.0000, 0.3420, 0.6428, 0.8660, 0.9848, 0.9848, 0.8660, 0.6428, 0.3420
-	};
-	
-	// Make sure all sizes are strictly positive
-	assert(width > 0);
-	assert(height > 0);
-	assert(depth > 0);
-	assert(cellSize > 0);
-	
-	// Memory for caching orientation histograms & their norms
-	int blocks[2];
-	blocks[0] = static_cast<double>(height) / cellSize + 0.5;
-	blocks[1] = static_cast<double>(width) / cellSize + 0.5;
-	MatrixXf hist = MatrixXf::Zero(blocks[0], blocks[1] * 18);
-	MatrixXf norm = MatrixXf::Zero(blocks[0], blocks[1]);
-	
-	// Memory for HOG features
-	int out[3];
-	out[0] = max(blocks[0] - 2, 0);
-	out[1] = max(blocks[1] - 2, 0);
-	out[2] = 27 + 4 + 1;
-	level.resize(out[0], out[1]);
-	
-	int visible[2];
-	visible[0] = blocks[0] * cellSize;
-	visible[1] = blocks[1] * cellSize;
-	
-	for (int y = 1; y < visible[0] - 1; ++y) {
-		for (int x = 1; x < visible[1] - 1; ++x) {
-			const int x2 = min(x, width - 2);
-			const int y2 = min(y, height - 2);
-			
-			// Use the channel with the largest gradient magnitude
-			Scalar magnitude = 0;
-			int argDx = 0;
-			int argDy = 0;
-			
-			for (int i = 0; i < depth; ++i) {
-				const int dx = static_cast<int>(bits[(y2 * width + x2 + 1) * depth + i]) -
-							   static_cast<int>(bits[(y2 * width + x2 - 1) * depth + i]);
-				const int dy = static_cast<int>(bits[((y2 + 1) * width + x2) * depth + i]) -
-							   static_cast<int>(bits[((y2 - 1) * width + x2) * depth + i]);
-				
-				if (dx * dx + dy * dy > magnitude) {
-					magnitude = dx * dx + dy * dy;
-					argDx = dx;
-					argDy = dy;
-				}
-			}
-			
-			// Snap to one of 18 orientations
-			int theta = 0;
-			Scalar best = 0;
-			
-			for (int i = 0; i < 9; ++i) {
-				const Scalar dot = UU[i] * argDx + VV[i] * argDy;
-				
-				if (dot > best) {
-					best = dot;
-					theta = i;
-				}
-				else if (-dot > best) {
-					best = -dot;
-					theta = i + 9;
-				}
-			}
-			
-			// Add to 4 histograms around pixel using linear interpolation
-			Scalar xp = (x + Scalar(0.5)) / cellSize - Scalar(0.5);
-			Scalar yp = (y + Scalar(0.5)) / cellSize - Scalar(0.5);
-			int ixp = floor(xp);
-			int iyp = floor(yp);
-			Scalar vx0 = xp - ixp;
-			Scalar vy0 = yp - iyp;
-			Scalar vx1 = 1 - vx0;
-			Scalar vy1 = 1 - vy0;
-			
-			magnitude = sqrt(magnitude);
-			
-			if ((ixp >= 0) && (iyp >= 0))
-				hist(iyp, ixp * 18 + theta) += vx1 * vy1 * magnitude;
-			
-			if ((ixp + 1 < blocks[1]) && (iyp >= 0))
-				hist(iyp, (ixp + 1) * 18 + theta) += vx0 * vy1 * magnitude;
-			
-			if ((ixp >= 0) && (iyp + 1 < blocks[0]))
-				hist(iyp + 1, ixp * 18 + theta) += vx1 * vy0 * magnitude;
-			
-			if ((ixp + 1 < blocks[1]) && (iyp + 1 < blocks[0]))
-				hist(iyp + 1, (ixp + 1) * 18 + theta) += vx0 * vy0 * magnitude;
-		}
-	}
-	
-	// Compute energy in each block by summing over orientations
-	for (int y = 0; y < blocks[0]; ++y) {
-		for (int x = 0; x < blocks[1]; ++x) {
-			Scalar sumSq = 0;
-			
-			for (int i = 0; i < 9; ++i)
-				sumSq += (hist(y, x * 18 + i) + hist(y, x * 18 + i + 9)) *
-						 (hist(y, x * 18 + i) + hist(y, x * 18 + i + 9));
-			
-			norm(y, x) = sumSq;
-		}
-	}
-	
-	// Compute features
-	for (int y = 0; y < out[0]; ++y) {
-		for (int x = 0; x < out[1]; ++x) {
-			// Normalization factors
-			const Scalar n0 = 1 / sqrt(norm(y    , x    ) + norm(y    , x + 1) +
-											norm(y + 1, x    ) + norm(y + 1, x + 1) + EPS);
-			const Scalar n1 = 1 / sqrt(norm(y    , x + 1) + norm(y    , x + 2) +
-											norm(y + 1, x + 1) + norm(y + 1, x + 2) + EPS);
-			const Scalar n2 = 1 / sqrt(norm(y + 1, x    ) + norm(y + 1, x + 1) +
-											norm(y + 2, x    ) + norm(y + 2, x + 1) + EPS);
-			const Scalar n3 = 1 / sqrt(norm(y + 1, x + 1) + norm(y + 1, x + 2) +
-											norm(y + 2, x + 1) + norm(y + 2, x + 2) + EPS);
-			
-			// Contrast-insensitive features
-			for (int i = 0; i < 9; ++i) {
-				const Scalar sum = hist(y + 1, (x + 1) * 18 + i) +
-								   hist(y + 1, (x + 1) * 18 + i + 9);
-				const Scalar h0 = min(sum * n0, Scalar(0.2));
-				const Scalar h1 = min(sum * n1, Scalar(0.2));
-				const Scalar h2 = min(sum * n2, Scalar(0.2));
-				const Scalar h3 = min(sum * n3, Scalar(0.2));
-				level(y, x)(i + 18) = (h0 + h1 + h2 + h3) / 2;
-			}
-			
-			// Contrast-sensitive features
-			Scalar t0 = 0;
-			Scalar t1 = 0;
-			Scalar t2 = 0;
-			Scalar t3 = 0;
-			
-			for (int i = 0; i < 18; ++i) {
-				const Scalar sum = hist(y + 1, (x + 1) * 18 + i);
-				const Scalar h0 = min(sum * n0, Scalar(0.2));
-				const Scalar h1 = min(sum * n1, Scalar(0.2));
-				const Scalar h2 = min(sum * n2, Scalar(0.2));
-				const Scalar h3 = min(sum * n3, Scalar(0.2));
-				level(y, x)(i) = (h0 + h1 + h2 + h3) / 2;
-				t0 += h0;
-				t1 += h1;
-				t2 += h2;
-				t3 += h3;
-			}
-			
-			// Texture features
-			level(y, x)(27) = t0 * Scalar(0.2357);
-			level(y, x)(28) = t1 * Scalar(0.2357);
-			level(y, x)(29) = t2 * Scalar(0.2357);
-			level(y, x)(30) = t3 * Scalar(0.2357);
-		}
-	}
-	
-	// Truncation feature
-	for (int y = 0; y < level.rows(); ++y)
-		for (int x = 0; x < level.cols(); ++x)
-			level(y, x)(31) = 0;
-}
-#endif
 
 // UNINTERESTING STUFF BELOW THIS LINE (carryover from FFLD)
 
