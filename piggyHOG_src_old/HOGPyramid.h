@@ -144,6 +144,8 @@ private:
 	// cellSize should be either 4 or 8
 	static void Hog(const JPEGImage & image, Level & level, int padx, int pady,
 					int cellSize = 8);
+
+    static void fill_atan2_table(Scalar** ATAN2_TABLE);
 	
 	// Computes the 2D convolution of a pyramid level with a filter
 	static void Convolve(const Level & x, const Level & y, Matrix & z);

@@ -159,11 +159,36 @@ template <class Matrix, int CellSize>
 }
 }
 
+//hard-coded: ATAN2_TABLE is of size [512][512]
+void HOGPyramid::fill_atan2_table(Scalar** ATAN2_TABLE){
+	// Fill the atan2 table
+#pragma omp critical
+	if (ATAN2_TABLE[0][0] == 0) {
+		for (int dy = -255; dy <= 255; ++dy) {
+			for (int dx = -255; dx <= 255; ++dx) {
+				// Angle in the range [-pi, pi]
+				double angle = atan2(static_cast<double>(dy), static_cast<double>(dx));
+				
+				// Convert it to the range [9.0, 27.0]
+				angle = angle * (9.0 / M_PI) + 18.0;
+				
+				// Convert it to the range [0, 18)
+				if (angle >= 18.0)
+					angle -= 18.0;
+				ATAN2_TABLE[dy + 255][dx + 255] = max(angle, 0.0); //ATAN2_TABLE[][] is a HOGPyramid class variable
+			}
+		}
+	}
+
+}
+
 void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 					 int cellSize)
 {
-    static Scalar ATAN2_TABLE[512][512] = {{0}};
+    static Scalar ATAN2_TABLE[512][512];
 
+    fill_atan2_table((float**)ATAN2_TABLE);
+#if 0
 	// Fill the atan2 table
 #pragma omp critical
 	if (ATAN2_TABLE[0][0] == 0) {
@@ -183,7 +208,8 @@ void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 		}
 	}
 	while (ATAN2_TABLE[510][510] == 0);
-	
+#endif	
+
 	// Get all the image members
 	const int width = image.width();
 	const int height = image.height();
