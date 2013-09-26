@@ -92,6 +92,8 @@ pady_(0), interval_(0)
 	}
 }
 
+
+
 namespace FFLD
 {
 namespace detail
@@ -129,7 +131,8 @@ void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 					 int cellSize)
 {
 	// Table of all the possible tangents (1MB)
-	static Scalar ATAN2_TABLE[512][512] = {{0}};
+//	static Scalar ATAN2_TABLE[512][512] = {{0}};
+    static Scalar ATAN2_TABLE[512][512];
 	
 	// Fill the atan2 table
 #pragma omp critical

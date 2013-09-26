@@ -78,7 +78,7 @@ public:
 	/// @param[in] interval Number of levels per octave in the pyramid.
 	/// @note The amount of padding and the interval should be at least 1.
 	HOGPyramid(const JPEGImage & image, int padx, int pady, int interval = 10);
-	
+
 	/// Returns whether the pyramid is empty. An empty pyramid has no level.
 	bool empty() const;
 	
@@ -138,18 +138,14 @@ public:
 	static HOGPyramid::Level Flip(const HOGPyramid::Level & filter);
 	
 private:
-#ifndef FFLD_HOGPYRAMID_FELZENSZWALB_FEATURES
 	// Efficiently computes Histogram of Oriented Gradient (HOG) features
 	// Code to compute HOG features as described in "Object Detection with Discriminatively Trained
 	// Part Based Models" by Felzenszwalb, Girshick, McAllester and Ramanan, PAMI10
 	// cellSize should be either 4 or 8
 	static void Hog(const JPEGImage & image, Level & level, int padx, int pady,
 					int cellSize = 8);
-#else
-	// Felzenszwalb version (not as accurate, provided for compatibility only)
-	static void Hog(const uint8_t * bits, int width, int height, int depth, Level & level,
-					int cellSize = 8);
-#endif
+	
+    void precompute_atan_table();	
 	
 	// Computes the 2D convolution of a pyramid level with a filter
 	static void Convolve(const Level & x, const Level & y, Matrix & z);
@@ -163,6 +159,8 @@ private:
 	// Computes the 2D convolution of a pyramid level with sparse labels
 	static void Convolve(const Level & x, const SparseMatrix & z, Level & y);
 	
+
+    //static Scalar ATAN2_TABLE[512][512] = {{0}};
 	int padx_;
 	int pady_;
 	int interval_;
