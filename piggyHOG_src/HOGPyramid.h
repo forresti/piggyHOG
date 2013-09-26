@@ -145,8 +145,6 @@ private:
 	static void Hog(const JPEGImage & image, Level & level, int padx, int pady,
 					int cellSize = 8);
 	
-    void precompute_atan_table();	
-	
 	// Computes the 2D convolution of a pyramid level with a filter
 	static void Convolve(const Level & x, const Level & y, Matrix & z);
 	
@@ -158,9 +156,10 @@ private:
 	
 	// Computes the 2D convolution of a pyramid level with sparse labels
 	static void Convolve(const Level & x, const SparseMatrix & z, Level & y);
-	
 
-    //static Scalar ATAN2_TABLE[512][512] = {{0}};
+    void HOGPyramid::precompute_atan_table();	
+
+    static Scalar ATAN2_TABLE[512][512];
 	int padx_;
 	int pady_;
 	int interval_;
