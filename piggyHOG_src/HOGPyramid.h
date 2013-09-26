@@ -137,7 +137,7 @@ public:
 	/// Returns the flipped version (horizontally) of a filter.
 	static HOGPyramid::Level Flip(const HOGPyramid::Level & filter);
 	
-private:
+//private:
 	// Efficiently computes Histogram of Oriented Gradient (HOG) features
 	// Code to compute HOG features as described in "Object Detection with Discriminatively Trained
 	// Part Based Models" by Felzenszwalb, Girshick, McAllester and Ramanan, PAMI10
