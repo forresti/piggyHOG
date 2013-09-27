@@ -39,10 +39,6 @@ void writeGradToFile(Mat oriImg, Mat gradImg);
 
 //compute the gradient and magnitude at one image location, store the results in oriImg and magImg
 void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
-
-    //accesses to 'img' aren't clamped; be careful!
-    // make sure x is in range (1, width-1), and y is in range (1, height-1) 
-
     x = clamp(x, 1, img.cols-1);
     y = clamp(y, 1, img.rows-1);
 
@@ -52,10 +48,10 @@ void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
 
     for(int channel=0; channel<3; channel++){
         //TODO: index the data directly instead of using .at
-        float tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel];
-        float tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
-        //float tmp_gradX = (float)img.at<cv::Vec3b>(y,x-1)[channel] - img.at<cv::Vec3b>(y,x+1)[channel];
-        //float tmp_gradY = (float)img.at<cv::Vec3b>(y-1,x)[channel] - img.at<cv::Vec3b>(y+1,x)[channel];
+        //float tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel];
+        //float tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
+        float tmp_gradX = img.data[y*img.rows*3 + (x+1)*3 + channel] - img.data[y*img.rows*3 + (x-1)*3 + channel];
+        float tmp_gradY = img.data[(y+1)*img.rows*3 + x*3 + channel] - img.data[(y-1)*img.rows*3 + x*3 + channel];
         float tmp_mag = tmp_gradX*tmp_gradX + tmp_gradY*tmp_gradY;       
 
         if(tmp_mag > max_mag){
@@ -67,7 +63,6 @@ void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     //this is the gradient angle
     //float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
     float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255];
-    //float ori = gradY; //tmp
     max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
     //printf("x = %d, y = %d, gradX = %f, gradY = %f, ori = %f, max_mag = %f \n", x, y, gradX, gradY, ori, max_mag);
@@ -108,7 +103,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
         
         }
     }
-    writeGradToFile(oriImg, magImg);
+    //writeGradToFile(oriImg, magImg);
 }
 
 //----------------- TEMP DEBUG functions below this line ------------------
