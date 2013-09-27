@@ -40,7 +40,8 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 
             for(int y=0; y<spatialBinSize; y++){ //TODO: move these loops into PgHog::gradient()?
                 for(int x=0; x<spatialBinSize; x++){
-                    PgHog::gradient(hogX + x, hogY + y, gradImg, magImg); 
+                    //update gradImg and magImg at this x,y location
+                    PgHog::gradient(hogX + x, hogY + y, gradImg, magImg);  
                 }
             }
 
