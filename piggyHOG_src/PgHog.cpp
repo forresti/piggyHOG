@@ -45,7 +45,8 @@ void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
         } 
     }
     //this is the gradient angle
-    float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
+    //float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
+    float ori = gradY; //tmp
     max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
     //printf("x = %d, y = %d, gradX = %f, gradY = %f, ori = %f, max_mag = %f \n", x, y, gradX, gradY, ori, max_mag);
