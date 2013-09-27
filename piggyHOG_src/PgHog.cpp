@@ -27,8 +27,8 @@ void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
         //TODO: index the data directly instead of using .at
         //float tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel];
         //float tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
-        float tmp_gradX = img.at<cv::Vec3b>(y,x-1)[channel] - img.at<cv::Vec3b>(y,x+1)[channel];
-        float tmp_gradY = img.at<cv::Vec3b>(y-1,x)[channel] - img.at<cv::Vec3b>(y+1,x)[channel];
+        float tmp_gradX = (float)img.at<cv::Vec3b>(y,x-1)[channel] - img.at<cv::Vec3b>(y,x+1)[channel];
+        float tmp_gradY = (float)img.at<cv::Vec3b>(y-1,x)[channel] - img.at<cv::Vec3b>(y+1,x)[channel];
         float tmp_mag = tmp_gradX*tmp_gradX + tmp_gradY*tmp_gradY;       
 
         if(tmp_mag > max_mag){
@@ -85,10 +85,10 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 
 void writeGradToFile(Mat oriImg, Mat magImg){
 
-    oriImg.convertTo(oriImg, CV_8UC1, 255.);
+    //oriImg.convertTo(oriImg, CV_8UC1, 255.);
     imwrite("PgHog_orientations.jpg", oriImg);
     
-    magImg.convertTo(magImg, CV_8UC1, 255.);
+    //magImg.convertTo(magImg, CV_8UC1, 255.);
     imwrite("PgHog_magnitudes.jpg", magImg); 
 }
 
