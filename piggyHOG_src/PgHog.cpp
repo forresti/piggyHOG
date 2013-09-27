@@ -10,6 +10,9 @@ PgHog::~PgHog(){
 
 }
 
+//temp debug function declarations
+void writeGradToFile(Mat oriImg, Mat gradImg);
+
 //compute the gradient and magnitude at one image location, store the results in oriImg and magImg
 void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
 
@@ -33,12 +36,11 @@ void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
         } 
     }
     //this is the gradient angle
-    float grad = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
+    float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
 
-    oriImg.at<float>(y, x) = grad;
-    magImg.at<float>(y, x)  = max_mag;
+    oriImg.at<float>(y, x) = ori;
+    magImg.at<float>(y, x) = max_mag;
 }
-
 
 PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
   //setup
@@ -70,9 +72,24 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
                     PgHog::gradient(hogX + x, hogY + y, img, oriImg, magImg);  
                 }
             }
-
+        
         }
     }
+    writeGradToFile(oriImg, magImg);
 }
+
+//----------------- TEMP DEBUG functions below this line ------------------
+
+void writeGradToFile(Mat oriImg, Mat magImg){
+
+    oriImg.convertTo(oriImg, CV_8UC1, 255.);
+    imwrite("PgHog_orientations.jpg", oriImg);
+    
+    
+
+}
+
+
+
 
 
