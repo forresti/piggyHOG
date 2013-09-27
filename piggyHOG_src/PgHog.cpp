@@ -47,6 +47,8 @@ void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     //this is the gradient angle
     float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
 
+    printf("x = %d, y = %d, gradX = %f, gradY = %f, ori = %f, max_mag = %f \n", x, y, gradX, gradY, ori, max_mag);
+
     oriImg.at<float>(y, x) = ori;
     magImg.at<float>(y, x) = max_mag;
 }
@@ -73,8 +75,6 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
   //extract features
     for(int hogY = 0; hogY < hogResult.height; hogY++){
         for(int hogX = 0; hogX < hogResult.width; hogX++){
-    //for(int hogY = 1; hogY < hogResult.height-1; hogY++){ //start from 1 to avoid needing to clamp
-    //    for(int hogX = 1; hogX < hogResult.width-1; hogX++){
  
             for(int y=0; y<spatialBinSize; y++){ //TODO: move these loops into PgHog::gradient()?
                 for(int x=0; x<spatialBinSize; x++){
