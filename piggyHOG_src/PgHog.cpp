@@ -62,7 +62,8 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     }
     //this is the gradient angle
     //float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
-    float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255];
+    float ori = cv::fastAtan2((double)gradY, (double)gradX);
+    //float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255];
     max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
     //printf("x = %d, y = %d, gradX = %f, gradY = %f, ori = %f, max_mag = %f \n", x, y, gradX, gradY, ori, max_mag);
@@ -100,6 +101,10 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
                     PgHog::gradient(hogX*sbin + x, hogY*sbin + y, img, oriImg, magImg);  
                 }
             }
+
+            //TODO: HOG cell binning
+
+            //TODO: HOG block normalization
         
         }
     }
