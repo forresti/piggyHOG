@@ -7,7 +7,27 @@ static inline int clamp(int idx, int min_idx, int max_idx){
 }
 
 PgHog::PgHog(){
-    //TODO: arctan lookup table
+
+    // Fill the atan2 table (from FFLD) 
+    #pragma omp critical
+    if (ATAN2_TABLE[0][0] == 0) {
+        for (int dy = -255; dy <= 255; ++dy) {
+            for (int dx = -255; dx <= 255; ++dx) {
+                // Angle in the range [-pi, pi]
+                double angle = atan2(static_cast<double>(dy), static_cast<double>(dx));
+
+                // Convert it to the range [9.0, 27.0]
+                angle = angle * (9.0 / M_PI) + 18.0;
+           
+                // Convert it to the range [0, 18)
+                if (angle >= 18.0)
+                    angle -= 18.0;
+
+                ATAN2_TABLE[dy + 255][dx + 255] = max(angle, 0.0);
+            }
+        }
+    }
+
 }
 
 PgHog::~PgHog(){
@@ -32,10 +52,10 @@ void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
 
     for(int channel=0; channel<3; channel++){
         //TODO: index the data directly instead of using .at
-        //float tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel];
-        //float tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
-        float tmp_gradX = (float)img.at<cv::Vec3b>(y,x-1)[channel] - img.at<cv::Vec3b>(y,x+1)[channel];
-        float tmp_gradY = (float)img.at<cv::Vec3b>(y-1,x)[channel] - img.at<cv::Vec3b>(y+1,x)[channel];
+        float tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel];
+        float tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
+        //float tmp_gradX = (float)img.at<cv::Vec3b>(y,x-1)[channel] - img.at<cv::Vec3b>(y,x+1)[channel];
+        //float tmp_gradY = (float)img.at<cv::Vec3b>(y-1,x)[channel] - img.at<cv::Vec3b>(y+1,x)[channel];
         float tmp_mag = tmp_gradX*tmp_gradX + tmp_gradY*tmp_gradY;       
 
         if(tmp_mag > max_mag){
@@ -45,8 +65,8 @@ void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
         } 
     }
     //this is the gradient angle
-    //float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
-    float ori = gradY; //tmp
+    float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
+    //float ori = gradY; //tmp
     max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
     //printf("x = %d, y = %d, gradX = %f, gradY = %f, ori = %f, max_mag = %f \n", x, y, gradX, gradY, ori, max_mag);
