@@ -9,7 +9,11 @@ using namespace std;
 
 int main (int argc, char **argv)
 {
-    cv::Mat x;
+    Mat img = imread("../images_640x480/carsgraz_001.image.jpg"); //OpenCV 8U_C3 image
+
+    PgHog pghog;
+    int spatialBinSize = 4;
+    PgHogContainer hogResult = pghog.extract_HOG_oneScale(img, spatialBinSize);
 
     return 0;
 }
