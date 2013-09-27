@@ -2,6 +2,10 @@
 using namespace std;
 using namespace cv;
 
+static inline int clamp(int idx, int min_idx, int max_idx){
+    return max(min_idx, min(idx, max_idx));
+}
+
 PgHog::PgHog(){
     //TODO: arctan lookup table
 }
@@ -18,6 +22,9 @@ void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
 
     //accesses to 'img' aren't clamped; be careful!
     // make sure x is in range (1, width-1), and y is in range (1, height-1) 
+
+    x = clamp(x, 1, img.cols-1);
+    y = clamp(y, 1, img.rows-1);
 
     float gradX;
     float gradY;
@@ -64,10 +71,10 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     //float* norm = malloc(hogResult.width * hogResult.height); 
 
   //extract features
-    //for(int hogY = 0; hogY < hogResult.height; hogY++){
-    //    for(int hogX = 0; hogX < hogResult.width; hogX++){
-    for(int hogY = 1; hogY < hogResult.height-1; hogY++){ //start from 1 to avoid needing to clamp
-        for(int hogX = 1; hogX < hogResult.width-1; hogX++){
+    for(int hogY = 0; hogY < hogResult.height; hogY++){
+        for(int hogX = 0; hogX < hogResult.width; hogX++){
+    //for(int hogY = 1; hogY < hogResult.height-1; hogY++){ //start from 1 to avoid needing to clamp
+    //    for(int hogX = 1; hogX < hogResult.width-1; hogX++){
  
             for(int y=0; y<spatialBinSize; y++){ //TODO: move these loops into PgHog::gradient()?
                 for(int x=0; x<spatialBinSize; x++){
@@ -84,7 +91,6 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 //----------------- TEMP DEBUG functions below this line ------------------
 
 void writeGradToFile(Mat oriImg, Mat magImg){
-
     //oriImg.convertTo(oriImg, CV_8UC1, 255.);
     imwrite("PgHog_orientations.jpg", oriImg);
     
