@@ -25,8 +25,10 @@ void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
 
     for(int channel=0; channel<3; channel++){
         //TODO: index the data directly instead of using .at
-        float tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel];
-        float tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
+        //float tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel];
+        //float tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
+        float tmp_gradX = img.at<cv::Vec3b>(y,x-1)[channel] - img.at<cv::Vec3b>(y,x+1)[channel];
+        float tmp_gradY = img.at<cv::Vec3b>(y-1,x)[channel] - img.at<cv::Vec3b>(y+1,x)[channel];
         float tmp_mag = tmp_gradX*tmp_gradX + tmp_gradY*tmp_gradY;       
 
         if(tmp_mag > max_mag){
@@ -45,6 +47,7 @@ void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
 PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
   //setup
     assert(img.type() == CV_8UC3);
+    int sbin = spatialBinSize; //shorthand
 
     //TODO: possibly go down to 8-bit char
     Mat oriImg(img.rows, img.cols, CV_32FC1); //TODO: replace with aligned mem?
@@ -69,7 +72,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
             for(int y=0; y<spatialBinSize; y++){ //TODO: move these loops into PgHog::gradient()?
                 for(int x=0; x<spatialBinSize; x++){
                     //update oriImg and magImg at this x,y location
-                    PgHog::gradient(hogX + x, hogY + y, img, oriImg, magImg);  
+                    PgHog::gradient(hogX*sbin + x, hogY*sbin + y, img, oriImg, magImg);  
                 }
             }
         
@@ -85,11 +88,7 @@ void writeGradToFile(Mat oriImg, Mat magImg){
     oriImg.convertTo(oriImg, CV_8UC1, 255.);
     imwrite("PgHog_orientations.jpg", oriImg);
     
-    
-
+    magImg.convertTo(magImg, CV_8UC1, 255.);
+    imwrite("PgHog_magnitudes.jpg", magImg); 
 }
-
-
-
-
 
