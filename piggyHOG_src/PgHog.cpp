@@ -108,13 +108,13 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
         
         }
     }
-    //writeGradToFile(oriImg, magImg);
+    writeGradToFile(oriImg, magImg);
 }
 
 //----------------- TEMP DEBUG functions below this line ------------------
 
 void writeGradToFile(Mat oriImg, Mat magImg){
-    //oriImg.convertTo(oriImg, CV_8UC1, 255.);
+    oriImg.convertTo(oriImg, CV_8UC1, 255.);
     imwrite("PgHog_orientations.jpg", oriImg);
     
     //magImg.convertTo(magImg, CV_8UC1, 255.);
