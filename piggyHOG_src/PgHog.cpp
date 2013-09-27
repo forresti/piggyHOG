@@ -11,7 +11,7 @@ PgHog::PgHog(){
     // Fill the atan2 table (from FFLD) 
     #pragma omp critical
     if (ATAN2_TABLE[0][0] == 0) {
-        for (int dy = -255; dy <= 255; ++dy) {
+        for (int dy = -255; dy <= 255; ++dy) { //pixels are 0 to 255, so gradient values are -255 to 255
             for (int dx = -255; dx <= 255; ++dx) {
                 // Angle in the range [-pi, pi]
                 double angle = atan2(static_cast<double>(dy), static_cast<double>(dx));
@@ -65,7 +65,8 @@ void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
         } 
     }
     //this is the gradient angle
-    float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
+    //float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
+    float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255];
     //float ori = gradY; //tmp
     max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
