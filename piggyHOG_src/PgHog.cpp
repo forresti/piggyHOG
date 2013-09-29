@@ -140,28 +140,6 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     //TODO: store normalization results
     //float* norm = malloc(hogResult.width * hogResult.height); 
 
-    //TODO: PRECOMPUTE first few rows and cols worth of gradients, so that we can interpolate into (hogX-1) and (hogY-1) bins
-
-    for(int hogY = 0; hogY < hogResult.height; hogY++){
-        int hogX = 0; 
-            for(int y=0; y<spatialBinSize; y++){ 
-                for(int x=0; x<spatialBinSize; x++){
-                    //update oriImg and magImg at this x,y location
-                    PgHog::gradient(hogX*sbin + x, hogY*sbin + y, img, oriImg, magImg);  
-                }
-            }
-    }
-
-    int hogY = 0;
-        for(int hogX = 0; hogX < hogResult.width; hogX++){
-            for(int y=0; y<spatialBinSize; y++){ 
-                for(int x=0; x<spatialBinSize; x++){
-                    //update oriImg and magImg at this x,y location
-                    PgHog::gradient(hogX*sbin + x, hogY*sbin + y, img, oriImg, magImg);  
-                }
-            }
-    }
-
   //extract features
     for(int hogY = 0; hogY < hogResult.height; hogY++){
         for(int hogX = 0; hogX < hogResult.width; hogX++){
