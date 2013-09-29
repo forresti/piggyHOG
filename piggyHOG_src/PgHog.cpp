@@ -106,15 +106,17 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
             int pixelY = pixelY_start + offsetY; 
  
             //this pixel's contribution (weight) to our hog cell 
-            float weightX = abs(sbin - offsetX) / sbin; //when offset=0, we're at -sbin from hog cell's center. when offset=2*sbin-1, we're +sbin from the center.
-            float weightY = abs(sbin - offsetY) / sbin; // TODO: remove division by sbin 
+            //float weightX = abs(sbin - offsetX) / sbin; //when offset=0, we're at -sbin from hog cell's center. when offset=2*sbin-1, we're +sbin from the center.
+            //float weightY = abs(sbin - offsetY) / sbin; // TODO: remove division by sbin 
+            float weightX = abs(sbin - offsetX);
+            float weightY = abs(sbin - offsetY);
 
             int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
             float mag = magImg.at<float>(pixelY, pixelX);
 
             //hogResult.hog[hogOutputIdx + oriBin_signed] += 1; //test
-            hogResult.hog[hogOutputIdx + oriBin_signed] += mag;
-            //hogResult.hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY; 
+            //hogResult.hog[hogOutputIdx + oriBin_signed] += mag * 2.0f;
+            hogResult.hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY; 
         }
     }
 
