@@ -95,8 +95,8 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
 
     printf("hogX = %d, hogY = %d \n", hogX, hogY);
 
-    int hogOutputIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth; //+
-                       //hogX_internal * hogResult.depth;
+    int hogOutputIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth; +
+                       hogX_internal * hogResult.depth;
     
     //for(int pixelY = pixelY_start; pixelY < pixelY_end; pixelY++){
     //    for(int pixelX = pixelX_start; pixelX < pixelX_end; pixelX++){ 
@@ -115,7 +115,8 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
             //int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
             //float mag = magImg.at<float>(pixelY, pixelX);
 
-            hogResult.hog[hogOutputIdx + oriBin_signed] += 1; //test
+            hogResult.hog[hogOutputIdx] += 1;
+            //hogResult.hog[hogOutputIdx + oriBin_signed] += 1; //test
             //hogResult.hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY; 
         }
     }
