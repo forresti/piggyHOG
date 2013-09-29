@@ -86,14 +86,14 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
     //TODO: reorganize this math so that it's centered at hogX*sbin+1, and does +/-sbin in all directions
 
     int pixelX_start = hogX*sbin - sbin*0.5;
-    pixelX_start = clamp(pixelX_start, 0, magImg.cols-1); //not exactly the right logic ... should actually skip the indices that fall off the edge, instead of clamping
+    //pixelX_start = clamp(pixelX_start, 0, magImg.cols-1); //not exactly the right logic ... should actually skip the indices that fall off the edge, instead of clamping
     //int pixelX_end = pixelX_start + 2*sbin;    
     
     int pixelY_start = hogY*sbin - sbin*0.5;
-    pixelY_start = clamp(pixelY_start, 0, magImg.rows-1);
+    //pixelY_start = clamp(pixelY_start, 0, magImg.rows-1);
     //int pixelY_end = pixelY_start + 2*sbin;
 
-    printf("hogX = %d, hogY = %d \n", hogX, hogY);
+    //printf("hogX = %d, hogY = %d \n", hogX, hogY);
 
     int hogOutputIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth; +
                        hogX_internal * hogResult.depth;
@@ -111,12 +111,12 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
             float weightX = abs(sbin - offsetX) / sbin; //the HOG cell is centered at (hogX_internal+sbin, hogY_internal+sbin)
             float weightY = abs(sbin - offsetY) / sbin; // TODO: remove division by sbin 
 
-            int oriBin_signed = 0; //test
-            //int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
-            //float mag = magImg.at<float>(pixelY, pixelX);
+            //int oriBin_signed = 0; //test
+            int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
+            float mag = magImg.at<float>(pixelY, pixelX);
 
-            hogResult.hog[hogOutputIdx] += 1;
-            //hogResult.hog[hogOutputIdx + oriBin_signed] += 1; //test
+            //hogResult.hog[hogOutputIdx] += 1;
+            hogResult.hog[hogOutputIdx + oriBin_signed] += 1; //test
             //hogResult.hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY; 
         }
     }
@@ -163,7 +163,6 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 
             //TODO: HOG cell binning
             if(hogX>0 && hogY>0){
-                //hogCell(hogX-1, hogY-1, Mat &oriImg, Mat &magImg, PgHogContainer hogResult)
                 hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult);
             }
 
@@ -172,9 +171,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
         }
     }
 
-//    hogCell(0, 27, oriImg, magImg, hogResult); //test
-
-    writeGradToFile(oriImg, magImg);
+    //writeGradToFile(oriImg, magImg);
 }
 
 //----------------- TEMP DEBUG functions below this line ------------------
