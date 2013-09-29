@@ -72,7 +72,9 @@ pady_(0), interval_(0)
 	
 	int i;
 //#pragma omp parallel for private(i)
-	for (i = 0; i < interval; ++i) {
+    i=0;
+	//for (i = 0; i < interval; ++i) 
+    {
 		double scale = pow(2.0, static_cast<double>(-i) / interval);
 		JPEGImage scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
 		
