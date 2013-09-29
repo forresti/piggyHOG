@@ -79,7 +79,8 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
     //the 'center' of the hog cell is: (hogX+sbin/2, hogY+sbin/2).
     //we do (x,y)=(+/-sbin, +/-sbin) pixels from the center of the hog cell.
 
-    int sbin = hogResult.spatialBinSize;
+    const int sbin=4;
+    //int sbin = hogResult.spatialBinSize;
     int hogX_internal = hogX + hogResult.padx; //skip over padding on left side of hogResult.hog
     int hogY_internal = hogY + hogResult.pady; //skip over padding at the top of hogResult.hog
 
@@ -106,17 +107,15 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
             int pixelY = pixelY_start + offsetY; 
  
             //this pixel's contribution (weight) to our hog cell 
-            //float weightX = abs(sbin - offsetX) / sbin; //when offset=0, we're at -sbin from hog cell's center. when offset=2*sbin-1, we're +sbin from the center.
-            //float weightY = abs(sbin - offsetY) / sbin; // TODO: remove division by sbin 
-            float weightX = (offsetX);
-            float weightY = (offsetY);
+            float weightX = abs(sbin - offsetX) / sbin; //when offset=0, we're at -sbin from hog cell's center. when offset=2*sbin-1, we're +sbin from the center.
+            float weightY = abs(sbin - offsetY) / sbin; // TODO: remove division by sbin 
 
             int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
             float mag = magImg.at<float>(pixelY, pixelX);
 
             //hogResult.hog[hogOutputIdx + oriBin_signed] += 1; //test
             //hogResult.hog[hogOutputIdx + oriBin_signed] += mag * 2.0f;
-            hogResult.hog[hogOutputIdx + oriBin_signed] += mag * hogOutputX; 
+            hogResult.hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY;
         }
     }
 
