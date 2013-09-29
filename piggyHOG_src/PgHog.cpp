@@ -111,7 +111,8 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
             int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
             float mag = magImg.at<float>(pixelY, pixelX);
 
-            hogResult.hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY; 
+            hogResult.hog[hogOutputIdx + oriBin_signed] += 1; //test
+            //hogResult.hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY; 
         }
     }
 
