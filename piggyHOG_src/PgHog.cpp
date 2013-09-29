@@ -47,9 +47,10 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     float max_mag = 0.0f; //TODO: check range ... can this be uchar?
 
     for(int channel=0; channel<3; channel++){
-        //TODO: index the data directly instead of using .at
         float tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel];
         float tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
+
+        //indexing the data directly instead of using .at -- doesn't help with perf.
         //float tmp_gradX = img.data[y*img.rows*3 + (x+1)*3 + channel] - img.data[y*img.rows*3 + (x-1)*3 + channel];
         //float tmp_gradY = img.data[(y+1)*img.rows*3 + x*3 + channel] - img.data[(y-1)*img.rows*3 + x*3 + channel];
         float tmp_mag = tmp_gradX*tmp_gradX + tmp_gradY*tmp_gradY;       
@@ -62,8 +63,8 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     }
     //this is the gradient angle
     //float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
-    float ori = cv::fastAtan2((double)gradY, (double)gradX);
-    //float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255];
+    //float ori = cv::fastAtan2((double)gradY, (double)gradX);
+    float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255];
     max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
     //printf("x = %d, y = %d, gradX = %f, gradY = %f, ori = %f, max_mag = %f \n", x, y, gradX, gradY, ori, max_mag);
