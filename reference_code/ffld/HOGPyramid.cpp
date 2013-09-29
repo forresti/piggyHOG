@@ -297,8 +297,8 @@ template <class Matrix, int CellSize>
 	const int c = l * 2 + 1;
 	const int d = CellSize * 2 - c;
 
-    if(CellSize == 4)
-        printf("pixel (y=%d,x=%d) goes to HOG cells (j,i) = (%d,%d), (%d,%d), (%d,%d), (%d,%d) \n", y,x, i,j, i+1,j, i,j+1, i+1,j+1);
+    //if(CellSize == 4)
+        //printf("pixel (y=%d,x=%d) goes to HOG cells (j,i) = (%d,%d), (%d,%d), (%d,%d), (%d,%d) \n", y,x, i,j, i+1,j, i,j+1, i+1,j+1);
 	
 	matrix(i    , j    )(bin0) += magnitude0 * (b * d);
 	matrix(i    , j    )(bin1) += magnitude1 * (b * d);
@@ -404,7 +404,8 @@ void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 												magnitude * alpha, level);
 		}
 	}
-	
+
+#ifndef DISABLE_HOG_BLOCKS	
 	// Compute the "gradient energy" of each cell, i.e. ||C(i,j)||^2
 	for (int y = 0; y < level.rows(); ++y) {
 		for (int x = 0; x < level.cols(); ++x) {
@@ -491,8 +492,9 @@ void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 			}
 		}
 	}
+#endif //DISABLE_HOG_BLOCKS
 }
-#else
+#else //use FELZ-style (voc-release5) features
 void HOGPyramid::Hog(const uint8_t * bits, int width, int height, int depth, Level & level,
 					 int cellSize)
 {
