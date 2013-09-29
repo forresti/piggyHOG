@@ -92,6 +92,8 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     //TODO: store normalization results
     //float* norm = malloc(hogResult.width * hogResult.height); 
 
+    //TODO: precompute first few rows and cols worth of gradients, so that we can interpolate into (hogX-1) and (hogY-1) bins
+
   //extract features
     for(int hogY = 0; hogY < hogResult.height; hogY++){
         for(int hogX = 0; hogX < hogResult.width; hogX++){
@@ -109,7 +111,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
         
         }
     }
-    //writeGradToFile(oriImg, magImg);
+    writeGradToFile(oriImg, magImg);
 }
 
 //----------------- TEMP DEBUG functions below this line ------------------
