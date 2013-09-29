@@ -27,8 +27,8 @@ class PgHog{
         //out of the 3 RGB channels, use the gradient that has the highest magnitude
         void gradient(int x, int y, Mat img, Mat &gradImg, Mat &magImg);
 
-        //TODO:
-        //void hogCell(...) //compute HOG cell at one x,y location
+        //compute one HOG cell, storing the cell in hogResult
+        void hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer hogResult);
 
         //void hogBlock(...) //compute HOG block location at one x,y location (indexing into HOG cells)
         

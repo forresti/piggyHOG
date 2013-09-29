@@ -73,10 +73,9 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     magImg.at<float>(y, x) = max_mag;
 }
 
-#if 0
 //compute one HOG cell, storing the results in hogResult
 void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer hogResult){
-
+#if 0
     //populate this HOG cell by linearly interpolating the oriented gradients 
     //the 'center' of the hog cell is really its center (sbin/2, sbin/2). 
     //we do (+/-sbin, +/-sbin) pixels from the center of the hog cell.
@@ -99,7 +98,7 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
     //    for(int pixelX = pixelX_start; pixelX < pixelX_end; pixelX++){ 
     for(int offsetY = 0; offsetY < 2*sbin; offsetY++){
         for(int offsetX = 0; offsetX < 2*sbin; offsetX++){
-            //TODO: calculate contribution to this img
+            //this pixel's contribution (weight) to our hog cell 
             float weightX = abs(sbin - offsetX) / sbin; //the HOG cell is centered at (hogX_internal+sbin, hogY_internal+sbin)
             float weightY = abs(sbin - offsetY) / sbin; // TODO: remove division by sbin 
 
@@ -115,8 +114,8 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
 
     //TODO: oriBin_unsigned ... as a postprocessing step
     //TODO: calculate the sum of this bin and store it (for normalization)
-}
 #endif
+}
 
 PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
   //setup
