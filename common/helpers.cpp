@@ -15,6 +15,23 @@ void writeCsv_2dFloat(const float* vec, int nRows, int nCols, string fname)
     myfile.close();
 }
 
+void writeCsv_3d_Hog_Float(const float* vec, int width, int height, int depth, string fname)
+{
+    ofstream myfile;
+    myfile.open(fname.c_str());
+    myfile << depth << "," << width << "," << height << "\n"; //dimensions
+
+    for(int y=0; y<height; y++){
+        for(int x=0; x<width; x++){
+            for(int d=0; d<depth; d++){
+                myfile << vec[y*width*depth + x*depth + d] << ",";
+            }
+            myfile << vec[y*width*depth + x*depth + (depth-1)] << "\n";
+        }
+    }
+    myfile.close();
+}
+
 double read_timer(){
     struct timeval start;
     gettimeofday( &start, NULL );
