@@ -163,7 +163,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
             //TODO: HOG cell binning
             if(hogX>0 && hogY>0){
                 //hogCell(hogX-1, hogY-1, Mat &oriImg, Mat &magImg, PgHogContainer hogResult)
-                //hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult);
+                hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult);
             }
 
             //TODO: HOG block normalization
@@ -171,7 +171,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
         }
     }
 
-    hogCell(0, 27, oriImg, magImg, hogResult); //test
+//    hogCell(0, 27, oriImg, magImg, hogResult); //test
 
     writeGradToFile(oriImg, magImg);
 }
