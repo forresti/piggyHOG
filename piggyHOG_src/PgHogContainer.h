@@ -8,6 +8,8 @@ typedef struct PgHogContainer{
     int width;
     int height;
     int spatialBinSize;
+    int padx; //we have (padx/2) empty cells on the left- and right-hand side of the HOG array
+    int pady;
     int depth; //typically 32
 }PgHogContainer;
 
