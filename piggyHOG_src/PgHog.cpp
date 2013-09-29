@@ -67,7 +67,7 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255];
     max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
-    //printf("x = %d, y = %d, gradX = %f, gradY = %f, ori = %f, max_mag = %f \n", x, y, gradX, gradY, ori, max_mag);
+    printf("x = %d, y = %d, gradX = %f, gradY = %f, ori = %f, max_mag = %f \n", x, y, gradX, gradY, ori, max_mag);
 
     oriImg.at<float>(y, x) = ori;
     magImg.at<float>(y, x) = max_mag;
