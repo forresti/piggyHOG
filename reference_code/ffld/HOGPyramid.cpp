@@ -26,7 +26,7 @@
 #include <limits>
 #include <stdio.h>
 
-#define DISABLE_HOG_BLOCKS //if defined: just compute hog cells; don't normalize into hog blocks
+//#define DISABLE_HOG_BLOCKS //if defined: just compute hog cells; don't normalize into hog blocks
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -74,8 +74,8 @@ pady_(0), interval_(0)
 	
 	int i;
 //#pragma omp parallel for private(i)
-    i=0;
-	//for (i = 0; i < interval; ++i) 
+    //i=0;
+	for (i = 0; i < interval; ++i) 
     {
 		double scale = pow(2.0, static_cast<double>(-i) / interval);
 		JPEGImage scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
@@ -84,7 +84,7 @@ pady_(0), interval_(0)
 #ifndef FFLD_HOGPYRAMID_FELZENSZWALB_FEATURES
 		Hog(scaled, levels_[i], padx, pady, 4);
 	
-#if 0	
+#if 1	
 		// Second octave at the original resolution
 		if (i + interval <= maxScale)
 			Hog(scaled, levels_[i + interval], padx, pady, 8);
