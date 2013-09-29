@@ -82,6 +82,10 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
     //TODO: figure out where the 'center' of this HOG cell is located.
     // I was thinking that we center the cell at its top-left corner, but not sure.
 
+
+    int hogX_internal = hogX + (hogResult.sbin * hogResult.padx); //skip over padding on left side of hogResult.hog
+    int hogY_internal = hogY + (hogResult.sbin * hogResult.pady); //skip over padding at the top of hogResult.hog
+
 }
 #endif
 
@@ -100,6 +104,8 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     hogResult.height = round((float)img.rows / (float)spatialBinSize);
     hogResult.depth = 32;
     hogResult.spatialBinSize = spatialBinSize;
+    hogResult.padx = 11; //temporary (also, TODO: decide how to handle odd padding sizes)
+    hogResult.pady = 6; 
     hogResult.hog = (float*)malloc(hogResult.width * hogResult.height * hogResult.depth);
     
     //TODO: store normalization results
