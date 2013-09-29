@@ -116,7 +116,7 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
 
             //hogResult.hog[hogOutputIdx + oriBin_signed] += 1; //test
             //hogResult.hog[hogOutputIdx + oriBin_signed] += mag * 2.0f;
-            hogResult.hog[hogOutputIdx + oriBin_signed] += mag * offsetY; 
+            hogResult.hog[hogOutputIdx + oriBin_signed] += mag * hogOutputX; 
         }
     }
 
