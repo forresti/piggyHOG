@@ -77,39 +77,44 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
 //compute one HOG cell, storing the results in hogResult
 void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer hogResult){
 
-    //populate this HOG cell by linearly interpolating the oriented gradients at (hogX-1 : hogX), (hogY-1 : hogY)
-
-    //TODO: figure out where the 'center' of this HOG cell is located.
-    // I was thinking that we center the cell at its top-left corner, but not sure.
-
+    //populate this HOG cell by linearly interpolating the oriented gradients 
+    //the 'center' of the hog cell is really its center (sbin/2, sbin/2). 
+    //we do (+/-sbin, +/-sbin) pixels from the center of the hog cell.
 
     int hogX_internal = hogX + hogResult.padx; //skip over padding on left side of hogResult.hog
     int hogY_internal = hogY + hogResult.pady; //skip over padding at the top of hogResult.hog
 
+    //TODO: reorganize this math so that it's centered at hogX*sbin+1, and does +/-sbin in all directions
+
     int pixelX_start = hogX*sbin - sbin*0.5;
-    int pixelX_end = pixelX_start + 2*sbin;    
+    //int pixelX_end = pixelX_start + 2*sbin;    
     
     int pixelY_start = hogY*sbin - sbin*0.5;
-    int pixelY_end = pixelY_start + 2*sbin
+    //int pixelY_end = pixelY_start + 2*sbin;
 
     int hogIdx = hogY_internal * hogResult.width * hogResult.depth +
                  hogX_internal * hogResult.depth;
 
-    for(int pixelY = pixelY_start; pixelY < pixelY_end; pixelY++){
-        for(int pixelX = pixelX_start; pixelX < pixelX_end; pixelX++){ 
+    //for(int pixelY = pixelY_start; pixelY < pixelY_end; pixelY++){
+    //    for(int pixelX = pixelX_start; pixelX < pixelX_end; pixelX++){ 
+    for(int offsetY = 0; offsetY < 2*sbin; offsetY++){
+        for(int offsetX = 0; offsetX < 2*sbin; offsetX++){
+            //TODO: calculate contribution to this img
+            float weightX = abs(sbin - offsetX) / sbin; //the HOG cell is centered at (hogX_internal+sbin, hogY_internal+sbin)
+            float weightY = abs(sbin - offsetY) / sbin; // TODO: remove division by sbin 
 
+            int pixelX = pixelX_start + offsetX;
+            int pixelY = pixelY_start + offsetY; 
+ 
             int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
             float mag = magImg.at<float>(pixelY, pixelX);
 
-            //TODO: calculate contribution to this img
-            float weightX = abs(
-
-
-            hogResult.hog[hogIdx + oriBin_signed] += 
+            hogResult.hog[hogIdx + oriBin_signed] += mag * weightX * weightY; 
         }
     }
 
     //TODO: oriBin_unsigned ... as a postprocessing step
+    //TODO: calculate the sum of this bin and store it (for normalization)
 }
 #endif
 
