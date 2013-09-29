@@ -143,7 +143,8 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
   //extract features
     for(int hogY = 0; hogY < hogResult.height; hogY++){
         for(int hogX = 0; hogX < hogResult.width; hogX++){
- 
+
+            //calculate gradients 
             for(int y=0; y<spatialBinSize; y++){ //TODO: move these loops into PgHog::gradient()?
                 for(int x=0; x<spatialBinSize; x++){
                     //update oriImg and magImg at this x,y location
@@ -152,6 +153,9 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
             }
 
             //TODO: HOG cell binning
+            if(hogX>0 && hogY>0){
+                //hogCell(hogX-1, hogY-1, Mat &oriImg, Mat &magImg, PgHogContainer hogResult)
+            }
 
             //TODO: HOG block normalization
         
