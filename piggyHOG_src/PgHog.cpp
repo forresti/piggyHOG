@@ -77,13 +77,13 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
 void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer hogResult){
     //populate this HOG cell by linearly interpolating the oriented gradients 
     //the 'center' of the hog cell is: (hogX+sbin/2, hogY+sbin/2).
-    //we do (+/-sbin, +/-sbin) pixels from the center of the hog cell.
+    //we do (x,y)=(+/-sbin, +/-sbin) pixels from the center of the hog cell.
 
     int sbin = hogResult.spatialBinSize;
     int hogX_internal = hogX + hogResult.padx; //skip over padding on left side of hogResult.hog
     int hogY_internal = hogY + hogResult.pady; //skip over padding at the top of hogResult.hog
 
-    //TODO: reorganize this math so that it's centered at hogX*sbin+1, and does +/-sbin in all directions
+    //TODO: reorganize this math so that it's centered at hogX*sbin+1, and does +/-sbin in all directions?
 
     int pixelX_start = hogX*sbin - sbin*0.5;
     pixelX_start = clamp(pixelX_start, 0, magImg.cols-1); //not exactly the right logic ... should actually skip the indices that fall off the edge, instead of clamping
@@ -92,8 +92,6 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
     int pixelY_start = hogY*sbin - sbin*0.5;
     pixelY_start = clamp(pixelY_start, 0, magImg.rows-1);
     //int pixelY_end = pixelY_start + 2*sbin;
-
-    //printf("hogX = %d, hogY = %d \n", hogX, hogY);
 
     int hogOutputIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth; +
                        hogX_internal * hogResult.depth;
@@ -115,7 +113,8 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
             float mag = magImg.at<float>(pixelY, pixelX);
 
             //hogResult.hog[hogOutputIdx + oriBin_signed] += 1; //test
-            hogResult.hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY; 
+            hogResult.hog[hogOutputIdx + oriBin_signed] += mag;
+            //hogResult.hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY; 
         }
     }
 
