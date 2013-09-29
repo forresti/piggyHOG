@@ -91,8 +91,8 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
     int pixelY_start = hogY*sbin - sbin*0.5;
     //int pixelY_end = pixelY_start + 2*sbin;
 
-    int hogOutputIdx = hogY_internal * hogResult.width * hogResult.depth +
-                 hogX_internal * hogResult.depth;
+    int hogOutputIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth +
+                       hogX_internal * hogResult.depth;
     //for(int pixelY = pixelY_start; pixelY < pixelY_end; pixelY++){
     //    for(int pixelX = pixelX_start; pixelX < pixelX_end; pixelX++){ 
     for(int offsetY = 0; offsetY < 2*sbin; offsetY++){
@@ -128,13 +128,15 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 
     //hogResult first holds HOG Cells, then is normalized into HOG Blocks.
     PgHogContainer hogResult;
-    hogResult.width = round((float)img.cols / (float)spatialBinSize);
-    hogResult.height = round((float)img.rows / (float)spatialBinSize);
-    hogResult.depth = 32;
-    hogResult.spatialBinSize = spatialBinSize;
     hogResult.padx = 11; //temporary (also, TODO: decide how to handle odd padding sizes)
     hogResult.pady = 6; 
-    hogResult.hog = (float*)malloc(hogResult.width * hogResult.height * hogResult.depth);
+    hogResult.width = round((float)img.cols / (float)spatialBinSize);
+    hogResult.height = round((float)img.rows / (float)spatialBinSize);
+    hogResult.paddedWidth = hogResult.width + 2*hogResult.padx;
+    hogResult.paddedHeight = hogResult.height + 2*hogResult.pady;
+    hogResult.depth = 32;
+    hogResult.spatialBinSize = spatialBinSize;
+    hogResult.hog = (float*)malloc(hogResult.paddedWidth * hogResult.paddedHeight * hogResult.depth);
     
     //TODO: store normalization results
     //float* norm = malloc(hogResult.width * hogResult.height); 
