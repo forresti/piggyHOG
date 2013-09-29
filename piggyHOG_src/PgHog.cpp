@@ -93,8 +93,11 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
     pixelY_start = clamp(pixelY_start, 0, magImg.rows-1);
     //int pixelY_end = pixelY_start + 2*sbin;
 
+    printf("hogX = %d, hogY = %d \n", hogX, hogY);
+
     int hogOutputIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth +
                        hogX_internal * hogResult.depth;
+    
     //for(int pixelY = pixelY_start; pixelY < pixelY_end; pixelY++){
     //    for(int pixelX = pixelX_start; pixelX < pixelX_end; pixelX++){ 
     for(int offsetY = 0; offsetY < 2*sbin; offsetY++){
