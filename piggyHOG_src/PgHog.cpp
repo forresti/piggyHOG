@@ -67,11 +67,23 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255];
     max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
-    printf("x = %d, y = %d, gradX = %f, gradY = %f, ori = %f, max_mag = %f \n", x, y, gradX, gradY, ori, max_mag);
+    //printf("x = %d, y = %d, gradX = %f, gradY = %f, ori = %f, max_mag = %f \n", x, y, gradX, gradY, ori, max_mag);
 
     oriImg.at<float>(y, x) = ori;
     magImg.at<float>(y, x) = max_mag;
 }
+
+#if 0
+//compute one HOG cell, storing the results in hogResult
+void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer hogResult){
+
+    //populate this HOG cell by linearly interpolating the oriented gradients at (hogX-1 : hogX), (hogY-1 : hogY)
+
+    //TODO: figure out where the 'center' of this HOG cell is located.
+    // I was thinking that we center the cell at its top-left corner, but not sure.
+
+}
+#endif
 
 PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
   //setup
@@ -87,8 +99,9 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     hogResult.width = round((float)img.cols / (float)spatialBinSize);
     hogResult.height = round((float)img.rows / (float)spatialBinSize);
     hogResult.depth = 32;
+    hogResult.spatialBinSize = spatialBinSize;
     hogResult.hog = (float*)malloc(hogResult.width * hogResult.height * hogResult.depth);
-
+    
     //TODO: store normalization results
     //float* norm = malloc(hogResult.width * hogResult.height); 
 

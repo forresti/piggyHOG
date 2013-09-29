@@ -7,6 +7,7 @@ typedef struct PgHogContainer{
     float* hog;
     int width;
     int height;
+    int spatialBinSize;
     int depth; //typically 32
 }PgHogContainer;
 
