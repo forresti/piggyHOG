@@ -86,11 +86,11 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
     //TODO: reorganize this math so that it's centered at hogX*sbin+1, and does +/-sbin in all directions
 
     int pixelX_start = hogX*sbin - sbin*0.5;
-    //pixelX_start = clamp(pixelX_start, 0, magImg.cols-1); //not exactly the right logic ... should actually skip the indices that fall off the edge, instead of clamping
+    pixelX_start = clamp(pixelX_start, 0, magImg.cols-1); //not exactly the right logic ... should actually skip the indices that fall off the edge, instead of clamping
     //int pixelX_end = pixelX_start + 2*sbin;    
     
     int pixelY_start = hogY*sbin - sbin*0.5;
-    //pixelY_start = clamp(pixelY_start, 0, magImg.rows-1);
+    pixelY_start = clamp(pixelY_start, 0, magImg.rows-1);
     //int pixelY_end = pixelY_start + 2*sbin;
 
     //printf("hogX = %d, hogY = %d \n", hogX, hogY);
@@ -116,8 +116,8 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
             float mag = magImg.at<float>(pixelY, pixelX);
 
             //hogResult.hog[hogOutputIdx] += 1;
-            hogResult.hog[hogOutputIdx + oriBin_signed] += 1; //test
-            //hogResult.hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY; 
+            //hogResult.hog[hogOutputIdx + oriBin_signed] += 1; //test
+            hogResult.hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY; 
         }
     }
 
