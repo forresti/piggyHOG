@@ -23,7 +23,7 @@ void writeCsv_3d_Hog_Float(const float* vec, int width, int height, int depth, s
 
     for(int y=0; y<height; y++){
         for(int x=0; x<width; x++){
-            for(int d=0; d<depth; d++){
+            for(int d=0; d<depth-1; d++){
                 myfile << vec[y*width*depth + x*depth + d] << ",";
             }
             myfile << vec[y*width*depth + x*depth + (depth-1)] << "\n";
