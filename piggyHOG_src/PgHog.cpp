@@ -93,18 +93,19 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
 
     int hogOutputIdx = hogY_internal * hogResult.width * hogResult.depth +
                  hogX_internal * hogResult.depth;
-#if 0
     //for(int pixelY = pixelY_start; pixelY < pixelY_end; pixelY++){
     //    for(int pixelX = pixelX_start; pixelX < pixelX_end; pixelX++){ 
     for(int offsetY = 0; offsetY < 2*sbin; offsetY++){
         for(int offsetX = 0; offsetX < 2*sbin; offsetX++){
+
+            //location in magImg and gradImg
+            int pixelX = pixelX_start + offsetX;
+            int pixelY = pixelY_start + offsetY; 
+ 
             //this pixel's contribution (weight) to our hog cell 
             float weightX = abs(sbin - offsetX) / sbin; //the HOG cell is centered at (hogX_internal+sbin, hogY_internal+sbin)
             float weightY = abs(sbin - offsetY) / sbin; // TODO: remove division by sbin 
 
-            int pixelX = pixelX_start + offsetX;
-            int pixelY = pixelY_start + offsetY; 
- 
             int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
             float mag = magImg.at<float>(pixelY, pixelX);
 
@@ -114,7 +115,6 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
 
     //TODO: oriBin_unsigned ... as a postprocessing step
     //TODO: calculate the sum of this bin and store it (for normalization)
-#endif
 }
 
 PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
@@ -154,6 +154,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
             //TODO: HOG cell binning
             if(hogX>0 && hogY>0){
                 //hogCell(hogX-1, hogY-1, Mat &oriImg, Mat &magImg, PgHogContainer hogResult)
+                hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult);
             }
 
             //TODO: HOG block normalization
