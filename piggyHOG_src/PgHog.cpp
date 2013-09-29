@@ -83,9 +83,33 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
     // I was thinking that we center the cell at its top-left corner, but not sure.
 
 
-    int hogX_internal = hogX + (hogResult.sbin * hogResult.padx); //skip over padding on left side of hogResult.hog
-    int hogY_internal = hogY + (hogResult.sbin * hogResult.pady); //skip over padding at the top of hogResult.hog
+    int hogX_internal = hogX + hogResult.padx; //skip over padding on left side of hogResult.hog
+    int hogY_internal = hogY + hogResult.pady; //skip over padding at the top of hogResult.hog
 
+    int pixelX_start = hogX*sbin - sbin*0.5;
+    int pixelX_end = pixelX_start + 2*sbin;    
+    
+    int pixelY_start = hogY*sbin - sbin*0.5;
+    int pixelY_end = pixelY_start + 2*sbin
+
+    int hogIdx = hogY_internal * hogResult.width * hogResult.depth +
+                 hogX_internal * hogResult.depth;
+
+    for(int pixelY = pixelY_start; pixelY < pixelY_end; pixelY++){
+        for(int pixelX = pixelX_start; pixelX < pixelX_end; pixelX++){ 
+
+            int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
+            float mag = magImg.at<float>(pixelY, pixelX);
+
+            //TODO: calculate contribution to this img
+            float weightX = abs(
+
+
+            hogResult.hog[hogIdx + oriBin_signed] += 
+        }
+    }
+
+    //TODO: oriBin_unsigned ... as a postprocessing step
 }
 #endif
 

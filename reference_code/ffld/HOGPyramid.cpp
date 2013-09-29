@@ -390,7 +390,6 @@ void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 			const int theta1 = (theta0 < 17) ? (theta0 + 1) : 0;
             //printf("theta0 = %d, theta1 = %d \n", theta0, theta1);
 
-
 			const Scalar alpha = theta - theta0;
 			
 			if (cellSize == 8)
