@@ -75,11 +75,11 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
 
 //compute one HOG cell, storing the results in hogResult
 void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer hogResult){
-#if 0
     //populate this HOG cell by linearly interpolating the oriented gradients 
     //the 'center' of the hog cell is really its center (sbin/2, sbin/2). 
     //we do (+/-sbin, +/-sbin) pixels from the center of the hog cell.
 
+    int sbin = hogResult.spatialBinSize;
     int hogX_internal = hogX + hogResult.padx; //skip over padding on left side of hogResult.hog
     int hogY_internal = hogY + hogResult.pady; //skip over padding at the top of hogResult.hog
 
@@ -91,9 +91,9 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
     int pixelY_start = hogY*sbin - sbin*0.5;
     //int pixelY_end = pixelY_start + 2*sbin;
 
-    int hogIdx = hogY_internal * hogResult.width * hogResult.depth +
+    int hogOutputIdx = hogY_internal * hogResult.width * hogResult.depth +
                  hogX_internal * hogResult.depth;
-
+#if 0
     //for(int pixelY = pixelY_start; pixelY < pixelY_end; pixelY++){
     //    for(int pixelX = pixelX_start; pixelX < pixelX_end; pixelX++){ 
     for(int offsetY = 0; offsetY < 2*sbin; offsetY++){
@@ -108,7 +108,7 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
             int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
             float mag = magImg.at<float>(pixelY, pixelX);
 
-            hogResult.hog[hogIdx + oriBin_signed] += mag * weightX * weightY; 
+            hogResult.hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY; 
         }
     }
 
