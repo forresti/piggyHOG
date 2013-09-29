@@ -144,7 +144,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     hogResult.paddedHeight = hogResult.height + 2*hogResult.pady;
     hogResult.depth = 32;
     hogResult.spatialBinSize = spatialBinSize;
-    hogResult.hog = (float*)malloc(hogResult.paddedWidth * hogResult.paddedHeight * hogResult.depth);
+    hogResult.hog = (float*)malloc(hogResult.paddedWidth * hogResult.paddedHeight * hogResult.depth * sizeof(float));
     
     //TODO: store normalization results
     //float* norm = malloc(hogResult.width * hogResult.height); 
