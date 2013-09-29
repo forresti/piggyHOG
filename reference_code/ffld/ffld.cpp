@@ -192,11 +192,14 @@ void writePyraToCsv(HOGPyramid pyramid){
         ostringstream fname;
         fname << "../ffld_results/level" << level << ".csv"; //TODO: get orig img name into the CSV name.
     
+        #if 0 //old 2D csvwrite
         int nCols = depth; //one descriptor per row
         int nRows = width*height;
 
         //TODO: also write (depth, width, height) -- in some order -- to the top of the CSV file.
         writeCsv_2dFloat(raw_hog, nRows, nCols, fname.str());
+        #endif
+        writeCsv_3d_Hog_Float(raw_hog, width, height, depth, fname.str());
     }
 }
 
