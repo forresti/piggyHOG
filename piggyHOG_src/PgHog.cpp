@@ -73,7 +73,7 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
 }
 
 //compute one HOG cell, storing the results in hogResult
-void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer hogResult){
+inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer hogResult){
     //populate this HOG cell by linearly interpolating the oriented gradients 
     //the 'center' of the hog cell is: (hogX+sbin/2, hogY+sbin/2).
     //we do (x,y)=(+/-sbin, +/-sbin) pixels from the center of the hog cell.
