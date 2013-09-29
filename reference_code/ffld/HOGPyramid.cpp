@@ -295,8 +295,8 @@ template <class Matrix, int CellSize>
 	const int c = l * 2 + 1;
 	const int d = CellSize * 2 - c;
 
-    //if(CellSize == 4)
-        //printf("pixel (y=%d,x=%d) goes to HOG cells (j,i) = (%d,%d), (%d,%d), (%d,%d), (%d,%d) \n", y,x, i,j, i+1,j, i,j+1, i+1,j+1);
+    if(CellSize == 4)
+        printf("pixel (y=%d,x=%d) goes to HOG cells (j,i) = (%d,%d), (%d,%d), (%d,%d), (%d,%d) \n", y,x, i,j, i+1,j, i,j+1, i+1,j+1);
 	
 	matrix(i    , j    )(bin0) += magnitude0 * (b * d);
 	matrix(i    , j    )(bin1) += magnitude1 * (b * d);
