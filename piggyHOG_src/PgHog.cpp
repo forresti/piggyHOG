@@ -111,8 +111,9 @@ void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer
             float weightX = abs(sbin - offsetX) / sbin; //the HOG cell is centered at (hogX_internal+sbin, hogY_internal+sbin)
             float weightY = abs(sbin - offsetY) / sbin; // TODO: remove division by sbin 
 
-            int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
-            float mag = magImg.at<float>(pixelY, pixelX);
+            int oriBin_signed = 0; //test
+            //int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
+            //float mag = magImg.at<float>(pixelY, pixelX);
 
             hogResult.hog[hogOutputIdx + oriBin_signed] += 1; //test
             //hogResult.hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY; 
