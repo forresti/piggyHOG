@@ -68,7 +68,6 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
     //printf("x = %d, y = %d, gradX = %f, gradY = %f, ori = %f, max_mag = %f \n", x, y, gradX, gradY, ori, max_mag);
-
     oriImg.at<float>(y, x) = ori;
     magImg.at<float>(y, x) = max_mag;
 }
@@ -145,7 +144,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     hogResult.hog = (float*)malloc(hogResult.paddedWidth * hogResult.paddedHeight * hogResult.depth * sizeof(float));
     
     //TODO: store normalization results
-    //float* norm = malloc(hogResult.width * hogResult.height); 
+    //float* norm = malloc(hogResult.paddedWidth * hogResult.paddedHeight * sizeof(float)); 
 
   //extract features
     for(int hogY = 0; hogY < hogResult.height; hogY++){
@@ -159,7 +158,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
                 }
             }
 
-            //TODO: HOG cell binning
+            //HOG cell binning
             if(hogX>0 && hogY>0){
                 hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult);
             }
