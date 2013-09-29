@@ -81,7 +81,8 @@ pady_(0), interval_(0)
 		// First octave at twice the image resolution
 #ifndef FFLD_HOGPYRAMID_FELZENSZWALB_FEATURES
 		Hog(scaled, levels_[i], padx, pady, 4);
-		
+	
+#if 0	
 		// Second octave at the original resolution
 		if (i + interval <= maxScale)
 			Hog(scaled, levels_[i + interval], padx, pady, 8);
@@ -92,6 +93,7 @@ pady_(0), interval_(0)
 			scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
 			Hog(scaled, levels_[i + j * interval], padx, pady, 8);
 		}
+#endif
 #else
 		Hog(scaled.scanLine(0), scaled.width(), scaled.height(), scaled.depth(), levels_[i], 4);
 
