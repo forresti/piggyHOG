@@ -194,8 +194,27 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResu
 
     int hogIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth + 
                  hogX_internal * hogResult.depth;  //the location in hogResult.hog to update
+    
+    float t0 = 0.0f; //for texture features
+    float t1 = 0.0f;
+    float t2 = 0.0f; 
+    float t3 = 0.0f; 
+
     //contrast sensitive features (0 to 360 degrees)
-    //  TODO
+    for(int i=0; i<18; i++){
+        float currFeature = hogResult.hog[hogIdx + i + 18]; //contrast-insensitive feature in bin range 18 to 26
+        float h0 = min(currFeature * n0, 0.2f);
+        float h1 = min(currFeature * n1, 0.2f);
+        float h2 = min(currFeature * n2, 0.2f);
+        float h3 = min(currFeature * n3, 0.2f);
+
+        hogResult.hog[hogIdx + i] = (h0 + h1 + h2 + h3) * 0.5f; //TODO: check on numerical results 
+
+        t0 += h0; //precompute texture features
+        t1 += h1;
+        t2 += h2;
+        t3 += h3;
+    }
 
     //contrast-insensitive features (0 to 180 degrees)
     for(int i=0; i<9; i++){    
@@ -264,7 +283,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     }
 
     //writeGradToFile(oriImg, magImg);
-    writeHogCellsToFile(hogResult);
+    //writeHogCellsToFile(hogResult);
 }
 
 //----------------- TEMP DEBUG functions below this line ------------------
