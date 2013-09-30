@@ -201,7 +201,7 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResu
 
     //contrast sensitive features (0 to 360 degrees)
     for(int i=0; i<18; i++){
-        float currFeature = hogResult.hog[hogIdx + i + 18]; //contrast-insensitive feature in bin range 18 to 26
+        float currFeature = hogResult.hog[hogIdx + i]; //contrast-sensitive feature in bin range 0 to 17
         float h0 = min(currFeature * n0, 0.2f);
         float h1 = min(currFeature * n1, 0.2f);
         float h2 = min(currFeature * n2, 0.2f);
@@ -229,7 +229,7 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResu
     }
 
     //texture features
-    hogResult.hog[hogIdx + 27] = t0;
+    hogResult.hog[hogIdx + 27] = t0; //FIXME: some of these are greater than 0.4, seems wrong.
     hogResult.hog[hogIdx + 28] = t1;
     hogResult.hog[hogIdx + 29] = t2;
     hogResult.hog[hogIdx + 30] = t3;
@@ -290,7 +290,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     }
 
     //writeGradToFile(oriImg, magImg);
-    //writeHogCellsToFile(hogResult);
+    writeHogCellsToFile(hogResult);
 }
 
 //----------------- TEMP DEBUG functions below this line ------------------
