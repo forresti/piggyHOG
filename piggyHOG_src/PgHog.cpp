@@ -1,4 +1,7 @@
 #include "PgHog.h"
+#include <iomanip>
+#include <iostream>
+#include <fstream>
 using namespace std;
 using namespace cv;
 
@@ -36,6 +39,7 @@ PgHog::~PgHog(){
 
 //temp debug function declarations
 void writeGradToFile(Mat oriImg, Mat gradImg);
+void writeHogCellsToFile(PgHogContainer hogResult);
 
 //compute the gradient and magnitude at one image location, store the results in oriImg and magImg
 inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
@@ -106,8 +110,8 @@ inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogCo
             int pixelY = pixelY_start + offsetY; 
  
             //this pixel's contribution (weight) to our hog cell 
-            float weightX = abs(sbin - offsetX) / sbin; //when offset=0, we're at -sbin from hog cell's center. when offset=2*sbin-1, we're +sbin from the center.
-            float weightY = abs(sbin - offsetY) / sbin; // TODO: remove division by sbin 
+            float weightX = 1.0f - (abs(sbin - offsetX) / sbin); //when offset=0, we're at -sbin from hog cell's center. when offset=2*sbin-1, we're +sbin from the center.
+            float weightY = 1.0f - (abs(sbin - offsetY) / sbin); // TODO: remove division by sbin 
 
             int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
             float mag = magImg.at<float>(pixelY, pixelX);
@@ -169,6 +173,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     }
 
     //writeGradToFile(oriImg, magImg);
+    writeHogCellsToFile(hogResult);
 }
 
 //----------------- TEMP DEBUG functions below this line ------------------
@@ -179,5 +184,11 @@ void writeGradToFile(Mat oriImg, Mat magImg){
     
     //magImg.convertTo(magImg, CV_8UC1, 255.);
     imwrite("PgHog_magnitudes.jpg", magImg); 
+}
+
+void writeHogCellsToFile(PgHogContainer hogResult){
+    ostringstream fname;
+    fname << "piggyHOG_results/level" << 0 << ".csv";
+    writeCsv_3d_Hog_Float(hogResult.hog, hogResult.paddedWidth, hogResult.paddedHeight, hogResult.depth, fname.str());
 }
 
