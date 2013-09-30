@@ -119,6 +119,9 @@ mxArray *process(const mxArray *mximage, const mxArray *mxsbin) {
       double vy1 = 1.0-vy0;
       v = sqrt(v);
 
+
+      printf("weightX = %f, weightY = %f \n", vx0, vy0);
+
       if (ixp >= 0 && iyp >= 0) {
         *(hist + ixp*blocks[0] + iyp + best_o*blocks[0]*blocks[1]) += 
           vx1*vy1*v;

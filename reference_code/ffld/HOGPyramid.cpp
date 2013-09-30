@@ -299,9 +299,8 @@ template <class Matrix, int CellSize>
 
     //printf("pixel (y=%d,x=%d) goes to HOG cells (j,i) = (%d,%d), (%d,%d), (%d,%d), (%d,%d) \n", y,x, i,j, i+1,j, i,j+1, i+1,j+1);
 
-    //printf("weights: %d, %d, %d, %d \n", b*d, b*c, a*d, a*c);
-    printf("weightX = %d, weightY = %d \n", d, b);	
-
+    //printf("weightX = %d, weightY = %d \n", d, b);	
+    //printf("weightX = %d, weightY = %d \n", c, a); 
 
 	matrix(i    , j    )(bin0) += magnitude0 * (b * d);
 	matrix(i    , j    )(bin1) += magnitude1 * (b * d);
