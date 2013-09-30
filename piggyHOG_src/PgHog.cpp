@@ -194,7 +194,6 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResu
 
     int hogIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth + 
                  hogX_internal * hogResult.depth;  //the location in hogResult.hog to update
-#if 0
     //contrast sensitive features (0 to 360 degrees)
     //  TODO
 
@@ -210,7 +209,6 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResu
 
         hogResult.hog[hogIdx + i + 18] = (h0 + h1 + h2 + h3) * 0.5f; //TODO: check on numerical results 
     }
-#endif
 }
 
 PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
@@ -258,13 +256,15 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
                 hogCell_unsigned(hogX-1, hogY-1, hogResult); //contrast-insensitive features
             }
 
-            //TODO: HOG block normalization
+            //HOG block normalization
             //note: there are no 'if hogX>0' guards, because the hogResult.hog and normImg are padded.
+            //      also, hogBlock_normalize() has a forward dependency to its right and bottom neighbors, so we do hogX-2, hogY-2
+            hogBlock_normalize(hogX-2, hogY-2, hogResult, normImg); //TODO: think about edge cases
         }
     }
 
     //writeGradToFile(oriImg, magImg);
-    //writeHogCellsToFile(hogResult);
+    writeHogCellsToFile(hogResult);
 }
 
 //----------------- TEMP DEBUG functions below this line ------------------
