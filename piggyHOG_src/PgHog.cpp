@@ -229,10 +229,10 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResu
     }
 
     //texture features
-    hogResult.hog[hogIdx + 27] = t0; //FIXME: some of these are greater than 0.4, seems wrong.
-    hogResult.hog[hogIdx + 28] = t1;
-    hogResult.hog[hogIdx + 29] = t2;
-    hogResult.hog[hogIdx + 30] = t3;
+    hogResult.hog[hogIdx + 27] = t0 * 0.2357f; //FIXME: some of these are greater than 0.4, seems wrong.
+    hogResult.hog[hogIdx + 28] = t1 * 0.2357f;
+    hogResult.hog[hogIdx + 29] = t2 * 0.2357f;
+    hogResult.hog[hogIdx + 30] = t3 * 0.2357f;
 }
 
 PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
