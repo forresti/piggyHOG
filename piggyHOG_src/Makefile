@@ -13,11 +13,11 @@ $(EXENAME) : $(OBJS)
 main.o : main.cpp PgHog.h common/helpers.h 
 	$(CC) $(CCOPTS) main.cpp
 
-PgHog.o : PgHog.cpp PgHog.h PgHogContainer.h
+PgHog.o : PgHog.cpp PgHog.h PgHogContainer.h common/helpers.h
 	$(CC) $(CCOPTS) PgHog.cpp
 
-helpers.o: ../common/helpers.cpp ../common/helpers.h
-	$(CXX) $(CFLAGS) -c ../common/helpers.cpp
+helpers.o: common/helpers.cpp common/helpers.h
+	$(CXX) $(CFLAGS) -c common/helpers.cpp
 
 clean : 
 	rm -f *.o $(EXENAME) 2>/dev/null

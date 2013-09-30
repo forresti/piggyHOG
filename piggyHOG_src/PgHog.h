@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 #include "PgHogContainer.h"
+#include "common/helpers.h"
 
 using namespace std;
 using namespace cv;
