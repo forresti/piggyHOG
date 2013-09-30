@@ -170,9 +170,6 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResu
 
     //TODO: clamp hogX_internal and hogY_internal to a minimum of 1, to avoid falling off the edge?
 
-    int hogIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth +
-                 hogX_internal * hogResult.depth;    
-
     //TODO: use const here (like ffld)? -- does const matter here?
     float n0 = 1 / sqrt(normImg.at<float>(hogY_internal-1, hogX_internal-1) + //top-left 
                         normImg.at<float>(hogY_internal-1, hogX_internal  ) + 
@@ -195,6 +192,24 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResu
                         normImg.at<float>(hogY_internal+1, hogX_internal+1) + eps);
 
 
+    int hogIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth + 
+                 hogX_internal * hogResult.depth;  //the location in hogResult.hog to update
+
+    //contrast sensitive features (0 to 360 degrees)
+    //  TODO
+
+    //contrast-insensitive features (0 to 180 degrees)
+    for(int i=0; i<9; i++){    
+        //TODO: good candidate for vectorization, if compute bound?
+
+        float currFeature = hogResult.hog[hogIdx + i + 18]; //contrast-insensitive feature in bin range 18 to 26
+        float h0 = min(currFeature * n0, 0.2f); 
+        float h1 = min(currFeature * n1, 0.2f);
+        float h2 = min(currFeature * n2, 0.2f); 
+        float h3 = min(currFeature * n3, 0.2f);
+
+        hogResult.hog[hogIdx + i + 18] = (h0 + h1 + h2 + h3) * 0.5f; //TODO: check on numerical results 
+    }
 }
 #endif
 
