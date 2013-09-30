@@ -102,20 +102,21 @@ inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogCo
     
     //for(int pixelY = pixelY_start; pixelY < pixelY_end; pixelY++){
     //    for(int pixelX = pixelX_start; pixelX < pixelX_end; pixelX++){ 
-    for(int offsetY = 0; offsetY < 2*sbin; offsetY++){
-        for(int offsetX = 0; offsetX < 2*sbin; offsetX++){
+    //for(int offsetY = 0; offsetY < 2*sbin; offsetY++){
+    //    for(int offsetX = 0; offsetX < 2*sbin; offsetX++){
+    for(int offsetY = 1; offsetY < 2*sbin-1; offsetY++){
+        for(int offsetX = 1; offsetX < 2*sbin-1; offsetX++){
+
 
             //location in magImg and gradImg
             int pixelX = pixelX_start + offsetX;
             int pixelY = pixelY_start + offsetY; 
  
             //this pixel's contribution (weight) to our hog cell 
-            float weightX = 1.0f - ((float)abs(sbin - offsetX + 0.5) / sbin); //when offset=0, we're at -sbin from hog cell's center. when offset=2*sbin-1, we're +sbin from the center.
+            float weightX = 1.0f - ((float)abs(sbin - offsetX + 0.5) / sbin); //when offset=0, we're at -sbin from hog cell's center. when offset=2*sbin-1, we're +sbin from the center. the +0.5 is because we're indexing from top-left of cell, not from center of cell.
             float weightY = 1.0f - ((float)abs(sbin - offsetY + 0.5) / sbin); // TODO: remove division by sbin 
-            //float weightX = ((float)abs(sbin - offsetX + 0.5) / sbin) - 0.5; //trying to adapt from VOC5 
-            //float weightX = 1.0f - ((float)abs(sbin - offsetY + 0.5) / sbin);
 
-            printf("weightX = %f, weightY = %f \n", weightX, weightY);
+            //printf("weightX = %f, weightY = %f \n", weightX, weightY);
 
             int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
             float mag = magImg.at<float>(pixelY, pixelX);
