@@ -38,6 +38,7 @@ class PgHog{
         void hogCell_gradientEnergy(int hogX, int hogY, PgHogContainer hogResult, Mat &normImg);
 
         //void hogBlock(...) //compute HOG block location at one x,y location (indexing into HOG cells)
+        void hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResult, Mat normImg);
         
 
     private:

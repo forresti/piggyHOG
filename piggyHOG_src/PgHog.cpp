@@ -159,8 +159,8 @@ inline void PgHog::hogCell_gradientEnergy(int hogX, int hogY, PgHogContainer hog
     normImg.at<float>(hogY_internal, hogX_internal) = norm;
 }
 
-#if 0
 //normalize HOG Cells (contrast-sensitive and contrast-insensitive features) into HOG Blocks
+//produces *one* HOG Block based on (hogY, hogX) and its neighbors
 inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResult, Mat normImg){
 
     //TODO: calculate the normalization factors with convolution implementation? (sacrifice locality for reuse?)
@@ -194,7 +194,7 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResu
 
     int hogIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth + 
                  hogX_internal * hogResult.depth;  //the location in hogResult.hog to update
-
+#if 0
     //contrast sensitive features (0 to 360 degrees)
     //  TODO
 
@@ -210,8 +210,8 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResu
 
         hogResult.hog[hogIdx + i + 18] = (h0 + h1 + h2 + h3) * 0.5f; //TODO: check on numerical results 
     }
-}
 #endif
+}
 
 PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
   //setup
