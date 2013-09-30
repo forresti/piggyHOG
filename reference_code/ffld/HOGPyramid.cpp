@@ -419,7 +419,7 @@ void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 			
 			level(y, x)(NbFeatures - 1) = sumSq;
 
-            printf("gradientEnergy(y=%d, x=%d) = %f \n", y, x, sqrt(level(y, x)(NbFeatures - 1)));
+            //printf("gradientEnergy(y=%d, x=%d) = %f \n", y, x, sqrt(level(y, x)(NbFeatures - 1)));
 		}
 	}
 

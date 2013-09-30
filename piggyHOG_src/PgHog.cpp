@@ -5,6 +5,8 @@
 using namespace std;
 using namespace cv;
 
+#define eps 0.0001
+
 static inline int clamp(int idx, int min_idx, int max_idx){
     return max(min_idx, min(idx, max_idx));
 }
@@ -157,6 +159,45 @@ inline void PgHog::hogCell_gradientEnergy(int hogX, int hogY, PgHogContainer hog
     normImg.at<float>(hogY_internal, hogX_internal) = norm;
 }
 
+#if 0
+//normalize HOG Cells (contrast-sensitive and contrast-insensitive features) into HOG Blocks
+inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResult, Mat normImg){
+
+    //TODO: calculate the normalization factors with convolution implementation? (sacrifice locality for reuse?)
+
+    int hogX_internal = hogX + hogResult.padx; //skip over padding on left side of hogResult.hog
+    int hogY_internal = hogY + hogResult.pady; //skip over padding at the top of hogResult.hog
+
+    //TODO: clamp hogX_internal and hogY_internal to a minimum of 1, to avoid falling off the edge?
+
+    int hogIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth +
+                 hogX_internal * hogResult.depth;    
+
+    //TODO: use const here (like ffld)? -- does const matter here?
+    float n0 = 1 / sqrt(normImg.at<float>(hogY_internal-1, hogX_internal-1) + //top-left 
+                        normImg.at<float>(hogY_internal-1, hogX_internal  ) + 
+                        normImg.at<float>(hogY_internal  , hogX_internal-1) + 
+                        normImg.at<float>(hogY_internal  , hogX_internal  ) + eps);
+
+    float n1 = 1 / sqrt(normImg.at<float>(hogY_internal-1, hogX_internal  ) + //top-right
+                        normImg.at<float>(hogY_internal-1, hogX_internal+1) + 
+                        normImg.at<float>(hogY_internal  , hogX_internal  ) + 
+                        normImg.at<float>(hogY_internal  , hogX_internal+1) + eps);
+
+    float n2 = 1 / sqrt(normImg.at<float>(hogY_internal  , hogX_internal-1) + //bottom-left
+                        normImg.at<float>(hogY_internal  , hogX_internal  ) + 
+                        normImg.at<float>(hogY_internal+1, hogX_internal-1) + 
+                        normImg.at<float>(hogY_internal+1, hogX_internal  ) + eps);
+
+    float n3 = 1 / sqrt(normImg.at<float>(hogY_internal  , hogX_internal  ) + //bottom-right
+                        normImg.at<float>(hogY_internal  , hogX_internal+1) + 
+                        normImg.at<float>(hogY_internal+1, hogX_internal  ) + 
+                        normImg.at<float>(hogY_internal+1, hogX_internal+1) + eps);
+
+
+}
+#endif
+
 PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
   //setup
     assert(img.type() == CV_8UC3);
@@ -169,7 +210,8 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     //hogResult first holds HOG Cells, then is normalized into HOG Blocks.
     PgHogContainer hogResult;
     hogResult.padx = 11; //temporary (also, TODO: decide how to handle odd padding sizes)
-    hogResult.pady = 6; 
+    hogResult.pady = 6;
+    //TODO: require padx>=1 and pady>=1. (is this enough to avoid the need for guards on block normalization?) 
     hogResult.width = round((float)img.cols / (float)spatialBinSize);
     hogResult.height = round((float)img.rows / (float)spatialBinSize);
     hogResult.paddedWidth = hogResult.width + 2*hogResult.padx;
@@ -202,7 +244,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
             }
 
             //TODO: HOG block normalization
-        
+            //note: there are no 'if hogX>0' guards, because the hogResult.hog and normImg are padded.
         }
     }
 
