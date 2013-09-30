@@ -140,6 +140,23 @@ inline void PgHog::hogCell_unsigned(int hogX, int hogY, PgHogContainer hogResult
     }
 }
 
+//compute the norm of one hog cell (sum up its 'energy'), store it in normImg
+// assume that hogCell() has already been performed on hogResult.
+inline void PgHog::hogCell_gradientEnergy(int hogX, int hogY, PgHogContainer hogResult, Mat &normImg){
+    int hogX_internal = hogX + hogResult.padx; //skip over padding on left side of hogResult.hog
+    int hogY_internal = hogY + hogResult.pady; //skip over padding at the top of hogResult.hog
+
+    int hogIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth +
+                 hogX_internal * hogResult.depth;
+ 
+    //sum up the (0 to 360 degree) hog cells
+    float norm = 0.0f;
+    for(int i=0; i<18; i++){
+        norm += hogResult.hog[hogIdx];
+    }
+    normImg.at<float>(hogY_internal, hogX_internal) = norm;
+}
+
 PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
   //setup
     assert(img.type() == CV_8UC3);
@@ -163,6 +180,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     
     //TODO: store normalization results
     //float* norm = malloc(hogResult.paddedWidth * hogResult.paddedHeight * sizeof(float)); 
+    Mat normImg(hogResult.paddedHeight, hogResult.paddedWidth, CV_32FC1);
 
   //extract features
     for(int hogY = 0; hogY < hogResult.height; hogY++){
@@ -179,6 +197,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
             //HOG cell binning
             if(hogX>0 && hogY>0){
                 hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult); //constrast sensitive features
+                hogCell_gradientEnergy(hogX-1, hogY-1, hogResult, normImg); //sum of each hog cell's contrast sensitive (0-360) bins
                 hogCell_unsigned(hogX-1, hogY-1, hogResult); //contrast-insensitive features
             }
 
@@ -188,7 +207,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     }
 
     //writeGradToFile(oriImg, magImg);
-    writeHogCellsToFile(hogResult);
+    //writeHogCellsToFile(hogResult);
 }
 
 //----------------- TEMP DEBUG functions below this line ------------------

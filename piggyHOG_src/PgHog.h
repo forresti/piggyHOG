@@ -31,8 +31,11 @@ class PgHog{
         //compute one HOG cell, storing the cell in hogResult
         void hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer hogResult);
 
-        //pool contrast-sensitive (0-360) into contrast-insensitive (0-180)
+        //pool contrast-sensitive (0-360) into contrast-insensitive (0-180), store in hogResult
         void hogCell_unsigned(int hogX, int hogY, PgHogContainer hogResult);
+
+        //compute the norm of one hog cell (sum up its 'energy'), store it in normImg
+        void hogCell_gradientEnergy(int hogX, int hogY, PgHogContainer hogResult, Mat &normImg);
 
         //void hogBlock(...) //compute HOG block location at one x,y location (indexing into HOG cells)
         
