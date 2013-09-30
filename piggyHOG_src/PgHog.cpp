@@ -110,10 +110,12 @@ inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogCo
             int pixelY = pixelY_start + offsetY; 
  
             //this pixel's contribution (weight) to our hog cell 
-            float weightX = 1.0f - (abs((float)sbin - (float)offsetX) / (float)sbin); //when offset=0, we're at -sbin from hog cell's center. when offset=2*sbin-1, we're +sbin from the center.
-            float weightY = 1.0f - (abs((float)sbin - (float)offsetY) / (float)sbin); // TODO: remove division by sbin 
+            float weightX = 1.0f - (abs(sbin - offsetX) / sbin); //when offset=0, we're at -sbin from hog cell's center. when offset=2*sbin-1, we're +sbin from the center.
+            float weightY = 1.0f - (abs(sbin - offsetY) / sbin); // TODO: remove division by sbin 
+            //float weightX = ((float)abs(sbin - offsetX + 0.5) / sbin) - 0.5; //trying to adapt from VOC5 
+            //float weightX = 1.0f - ((float)abs(sbin - offsetY + 0.5) / sbin);
 
-            printf("weightX = %f, weightY = %f \n", weightX, weightY);
+            //printf("weightX = %f, weightY = %f \n", weightX, weightY);
 
             int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
             float mag = magImg.at<float>(pixelY, pixelX);
@@ -175,7 +177,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     }
 
     //writeGradToFile(oriImg, magImg);
-    writeHogCellsToFile(hogResult);
+//    writeHogCellsToFile(hogResult);
 }
 
 //----------------- TEMP DEBUG functions below this line ------------------
