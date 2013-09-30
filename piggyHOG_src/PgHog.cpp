@@ -113,6 +113,8 @@ inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogCo
             float weightX = 1.0f - (abs(sbin - offsetX) / sbin); //when offset=0, we're at -sbin from hog cell's center. when offset=2*sbin-1, we're +sbin from the center.
             float weightY = 1.0f - (abs(sbin - offsetY) / sbin); // TODO: remove division by sbin 
 
+            printf("weight = %f \n", weightX*weightY);
+
             int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
             float mag = magImg.at<float>(pixelY, pixelX);
 
