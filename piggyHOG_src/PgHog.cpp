@@ -14,8 +14,7 @@ static inline int clamp(int idx, int min_idx, int max_idx){
 PgHog::PgHog(){
 
     // Fill the atan2 table (from FFLD) 
-    #pragma omp critical
-    if (ATAN2_TABLE[0][0] == 0) {
+    //if (ATAN2_TABLE[0][0] == 0) {
         for (int dy = -255; dy <= 255; ++dy) { //pixels are 0 to 255, so gradient values are -255 to 255
             for (int dx = -255; dx <= 255; ++dx) {
                 // Angle in the range [-pi, pi]
@@ -31,7 +30,7 @@ PgHog::PgHog(){
                 ATAN2_TABLE[dy + 255][dx + 255] = max(angle, 0.0);
             }
         }
-    }
+    //}
 
 }
 
@@ -247,7 +246,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 
     //hogResult first holds HOG Cells, then is normalized into HOG Blocks.
     PgHogContainer hogResult;
-    hogResult.padx = 11; //temporary (also, TODO: decide how to handle odd padding sizes)
+    hogResult.padx = 11; //temporary 
     hogResult.pady = 6;
     //TODO: require padx>=1 and pady>=1. (is this enough to avoid the need for guards on block normalization?) 
     hogResult.width = round((float)img.cols / (float)spatialBinSize);
