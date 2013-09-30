@@ -26,7 +26,7 @@
 #include <limits>
 #include <stdio.h>
 
-#define DISABLE_HOG_BLOCKS //if defined: just compute hog cells; don't normalize into hog blocks
+//#define DISABLE_HOG_BLOCKS //if defined: just compute hog cells; don't normalize into hog blocks
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -418,8 +418,11 @@ void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 						 (level(y, x)(i) + level(y, x)(i + 9));
 			
 			level(y, x)(NbFeatures - 1) = sumSq;
+
+            printf("gradientEnergy(y=%d, x=%d) = %f \n", y, x, sqrt(level(y, x)(NbFeatures - 1)));
 		}
 	}
+
 	
 	// Compute the four normalization factors then normalize and clamp everything
 	const Scalar EPS = numeric_limits<Scalar>::epsilon();

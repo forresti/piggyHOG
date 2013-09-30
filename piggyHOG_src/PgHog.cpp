@@ -77,6 +77,7 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
 }
 
 //compute one HOG cell, storing the results in hogResult
+// only compute the contrast-sensitive features (0 to 360 degrees)
 inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer hogResult){
     //populate this HOG cell by linearly interpolating the oriented gradients 
     //the 'center' of the hog cell is: (hogX+sbin/2, hogY+sbin/2).
@@ -110,7 +111,6 @@ inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogCo
             //this pixel's contribution (weight) to our hog cell 
             float weightX = 1.0f - ((float)abs(sbin - offsetX + 0.5f) / sbin); //when offset=0, we're at -sbin from hog cell's center. when offset=2*sbin-1, we're +sbin from the center. the +0.5 is because we're indexing from top-left of cell, not from center of cell.
             float weightY = 1.0f - ((float)abs(sbin - offsetY + 0.5f) / sbin); // TODO: remove division by sbin 
-
             //printf("weightX = %f, weightY = %f \n", weightX, weightY);
 
             int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
@@ -122,8 +122,22 @@ inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogCo
         }
     }
 
-    //TODO: oriBin_unsigned ... as a postprocessing step
     //TODO: calculate the sum of this bin and store it (for normalization)
+}
+
+//compute contrast-insensitive features (0 to 180 degrees)
+// assume that hogCell() has already been performed on hogResult.
+inline void PgHog::hogCell_unsigned(int hogX, int hogY, PgHogContainer hogResult){
+    int hogX_internal = hogX + hogResult.padx; //skip over padding on left side of hogResult.hog
+    int hogY_internal = hogY + hogResult.pady; //skip over padding at the top of hogResult.hog
+    int hogOutputIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth +
+                       hogX_internal * hogResult.depth;
+
+    //pool contrast-sensitive features to contrast-insensitive
+    for(int i=0; i<9; i++){
+        hogResult.hog[hogOutputIdx + 18 + i] = hogResult.hog[hogOutputIdx + 0 + i] + //0 to 180
+                                               hogResult.hog[hogOutputIdx + 9 + i];  //180 to 360
+    }
 }
 
 PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
@@ -164,7 +178,8 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 
             //HOG cell binning
             if(hogX>0 && hogY>0){
-                hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult);
+                hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult); //constrast sensitive features
+                hogCell_unsigned(hogX-1, hogY-1, hogResult); //contrast-insensitive features
             }
 
             //TODO: HOG block normalization
@@ -173,7 +188,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     }
 
     //writeGradToFile(oriImg, magImg);
-//    writeHogCellsToFile(hogResult);
+    writeHogCellsToFile(hogResult);
 }
 
 //----------------- TEMP DEBUG functions below this line ------------------
