@@ -110,8 +110,8 @@ inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogCo
             int pixelY = pixelY_start + offsetY; 
  
             //this pixel's contribution (weight) to our hog cell 
-            float weightX = 1.0f - (abs(sbin - offsetX) / sbin); //when offset=0, we're at -sbin from hog cell's center. when offset=2*sbin-1, we're +sbin from the center.
-            float weightY = 1.0f - (abs(sbin - offsetY) / sbin); // TODO: remove division by sbin 
+            float weightX = 1.0f - ((float)abs(sbin - offsetX) / sbin); //when offset=0, we're at -sbin from hog cell's center. when offset=2*sbin-1, we're +sbin from the center.
+            float weightY = 1.0f - ((float)abs(sbin - offsetY) / sbin); // TODO: remove division by sbin 
 
             printf("weight = %f \n", weightX*weightY);
 
