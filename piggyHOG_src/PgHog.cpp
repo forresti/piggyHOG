@@ -228,6 +228,12 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResu
 
         hogResult.hog[hogIdx + i + 18] = (h0 + h1 + h2 + h3) * 0.5f; //TODO: check on numerical results 
     }
+
+    //texture features
+    hogResult.hog[hogIdx + 27] = t0;
+    hogResult.hog[hogIdx + 28] = t1;
+    hogResult.hog[hogIdx + 29] = t2;
+    hogResult.hog[hogIdx + 30] = t3;
 }
 
 PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
@@ -279,6 +285,8 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
             //note: there are no 'if hogX>0' guards, because the hogResult.hog and normImg are padded.
             //      also, hogBlock_normalize() has a forward dependency to its right and bottom neighbors, so we do hogX-2, hogY-2
             hogBlock_normalize(hogX-2, hogY-2, hogResult, normImg); //TODO: think about edge cases
+
+            //TODO: binary truncation features
         }
     }
 
