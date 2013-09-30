@@ -30,7 +30,6 @@ function mydiff(experimentalCsv, referenceCsv, h)
     %display(['    size(experimentalResult) = ' mat2str(size(experimentalResult)) ' = ' num2str(resultSize)])
 
     %display(['    nnz(diff) = ' num2str(nnz(diff))])
-    %display(['    num diff elements above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)) ])
     display(['    percent mismatches above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)/resultSize * 100) '%'])
 end
 
@@ -39,4 +38,5 @@ end
 %[referenceResult experimentalResult] = trimToMinSize(referenceResult, experimentalResult)
     %[h w d] = reshape.... %ah, crap, need the original dims.
     %minWidth = 
+
 
