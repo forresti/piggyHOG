@@ -153,9 +153,8 @@ inline void PgHog::hogCell_gradientEnergy(int hogX, int hogY, PgHogContainer hog
     //sum up the (0 to 360 degree) hog cells
     float norm = 0.0f;
     for(int i=0; i<18; i++){
-        norm += hogResult.hog[hogIdx+i];
+        norm += hogResult.hog[hogIdx+i] * hogResult.hog[hogIdx+i]; //squared -- will do sqrt in hogBlock_normalize()
     }
-printf("norm = %f \n", norm);
     normImg.at<float>(hogY_internal, hogX_internal) = norm;
 }
 
@@ -256,8 +255,9 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     hogResult.paddedHeight = hogResult.height + 2*hogResult.pady;
     hogResult.depth = 32;
     hogResult.spatialBinSize = spatialBinSize;
-    hogResult.hog = (float*)malloc(hogResult.paddedWidth * hogResult.paddedHeight * hogResult.depth * sizeof(float));
-    
+    //hogResult.hog = (float*)malloc(hogResult.paddedWidth * hogResult.paddedHeight * hogResult.depth * sizeof(float));
+    hogResult.hog = (float*)calloc(hogResult.paddedWidth * hogResult.paddedHeight * hogResult.depth, sizeof(float));    
+
     //TODO: store normalization results
     //float* norm = malloc(hogResult.paddedWidth * hogResult.paddedHeight * sizeof(float)); 
     Mat normImg(hogResult.paddedHeight, hogResult.paddedWidth, CV_32FC1);
