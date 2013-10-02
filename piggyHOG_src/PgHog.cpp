@@ -291,7 +291,12 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     }
 
     //writeGradToFile(oriImg, magImg);
-    writeHogCellsToFile(hogResult);
+    //writeHogCellsToFile(hogResult);
+}
+
+vector<PgHogContainer> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady, int spatialBinSize){
+
+
 }
 
 //----------------- TEMP DEBUG functions below this line ------------------
