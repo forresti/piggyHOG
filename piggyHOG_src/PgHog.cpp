@@ -11,6 +11,28 @@ static inline int clamp(int idx, int min_idx, int max_idx){
     return max(min_idx, min(idx, max_idx));
 }
 
+//use OpenCV's bilinear filter downsampling
+Mat downsampleWithOpenCV(Mat img, double scale){ //TODO: move this to 'helpers' file
+    int inWidth = img.cols;
+    int inHeight = img.rows;
+    assert(img.type() == CV_8UC3);
+    int nChannels = 3;
+
+    int outWidth = round(inWidth * scale);
+    int outHeight = round(inHeight * scale);
+    Mat outImg(outHeight, outWidth, CV_8UC3); //col-major for OpenCV 
+    Size outSize = outImg.size();
+
+    cv::resize(img,
+               outImg,
+               outSize,
+               0, //scaleX -- default = outSize.width / img.cols
+               0, //scaleY -- default = outSize.height / img.rows
+               INTER_LINEAR /* use bilinear interpolation */);
+
+    return outImg;
+}
+
 PgHog::PgHog(){
 
     // Fill the atan2 table (from FFLD) 
@@ -294,9 +316,32 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     //writeHogCellsToFile(hogResult);
 }
 
-vector<PgHogContainer> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady, int spatialBinSize){
+vector<PgHogContainer> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
 
+    int interval = 10;
+    float sc = pow(2, 1 / (float)interval);
+    vector<Mat> imgPyramid(interval*2); //100% down to 25% of orig size (two octaves, 10 scales per octave)
+    int nLevels = 40; //TODO: compute this based on img size
+    vector<PgHogContainer> hogPyramid(nLevels); //do I need a copy constructor for PgHogContainer?
 
+//TODO: pass padx, pady into extract_HOG_oneScale()    
+
+    for(int i=0; i<interval; i++){
+        float downsampleFactor = 1/pow(sc, i);
+        //printf("downsampleFactor = %f \n", downsampleFactor);
+
+        imgPyramid[i] = downsampleWithOpenCV(img, downsampleFactor);
+        imgPyramid[i + interval] = downsampleWithOpenCV(img, downsampleFactor/2);
+
+        hogPyramid[i] = extract_HOG_oneScale(imgPyramid[i], 4); //sbin=4
+        hogPyramid[i + interval] = extract_HOG_oneScale(imgPyramid[i], 8); //sbin=8
+        hogPyramid[i + 2*interval] = extract_HOG_oneScale(imgPyramid[i + interval], 8);
+
+        //TODO: more small pyra levels?    
+
+    }
+
+    return hogPyramid;
 }
 
 //----------------- TEMP DEBUG functions below this line ------------------

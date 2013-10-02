@@ -19,10 +19,10 @@ class PgHog{
         PgHog(); //precompute tables, stuff like that 
         ~PgHog();
 
-        PgHogContainer extract_HOG_oneScale(Mat img, int spatialBinSize);
+        PgHogContainer extract_HOG_oneScale(Mat img, int spatialBinSize); //in voc-release5, spatialBinSize is typically 4 or 8 pixels
 
         //compute HOGs at many scales of downsampling
-        vector<PgHogContainer> extract_HOG_pyramid(Mat img, int padx, int pady, int spatialBinSize); //in voc-release5, spatialBinSize is typically 4 or 8 pixels
+        vector<PgHogContainer> extract_HOG_pyramid(Mat img, int padx, int pady);
 
         //compute the gradient and magnitude at one image location, store the results in gradImg and magImg
         //out of the 3 RGB channels, use the gradient that has the highest magnitude
