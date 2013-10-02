@@ -1,8 +1,9 @@
 function csvdiff()
     %for h=1:10:41
-    for h=1:41
-        experimentalCsv = ['./ffld_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
-        %experimentalCsv = ['./piggyHOG_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
+    %for h=1:41
+    for h=1:1
+        %experimentalCsv = ['./ffld_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
+        experimentalCsv = ['./piggyHOG_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
         %experimentalCsv = ['./piotr_results/carsgraz_001.image_scale_' int2str(h) '.csv'];
         referenceCsv = ['./voc5_features_results/carsgraz_001.image_scale_' int2str(h) '.csv']; %VOC5 is our baseline reference 
         mydiff(experimentalCsv, referenceCsv, h)
@@ -18,6 +19,7 @@ function mydiff(experimentalCsv, referenceCsv, h)
 
     thresh = 0.1;
     diff = abs(experimentalResult - referenceResult);
+keyboard
     [inHeight_voc5 inWidth_voc5] = size(referenceResult);
     [inHeight inWidth] = size(experimentalResult);
 
