@@ -153,8 +153,9 @@ inline void PgHog::hogCell_gradientEnergy(int hogX, int hogY, PgHogContainer hog
     //sum up the (0 to 360 degree) hog cells
     float norm = 0.0f;
     for(int i=0; i<18; i++){
-        norm += hogResult.hog[hogIdx];
+        norm += hogResult.hog[hogIdx+i];
     }
+printf("norm = %f \n", norm);
     normImg.at<float>(hogY_internal, hogX_internal) = norm;
 }
 
