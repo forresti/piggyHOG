@@ -326,6 +326,7 @@ vector<PgHogContainer> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
 
 //TODO: pass padx, pady into extract_HOG_oneScale()    
 
+    #pragma omp parallel for
     for(int i=0; i<interval; i++){
         float downsampleFactor = 1/pow(sc, i);
         //printf("downsampleFactor = %f \n", downsampleFactor);
