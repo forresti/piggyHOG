@@ -74,7 +74,9 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     float gradY;
     float max_mag = 0.0f; //TODO: check range ... can this be uchar?
 
-    for(int channel=0; channel<3; channel++){
+    int channel = 0;
+    //for(int channel=0; channel<3; channel++)
+    {
         float tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel];
         float tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
 
@@ -92,8 +94,10 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     //this is the gradient angle
     //float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
     //float ori = cv::fastAtan2((double)gradY, (double)gradX);
-    float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255]; //these are already scaled to range of 0-18
-    max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
+    //float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255]; //these are already scaled to range of 0-18
+    //max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
+
+    float ori = gradY + gradX; //TEST
 
     //printf("x = %d, y = %d, gradX = %f, gradY = %f, ori = %f, max_mag = %f \n", x, y, gradX, gradY, ori, max_mag);
     oriImg.at<float>(y, x) = ori;
@@ -313,15 +317,15 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 
             //HOG cell binning
             if(hogX>0 && hogY>0){
-                hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult); //constrast sensitive features
-                hogCell_gradientEnergy(hogX-1, hogY-1, hogResult, normImg); //sum of each hog cell's contrast sensitive (0-360) bins
-                hogCell_unsigned(hogX-1, hogY-1, hogResult); //contrast-insensitive features
+            //    hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult); //constrast sensitive features
+            //    hogCell_gradientEnergy(hogX-1, hogY-1, hogResult, normImg); //sum of each hog cell's contrast sensitive (0-360) bins
+            //    hogCell_unsigned(hogX-1, hogY-1, hogResult); //contrast-insensitive features
             }
 
             //HOG block normalization
             //note: there are no 'if hogX>0' guards, because the hogResult.hog and normImg are padded.
             //      also, hogBlock_normalize() has a forward dependency to its right and bottom neighbors, so we do hogX-2, hogY-2
-            hogBlock_normalize(hogX-2, hogY-2, hogResult, normImg); //TODO: think about edge cases
+            //hogBlock_normalize(hogX-2, hogY-2, hogResult, normImg); //TODO: think about edge cases
 
             //TODO: binary truncation features
           }
@@ -344,7 +348,7 @@ vector<PgHogContainer> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
 //TODO: pass padx, pady into extract_HOG_oneScale()    
 
     //omp_set_num_threads(5); //hmm, default thread count seems best
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for(int i=0; i<interval; i++){
         float downsampleFactor = 1/pow(sc, i);
         //printf("downsampleFactor = %f \n", downsampleFactor);
