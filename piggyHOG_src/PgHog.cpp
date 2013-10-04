@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <iostream>
 #include <fstream>
+#include "omp.h"
 using namespace std;
 using namespace cv;
 
@@ -342,6 +343,7 @@ vector<PgHogContainer> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
 
 //TODO: pass padx, pady into extract_HOG_oneScale()    
 
+    //omp_set_num_threads(5); //hmm, default thread count seems best
     #pragma omp parallel for
     for(int i=0; i<interval; i++){
         float downsampleFactor = 1/pow(sc, i);
