@@ -284,9 +284,23 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     //float* norm = malloc(hogResult.paddedWidth * hogResult.paddedHeight * sizeof(float)); 
     Mat normImg(hogResult.paddedHeight, hogResult.paddedWidth, CV_32FC1);
 
+    const int unrollX = 8;
+    const int unrollY = 8;
   //extract features
-    for(int hogY = 0; hogY < hogResult.height; hogY++){
-        for(int hogX = 0; hogX < hogResult.width; hogX++){
+    //for(int hogY = 0; hogY < hogResult.height; hogY++){
+    //    for(int hogX = 0; hogX < hogResult.width; hogX++){
+
+    for(int hogY_tile = 0; hogY_tile < hogResult.height; hogY_tile += unrollY){
+      for(int hogX_tile = 0; hogX_tile < hogResult.width; hogX_tile += unrollX){
+
+        for(int hogY_inner = 0; hogY_inner < unrollY; hogY_inner++){
+          for(int hogX_inner = 0; hogX_inner < unrollX; hogX_inner++){ 
+            
+            int hogX = hogX_tile + hogX_inner;
+            int hogY = hogY_tile + hogY_inner;
+
+            if(hogX >= hogResult.width || hogY >= hogResult.height)
+                continue;
 
             //calculate gradients 
             for(int y=0; y<spatialBinSize; y++){ //TODO: move these loops into PgHog::gradient()?
@@ -309,7 +323,9 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
             hogBlock_normalize(hogX-2, hogY-2, hogResult, normImg); //TODO: think about edge cases
 
             //TODO: binary truncation features
+          }
         }
+      }
     }
 
     //writeGradToFile(oriImg, magImg);
