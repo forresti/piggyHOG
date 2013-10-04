@@ -285,7 +285,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     Mat normImg(hogResult.paddedHeight, hogResult.paddedWidth, CV_32FC1);
 
     const int unrollX = 8;
-    const int unrollY = 8;
+    const int unrollY = 4;
   //extract features
     //for(int hogY = 0; hogY < hogResult.height; hogY++){
     //    for(int hogX = 0; hogX < hogResult.width; hogX++){
@@ -312,15 +312,15 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 
             //HOG cell binning
             if(hogX>0 && hogY>0){
-                hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult); //constrast sensitive features
-                hogCell_gradientEnergy(hogX-1, hogY-1, hogResult, normImg); //sum of each hog cell's contrast sensitive (0-360) bins
-                hogCell_unsigned(hogX-1, hogY-1, hogResult); //contrast-insensitive features
+            //    hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult); //constrast sensitive features
+            //    hogCell_gradientEnergy(hogX-1, hogY-1, hogResult, normImg); //sum of each hog cell's contrast sensitive (0-360) bins
+            //    hogCell_unsigned(hogX-1, hogY-1, hogResult); //contrast-insensitive features
             }
 
             //HOG block normalization
             //note: there are no 'if hogX>0' guards, because the hogResult.hog and normImg are padded.
             //      also, hogBlock_normalize() has a forward dependency to its right and bottom neighbors, so we do hogX-2, hogY-2
-            hogBlock_normalize(hogX-2, hogY-2, hogResult, normImg); //TODO: think about edge cases
+            //hogBlock_normalize(hogX-2, hogY-2, hogResult, normImg); //TODO: think about edge cases
 
             //TODO: binary truncation features
           }

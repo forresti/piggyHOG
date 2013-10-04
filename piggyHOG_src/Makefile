@@ -2,7 +2,7 @@ OBJS = main.o  helpers.o PgHog.o
 EXENAME = main
 
 CC = g++
-CCOPTS = -c -g -fopenmp -O3 `pkg-config opencv --cflags`
+CCOPTS = -c -g -fopenmp -O3 `pkg-config opencv --cflags` -funroll-all-loops -ftree-vectorizer-verbose=2
 LINK = g++
 LINKOPTS = -g -lgomp `pkg-config opencv --libs`
 
