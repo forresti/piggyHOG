@@ -74,9 +74,7 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     float gradY;
     float max_mag = 0.0f; //TODO: check range ... can this be uchar?
 
-    int channel = 0;
-    //for(int channel=0; channel<3; channel++)
-    {
+    for(int channel=0; channel<3; channel++){
         float tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel];
         float tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
 
@@ -94,10 +92,8 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     //this is the gradient angle
     //float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
     //float ori = cv::fastAtan2((double)gradY, (double)gradX);
-    //float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255]; //these are already scaled to range of 0-18
-    //max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
-
-    float ori = gradY + gradX; //TEST
+    float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255]; //these are already scaled to range of 0-18
+    max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
     //printf("x = %d, y = %d, gradX = %f, gradY = %f, ori = %f, max_mag = %f \n", x, y, gradX, gradY, ori, max_mag);
     oriImg.at<float>(y, x) = ori;
@@ -348,7 +344,7 @@ vector<PgHogContainer> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
 //TODO: pass padx, pady into extract_HOG_oneScale()    
 
     //omp_set_num_threads(5); //hmm, default thread count seems best
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for(int i=0; i<interval; i++){
         float downsampleFactor = 1/pow(sc, i);
         //printf("downsampleFactor = %f \n", downsampleFactor);
