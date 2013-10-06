@@ -6,15 +6,9 @@
 
 #include "static_image.h"
 
-//#define cimg_display 0
-//#include "CImg.h"
-//using namespace cimg_library;
-
 timeval t1, t2;
 #define begin_timing gettimeofday(&t1, NULL); for (int i = 0; i < 10; i++) {
 #define end_timing } gettimeofday(&t2, NULL);
-
-// typedef CImg<uint16_t> Image;
 
 extern "C" {
 #include "hog.h"
