@@ -55,5 +55,7 @@ int main(int argc, char **argv) {
     }
 #endif
 
+    save(gradient_result, "./gradient.png");
+
     return 0;
 }
