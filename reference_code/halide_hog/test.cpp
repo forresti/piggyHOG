@@ -3,8 +3,10 @@
 #include <sys/time.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string>
 
 #include "static_image.h"
+#include "image_io.h"
 
 timeval t1, t2;
 #define begin_timing gettimeofday(&t1, NULL); for (int i = 0; i < 10; i++) {
@@ -14,7 +16,7 @@ extern "C" {
 #include "gradient.h"
 }
 
-Image<uint16_t> blur_halide(Image<uint16_t> in) {
+Image<uint16_t> gradient_tester(Image<uint16_t> in) {
     Image<uint16_t> out(in.width()-8, in.height()-2);
 
     // Call it once to initialize the halide runtime stuff
@@ -33,15 +35,21 @@ Image<uint16_t> blur_halide(Image<uint16_t> in) {
 
 int main(int argc, char **argv) {
 
-    Image<uint16_t> input(6408, 4802);
+    //Image<uint16_t> input(6408, 4802);
 
+
+    std::string imgName = "../../images_640x480/carsgraz_001.image.jpg";
+    Image<uint8_t> input = load<uint8_t>(imgName.c_str());
+
+#if 0
     for (int y = 0; y < input.height(); y++) {
         for (int x = 0; x < input.width(); x++) {
             input(x, y) = rand() & 0xfff;
         }
     }
+#endif
 
- //   Image<uint16_t> halide = blur_halide(input);
+ //   Image<uint16_t> halide = gradient_tester(input);
  //   float halide_time = (t2.tv_sec - t1.tv_sec) + (t2.tv_usec - t1.tv_usec) / 1000000.0f;
 
     // fast_time2 is always slower than fast_time, so skip printing it
