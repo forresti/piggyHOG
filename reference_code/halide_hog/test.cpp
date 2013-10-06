@@ -16,8 +16,8 @@ extern "C" {
 #include "gradient.h"
 }
 
-Image<uint16_t> gradient_tester(Image<uint16_t> in) {
-    Image<uint16_t> out(in.width()-8, in.height()-2);
+Image<uint16_t> gradient_tester(Image<uint8_t> in) {
+    Image<uint16_t> out(in.width(), in.height());
 
     // Call it once to initialize the halide runtime stuff
 //    halide_blur(in, out);
@@ -38,18 +38,10 @@ int main(int argc, char **argv) {
     //Image<uint16_t> input(6408, 4802);
 
 
-    std::string imgName = "../../images_640x480/carsgraz_001.image.jpg";
-    Image<uint8_t> input = load<uint8_t>(imgName.c_str());
+    std::string imgName = "../../images_640x480/carsgraz_001.image.png"; //TODO: get jpg support 
+    Image<uint8_t> input = load<uint8_t>(imgName.c_str()); //only supports png and ppm
 
-#if 0
-    for (int y = 0; y < input.height(); y++) {
-        for (int x = 0; x < input.width(); x++) {
-            input(x, y) = rand() & 0xfff;
-        }
-    }
-#endif
-
- //   Image<uint16_t> halide = gradient_tester(input);
+    Image<uint16_t> halide = gradient_tester(input);
  //   float halide_time = (t2.tv_sec - t1.tv_sec) + (t2.tv_usec - t1.tv_usec) / 1000000.0f;
 
     // fast_time2 is always slower than fast_time, so skip printing it
