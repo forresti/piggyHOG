@@ -35,9 +35,6 @@ Image<uint8_t> gradient_tester(Image<uint8_t> in) {
 
 int main(int argc, char **argv) {
 
-    //Image<uint8_t> input(6408, 4802);
-
-
     std::string imgName = "../../images_640x480/carsgraz_001.image.png"; //TODO: get jpg support 
     Image<uint8_t> input = load<uint8_t>(imgName.c_str()); //only supports png and ppm
 
