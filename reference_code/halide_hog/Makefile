@@ -24,18 +24,19 @@ ifeq ($(HL_TARGET),ptx-debug)
   CUDA_LDFLAGS=-L/usr/lib/nvidia-current -lcuda
 endif
 
-all: hog test
+#TODO: find a way to automatically build gradient.o too
+all: gradient test
 
-hog: $(HALIDE_DIR) hog.cpp
+gradient: $(HALIDE_DIR) gradient.cpp
 	$(MAKE) -C $(HALIDE_DIR)/ bin/libHalide.a
-	$(GXX) hog.cpp -I $(HALIDE_DIR)/include $(HALIDE_DIR)/bin/libHalide.a -o hog -ldl -lpthread
+	$(GXX) gradient.cpp -I $(HALIDE_DIR)/include $(HALIDE_DIR)/bin/libHalide.a -o gradient -ldl -lpthread
 
-hog.o: hog
-	./hog
+gradient.o: gradient
+	./gradient
 
 # -O2 is faster than -O3 for this app (O3 unrolls too much)
-test: test.cpp hog.o
-	$(GXX) -msse2 -fopenmp -Wall -O2 -I $(HALIDE_DIR)/apps/support/ test.cpp hog.o -o test -lpthread -ldl $(PNGFLAGS) $(CUDA_LDFLAGS)
+test: test.cpp gradient.o
+	$(GXX) -msse2 -fopenmp -Wall -O2 -I $(HALIDE_DIR)/apps/support/ test.cpp gradient.o -o test -lpthread -ldl $(PNGFLAGS) $(CUDA_LDFLAGS)
 
 clean:
-	rm -f test hog.o hog
+	rm -f test gradient.o gradient

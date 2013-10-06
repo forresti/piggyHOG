@@ -11,7 +11,7 @@ timeval t1, t2;
 #define end_timing } gettimeofday(&t2, NULL);
 
 extern "C" {
-#include "hog.h"
+#include "gradient.h"
 }
 
 Image<uint16_t> blur_halide(Image<uint16_t> in) {
