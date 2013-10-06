@@ -24,18 +24,18 @@ ifeq ($(HL_TARGET),ptx-debug)
   CUDA_LDFLAGS=-L/usr/lib/nvidia-current -lcuda
 endif
 
-all: halide_blur test
+all: hog test
 
-halide_blur: $(HALIDE_DIR) halide_blur.cpp
+hog: $(HALIDE_DIR) hog.cpp
 	$(MAKE) -C $(HALIDE_DIR)/ bin/libHalide.a
-	$(GXX) halide_blur.cpp -I $(HALIDE_DIR)/include $(HALIDE_DIR)/bin/libHalide.a -o halide_blur -ldl -lpthread
+	$(GXX) hog.cpp -I $(HALIDE_DIR)/include $(HALIDE_DIR)/bin/libHalide.a -o hog -ldl -lpthread
 
-halide_blur.o: halide_blur
-	./halide_blur
+hog.o: hog
+	./hog
 
 # -O2 is faster than -O3 for this app (O3 unrolls too much)
-test: test.cpp halide_blur.o
-	$(GXX) -msse2 -fopenmp -Wall -O2 -I $(HALIDE_DIR)/apps/support/ test.cpp halide_blur.o -o test -lpthread -ldl $(PNGFLAGS) $(CUDA_LDFLAGS)
+test: test.cpp hog.o
+	$(GXX) -msse2 -fopenmp -Wall -O2 -I $(HALIDE_DIR)/apps/support/ test.cpp hog.o -o test -lpthread -ldl $(PNGFLAGS) $(CUDA_LDFLAGS)
 
 clean:
-	rm -f test halide_blur.o halide_blur
+	rm -f test hog.o hog
