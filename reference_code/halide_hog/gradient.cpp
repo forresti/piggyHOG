@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
     //thanks for cast idea: github.com/halide/Halide/blob/master/tutorial/lesson_02.cpp    
     //Expr input_as_float = Halide::cast<float>(input);
 
-    gradX_rgb(x, y, ch) =(cast<float>(clamped(x+1, y, ch)) - cast<float>(clamped(x-1, y, ch))); //uint8_t cast is temporary
+    gradX_rgb(x, y, ch) = cast<float>(clamped(x+1, y, ch)) - cast<float>(clamped(x-1, y, ch));
     gradY_rgb(x, y, ch) = cast<float>(clamped(x, y+1, ch)) - cast<float>(clamped(x, y-1, ch));
 
     Func mag_rgb;
@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
     //gradX_rgb.compile_to_file("gradient", input, output); 
     //gradX_rgb.compile_to_file("gradient", input); //temporary
       
-    mag_rgb.compile_to_file("gradient", input);
+    mag_rgb.compile_to_file("gradient", input); //I want a 1-channel float output buffer...how do I do this?
   
 //TODO: how I set things up so that 'output' is a separate space from 'input'?
 
