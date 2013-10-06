@@ -12,8 +12,8 @@ int main(int argc, char **argv) {
     Func clamped("clamped");
     clamped(x,y,ch) = input(clamp(x,0,input.width()-1), clamp(y,0,input.height()-1), ch);
 
-    Func input_as_float("input_as_float");
-    input_as_float(x,y,ch) = cast<float>input;
+    //Func input_as_float("input_as_float");
+    //input_as_float(x,y,ch) = cast<float>input;
     
 #if 0
     // The algorithm
