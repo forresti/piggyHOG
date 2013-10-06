@@ -41,15 +41,8 @@ arg_max_f() = 0;
 arg_max_f() = select(f(r) > f(arg_max_f()), r, arg_max_f());
 #endif
 
-//if ch0 > ch1 && ch0 > ch2, argmax=ch0
-//if ch1 > ch0 && ch1 > ch2, argmax=ch1
-//else argmax=ch2
-
     Func mag_argmax; //idx of channel with max gradient
     //mag_argmax(x, y) = mag_rgb(x, y, 0); //placeholder
-    //mag_argmax(x, y) = (mag_rgb(x,y,0)>mag_rgb(x,y,1) && mag_rgb(x,y,0)>mag_rgb(x,y,2)) ? 0 :  //argmax=0 if ch0>ch1 and ch0>ch2 
-    //                     (mag_rgb(x,y,1)>mag_rgb(x,y,0) && mag_rgb(x,y,1)>mag_rgb(x,y,2)) ? 1 : 2; //argmax=1 if ch1>ch0 and ch2>ch0, else argmax=2
-
     mag_argmax(x, y) = select( (mag_rgb(x,y,0)>mag_rgb(x,y,1) && mag_rgb(x,y,0)>mag_rgb(x,y,2)), 0,  //argmax=0 if ch0>ch1 and ch0>ch2 
                                select( (mag_rgb(x,y,1)>mag_rgb(x,y,0) && mag_rgb(x,y,1)>mag_rgb(x,y,2)), 1, 2) ); //argmax=1 if ch1>ch0 and ch2>ch0, else argmax=2
 
