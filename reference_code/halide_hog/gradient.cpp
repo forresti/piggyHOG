@@ -10,15 +10,10 @@ int main(int argc, char **argv) {
     Var xi("xi"), yi("yi");
 
     Func clamped("clamped");
-    clamped(x,y,ch) = input(clamp(x,0,input.width()-1), clamp(y,0,input.height()-1), ch);
+    clamped(x,y,ch) = cast<float>(input(clamp(x,0,input.width()-1), clamp(y,0,input.height()-1), ch));
 
-    //Func input_as_float("input_as_float");
-    //input_as_float(x,y,ch) = cast<float>input;
-    
-    Expr input_as_float = Halide::cast<float>(input);
-
-    //Expr input_as_float = input(x,y,ch);
-    //input_as_float = Halide::cast<float>(input_as_float);
+    //thanks for cast idea: github.com/halide/Halide/blob/master/tutorial/lesson_02.cpp    
+    //Expr input_as_float = Halide::cast<float>(input);
 
 #if 0
     // The algorithm
