@@ -24,19 +24,20 @@ int main(int argc, char **argv) {
 
 
 //argmax
-    //RDom r(0,3);// < 3, or <= 3?
-    //Func arg_max_f("arg_max_f");
-    //arg_max_f(x,y) = 0;
-    //arg_max_f(x,y) = select( (mag_rgb(x,y,r) > mag_rgb(x,y,arg_max_f())), r, arg_max_f() );
+    RDom r(0,3);// < 3, or <= 3?
+    Func arg_max_f("arg_max_f");
+    arg_max_f() = 0;
+    arg_max_f() = select( (mag_rgb(x,y,r) > mag_rgb(x,y,arg_max_f())), r, arg_max_f() );
 
 //from 6/17/13 halide-dev mailing list
+#if 0
 Func f("f");
 Func arg_max_f("arg_max_f");
 f(x) = input(x,0,0);
 RDom r(0, 100);
 arg_max_f() = 0;
 arg_max_f() = select(f(r) > f(arg_max_f()), r, arg_max_f());
-
+#endif
 
     Func mag_argmax; //idx of channel with max gradient
     //mag_argmax(x, y) = mag_rgb(x, y, 0); //placeholder
