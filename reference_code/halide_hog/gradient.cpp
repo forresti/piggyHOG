@@ -21,6 +21,23 @@ int main(int argc, char **argv) {
     Func mag_rgb;
     mag_rgb(x, y, ch) = cast<uint8_t>(gradX_rgb(x,y,ch)*gradX_rgb(x,y,ch) + gradY_rgb(x,y,ch)*gradY_rgb(x,y,ch)); //uint8_t cast is temporary
 
+
+//argmax
+    RDom r(0,3);// < 3, or <= 3?
+    Func arg_max_f("arg_max_f");
+    arg_max_f(x,y) = 0;
+    arg_max_f(x,y) = select( (mag_rgb(x,y,r) > mag_rgb(x,y,arg_max_f())), r, arg_max_f() );
+    //arg_max_f(x,y) = select(1 > 0, 0, 0);
+
+    Func mag_argmax; //idx of channel with max gradient
+    //mag_argmax(x, y) = mag_rgb(x, y, 0);
+
+//from 6/17/13 halide-dev mailing list
+//RDom r(0, 100);
+//arg_max_f() = 0
+//arg_max_f() = select(f(r) > f(arg_max_f()), r, arg_max_f());
+
+
     //gradX_rgb.compile_to_file("gradient", input, output); 
     //gradX_rgb.compile_to_file("gradient", input); //temporary
       
