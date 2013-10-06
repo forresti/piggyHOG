@@ -24,10 +24,12 @@ int main(int argc, char **argv) {
 
 
 //argmax
-    RDom r(0,3);// < 3, or <= 3?
+    //RDom r(0,3);// < 3, or <= 3?
+    RDom r(x,x+1, y,y+1, 0,3); //trying all 3 dims in RDom
     Func arg_max_f("arg_max_f");
     arg_max_f() = 0;
-    arg_max_f() = select( (mag_rgb(x,y,r) > mag_rgb(x,y,arg_max_f())), r, arg_max_f() );
+    //arg_max_f() = select( (mag_rgb(x,y,r) > mag_rgb(x,y,arg_max_f())), r, arg_max_f() );
+    arg_max_f() = select( (mag_rgb(r.x, r.y, r.z) > mag_rgb(arg_max_f())), r, arg_max_f() );
 
 //from 6/17/13 halide-dev mailing list
 #if 0
