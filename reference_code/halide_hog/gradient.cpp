@@ -8,9 +8,12 @@ int main(int argc, char **argv) {
     Func grad_x("grad_x"), grad_y("grad_y");
     Var x("x"), y("y"), ch("ch");
     Var xi("xi"), yi("yi");
-    Func clamped("clamped");
 
+    Func clamped("clamped");
     clamped(x,y,ch) = input(clamp(x,0,input.width()-1), clamp(y,0,input.height()-1), ch);
+
+    Func input_as_float("input_as_float");
+    input_as_float(x,y,ch) = cast<float>input;
     
 #if 0
     // The algorithm
