@@ -15,6 +15,11 @@ int main(int argc, char **argv) {
     //Func input_as_float("input_as_float");
     //input_as_float(x,y,ch) = cast<float>input;
     
+    Expr input_as_float = Halide::cast<float>(input);
+
+    //Expr input_as_float = input(x,y,ch);
+    //input_as_float = Halide::cast<float>(input_as_float);
+
 #if 0
     // The algorithm
     grad_x(x, y) = (input(x, y) + input(x+1, y) + input(x+2, y))/3;
