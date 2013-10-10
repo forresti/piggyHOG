@@ -311,7 +311,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
                 }
             }
 
-#if 0
+#if  1
             //HOG cell binning
             if(hogX>0 && hogY>0){
                 hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult); //constrast sensitive features
@@ -345,7 +345,7 @@ vector<PgHogContainer> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
 //TODO: pass padx, pady into extract_HOG_oneScale()    
 
     //omp_set_num_threads(5); //hmm, default thread count seems best
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for(int i=0; i<interval; i++){
         float downsampleFactor = 1/pow(sc, i);
         //printf("downsampleFactor = %f \n", downsampleFactor);
@@ -353,9 +353,9 @@ vector<PgHogContainer> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
         imgPyramid[i] = downsampleWithOpenCV(img, downsampleFactor);
         imgPyramid[i + interval] = downsampleWithOpenCV(img, downsampleFactor/2);
 
-        hogPyramid[i] = extract_HOG_oneScale(imgPyramid[i], 4); //sbin=4
-        hogPyramid[i + interval] = extract_HOG_oneScale(imgPyramid[i], 8); //sbin=8
-//        hogPyramid[i + 2*interval] = extract_HOG_oneScale(imgPyramid[i + interval], 8);
+        //hogPyramid[i] = extract_HOG_oneScale(imgPyramid[i], 4); //sbin=4
+        //hogPyramid[i + interval] = extract_HOG_oneScale(imgPyramid[i], 8); //sbin=8
+        hogPyramid[i + 2*interval] = extract_HOG_oneScale(imgPyramid[i + interval], 8);
 
         //TODO: more small pyra levels?    
 
