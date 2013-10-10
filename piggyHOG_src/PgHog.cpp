@@ -285,8 +285,8 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     //float* norm = malloc(hogResult.paddedWidth * hogResult.paddedHeight * sizeof(float)); 
     Mat normImg(hogResult.paddedHeight, hogResult.paddedWidth, CV_32FC1);
 
-    const int unrollX = 2;
-    const int unrollY = 2;
+    const int unrollX = 8;
+    const int unrollY = 4;
   //extract features
     //for(int hogY = 0; hogY < hogResult.height; hogY++){
     //    for(int hogX = 0; hogX < hogResult.width; hogX++){
@@ -355,7 +355,7 @@ vector<PgHogContainer> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
 
         hogPyramid[i] = extract_HOG_oneScale(imgPyramid[i], 4); //sbin=4
         hogPyramid[i + interval] = extract_HOG_oneScale(imgPyramid[i], 8); //sbin=8
-        hogPyramid[i + 2*interval] = extract_HOG_oneScale(imgPyramid[i + interval], 8);
+//        hogPyramid[i + 2*interval] = extract_HOG_oneScale(imgPyramid[i + interval], 8);
 
         //TODO: more small pyra levels?    
 
