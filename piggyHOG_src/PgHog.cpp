@@ -285,8 +285,8 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     //float* norm = malloc(hogResult.paddedWidth * hogResult.paddedHeight * sizeof(float)); 
     Mat normImg(hogResult.paddedHeight, hogResult.paddedWidth, CV_32FC1);
 
-    const int unrollX = 8;
-    const int unrollY = 4;
+    const int unrollX = 2;
+    const int unrollY = 2;
   //extract features
     //for(int hogY = 0; hogY < hogResult.height; hogY++){
     //    for(int hogX = 0; hogX < hogResult.width; hogX++){
@@ -311,6 +311,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
                 }
             }
 
+#if 0
             //HOG cell binning
             if(hogX>0 && hogY>0){
                 hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult); //constrast sensitive features
@@ -322,7 +323,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
             //note: there are no 'if hogX>0' guards, because the hogResult.hog and normImg are padded.
             //      also, hogBlock_normalize() has a forward dependency to its right and bottom neighbors, so we do hogX-2, hogY-2
             hogBlock_normalize(hogX-2, hogY-2, hogResult, normImg); //TODO: think about edge cases
-
+#endif
             //TODO: binary truncation features
           }
         }
@@ -344,7 +345,7 @@ vector<PgHogContainer> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
 //TODO: pass padx, pady into extract_HOG_oneScale()    
 
     //omp_set_num_threads(5); //hmm, default thread count seems best
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for(int i=0; i<interval; i++){
         float downsampleFactor = 1/pow(sc, i);
         //printf("downsampleFactor = %f \n", downsampleFactor);

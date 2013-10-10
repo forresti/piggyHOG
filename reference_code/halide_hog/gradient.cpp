@@ -35,7 +35,6 @@ int main(int argc, char **argv) {
 
     //gradX_rgb.compile_to_file("gradient", input, output); 
     //gradX_rgb.compile_to_file("gradient", input); //temporary
-      
     //mag_rgb.compile_to_file("gradient", input); //I want a 1-channel float output buffer...how do I do this?
     mag_argmax_uchar.compile_to_file("gradient", input);   
 
