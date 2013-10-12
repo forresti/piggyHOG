@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     gradY_rgb(x, y, ch) = cast<float>(clamped(x, y+1, ch)) - cast<float>(clamped(x, y-1, ch));
 
     Func mag_rgb;
-    mag_rgb(x, y, ch) = cast<uint8_t>(gradX_rgb(x,y,ch)*gradX_rgb(x,y,ch) + gradY_rgb(x,y,ch)*gradY_rgb(x,y,ch)); //uint8_t cast is temporary
+    mag_rgb(x, y, ch) = (gradX_rgb(x,y,ch)*gradX_rgb(x,y,ch) + gradY_rgb(x,y,ch)*gradY_rgb(x,y,ch)); //uint8_t cast is temporary
 
     Func mag_argmax; //idx of channel with max gradient
     //mag_argmax(x, y) = mag_rgb(x, y, 0); //placeholder
@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
                                select( (mag_rgb(x,y,1)>mag_rgb(x,y,0) && mag_rgb(x,y,1)>mag_rgb(x,y,2)), 1, 2) ); //argmax=1 if ch1>ch0 and ch2>ch0, else argmax=2
 
     Func mag_argmax_uchar; //temp
-    mag_argmax_uchar(x, y) = 50*cast<uint8_t>(mag_argmax(x, y)); //temp
+    mag_argmax_uchar(x, y) = 50*(mag_argmax(x, y)); //temp
 
 
     //gradX_rgb.compile_to_file("gradient", input, output); 

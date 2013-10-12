@@ -353,8 +353,8 @@ vector<PgHogContainer> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
         imgPyramid[i] = downsampleWithOpenCV(img, downsampleFactor);
         imgPyramid[i + interval] = downsampleWithOpenCV(img, downsampleFactor/2);
 
-        //hogPyramid[i] = extract_HOG_oneScale(imgPyramid[i], 4); //sbin=4
-        //hogPyramid[i + interval] = extract_HOG_oneScale(imgPyramid[i], 8); //sbin=8
+        hogPyramid[i] = extract_HOG_oneScale(imgPyramid[i], 4); //sbin=4
+        hogPyramid[i + interval] = extract_HOG_oneScale(imgPyramid[i], 8); //sbin=8
         hogPyramid[i + 2*interval] = extract_HOG_oneScale(imgPyramid[i + interval], 8);
 
         //TODO: more small pyra levels?    
