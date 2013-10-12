@@ -44,7 +44,9 @@ array gradient_gfor(array input){
         for(int y=0; y<height; y++){
             //gradX(x, y) = input(x, y, 0); //test -- just yank out first channel
             //gradX_ch0(y,x) = input(y,x,0);
-            gradX_ch0(y,x) = input(CLAMP(y,0,height), CLAMP(x,0,width), 0);
+            //gradX_ch0(y,x) = input(CLAMP(y,0,height), CLAMP(x,0,width), 0);
+            gradX_ch0(y,x) = input(CLAMP(y,0,height-1), CLAMP(x+1,0,width-1), 0) - 
+                             input(CLAMP(y,0,height-1), CLAMP(x-1,0,width-1), 0);
         }
     }
 
