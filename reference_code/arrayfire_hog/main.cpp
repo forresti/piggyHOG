@@ -23,7 +23,7 @@ array gradient(array input){
     //output doesn't look very good. (some sort of ugly shadow effect). 
     // I wonder if this grad() function doesn't understand 3-channel.
 
-    printf("%d,%d\n", gradX.dims(0), gradX.dims(1)); 
+    printf("%d, %d, %d\n", gradX.dims(0), gradX.dims(1), gradX.dims(2)); 
 
     return gradX;
 }
