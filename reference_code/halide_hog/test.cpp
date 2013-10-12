@@ -22,7 +22,7 @@ int main(int argc, char **argv){
     std::string imgName = "../../images_640x480/carsgraz_001.image.png"; //TODO: get jpg support
     Image<uint8_t> input = load<uint8_t>(imgName.c_str()); //only supports png and ppm
     //Image<uint8_t> result(input.width(), input.height(), input.channels());
-    Image<float> result(input.width(), input.height(), input.channels());
+    Image<float> result(input.width(), input.height(), 1);
 
     double start_gradient = read_timer();
     gradient(input, result); 
