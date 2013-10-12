@@ -35,27 +35,32 @@ static double convolutionBenchmark(int kernelSize, array img_gray)
     return responseTime;
 }
 
+//for now, just return the orientations. (TODO: return the magnitudes too ... I may need to pass magnitude and orientation output arrays by reference)
+array gradient(array input){
+
+    array gradX, gradY;
+
+    grad(gradX, gradY, input);
+
+    return gradX;
+}
+
+
 int main(int argc, char** argv) {
     //cudaSetDevice(3);
     //deviceset(1);
 
     try {
         info();
-        array img_gray = loadimage("../../images_640x480/carsgraz_001.image.jpg");
-//        convolutionBenchmark(3, img_gray); //warmup
-        int nRuns = 10;
-        double execTime = 0;
-        int imgCols = img_gray.dims(0); int imgRows = img_gray.dims(1);
+        array input = loadimage("../../images_640x480/carsgraz_001.image.jpg");
 
-        for(int kernelSize=2; kernelSize<9; kernelSize++)
-        {
-            execTime = 0;
-            for(int i=0; i<nRuns; i++)
-            {
-                execTime += convolutionBenchmark(kernelSize, img_gray);
-            }
-            printf("imgSize = %dx%d,  kernelSize = %d,  avg execTime = %f \n", imgCols, imgRows, kernelSize, execTime/nRuns);
-        }
+        double start_gradient = read_timer();
+        array result = gradient(input);
+        double time_gradient = read_timer() - start_gradient;
+        printf("computed gradient in %f ms \n", time_gradient);
+
+        saveimage("./gradient.jpg", result);
+
     } catch (af::exception& e) {
         fprintf(stderr, "%s\n", e.what());
     }
