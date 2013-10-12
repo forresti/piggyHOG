@@ -20,9 +20,7 @@ array gradient_builtin(array input){
     //output doesn't look very good. (some sort of ugly shadow effect). 
     // I wonder if this grad() function doesn't understand 3-channel.
 
-
     printf("size of gradX: %d, %d, %d\n", gradX.dims(0), gradX.dims(1), gradX.dims(2)); 
-
     return gradX;
 }
 
@@ -30,14 +28,14 @@ array gradient_gfor(array input){
     array gradX, gradY;
     //gradX = constant(n,n,1);
 
+#if 0
     //TODO: gfor loop
     for(int x=0; x<input.dims(1); x++){
         for(int y=0; y<input.dims(0); y++){
-
             gradX(x, y) = input(x, y, 0); //test -- just yank out first channel
         }
     }
-
+#endif
 
     return gradX;
 }
@@ -48,7 +46,7 @@ int main(int argc, char** argv) {
 
     try {
         info();
-        array input = loadimage("../../images_640x480/carsgraz_001.image.jpg");
+        array input = loadimage("../../images_640x480/carsgraz_001.image.jpg", true); //iscolor='true'
         printf("size of input: %d, %d, %d\n", input.dims(0), input.dims(1), input.dims(2));
 
     //builtin version
