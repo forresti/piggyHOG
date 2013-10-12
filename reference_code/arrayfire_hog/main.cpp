@@ -32,7 +32,8 @@ array gradient_builtin(array input){
 
     //grad(gradX_ch0, gradY_ch0, input_ch0); //output doesn't look very good. (some sort of ugly shadow effect). 
     
-    return gradX;
+    //return gradX;
+    return gradY;
 }
 
 array gradient_gfor(array input){
@@ -40,7 +41,7 @@ array gradient_gfor(array input){
     int height = input.dims(0);
 
     //array gradX, gradY;
-    array gradX_ch0(input(span, span, 0)); //using just 1 channel gives reasonable-looking output
+    //array gradX_ch0(input(span, span, 0)); //using just 1 channel gives reasonable-looking output
     array gradX(height, width, 3, f32);
 
     //TODO: gfor loop
