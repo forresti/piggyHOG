@@ -44,8 +44,8 @@ array gradient_gfor(array input){
     for(int x=0; x<width; x++){
         for(int y=0; y<height; y++){
             for(int ch=0; ch<3; ch++){
-                gradX(y,x,ch) = input(CLAMP(y,0,height-1), CLAMP(x+1,0,width-1), ch) - 
-                                input(CLAMP(y,0,height-1), CLAMP(x-1,0,width-1), ch);
+                gradX(y,x,ch) = (float)input(CLAMP(y,0,height-1), CLAMP(x+1,0,width-1), ch) - 
+                                (float)input(CLAMP(y,0,height-1), CLAMP(x-1,0,width-1), ch); //TODO: cast this stuff to float
             }
         }
     }
