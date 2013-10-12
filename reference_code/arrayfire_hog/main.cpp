@@ -18,34 +18,20 @@ double read_timer(){
 array gradient_builtin(array input){
     int width = input.dims(1);
     int height = input.dims(0);
-    //array gradX_rgb(input); //deepcopy (is it any faster to preallocate zeros instead of copying?)
-    //array gradY_rgb(input);
-    //grad(gradX_rgb(span, span, 0), gradY_rgb(span, span, 0), input(span, span, 0)); //doesn't compile.
-    //array input_ch0 = input(span, span, 0);
-    //array gradX_ch0, gradY_ch0;
 
-    array gradX(height, width, 3, f32);
+    array gradX(height, width, 3, f32); //I think even the input, by default, is f32.
     array gradY(height, width, 3, f32);
 
     array gradX_1ch, gradY_1ch; //tmp
     for(int ch=0; ch<3; ch++){
         array input_1ch = input(span, span, ch);
         grad(gradX_1ch, gradY_1ch, input_1ch);
-        gradX(span, span, ch) = gradX_1ch;
-        //gradY...
+        gradX(span, span, ch) = gradX_1ch; //output is some goofy thing that sorta has shadows.
+        gradY(span, span, ch) = gradY_1ch;
     }
 
     //grad(gradX_ch0, gradY_ch0, input_ch0); //output doesn't look very good. (some sort of ugly shadow effect). 
     
-
-
-    //array gradX, gradY;
-    //grad(gradX, gradY, input); //not happy with 3-channel.
-
-    //printf("size of gradX_rgb: %d, %d, %d\n", gradX_rgb.dims(0), gradX_rgb.dims(1), gradX_rgb.dims(2)); 
-    //return gradX_rgb;
-    //return gradX_ch0;
-    //return input_ch0;
     return gradX;
 }
 
