@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <arrayfire.h>
+#include <sys/time.h>
+using namespace af;
+
+double read_timer()
+{
+    struct timeval start;
+    gettimeofday( &start, NULL );
+    return (double)((start.tv_sec) + 1.0e-6 * (start.tv_usec)); //in seconds
+}
+
+static const float h_sobel[] = {-2.0, -1.0,  0.0,
+                                -1.0,  0.0,  1.0,
+                                0.0,  1.0,  2.0}; // 3x3 sobel weights
+
+// Demonstrates various image manipulations.
+static void convolutionTest() {
+    array sobel_k = array(3, 3, h_sobel);
+    array img_gray = loadimage("../forrest_hacked_OpenCV_2_Cookbook_Code/9k_x_9k.png", false); // 1 channel grayscale [0-255]
+    //array img_gray = loadimage("Lena.png", false);
+
+    array img_convolved = convolve(img_gray, sobel_k); //TODO: preallocate the output space?
+
+    //array result(img_gray); //preallocate result array, same size as img_gray
+}
+
+int main(int argc, char** argv) {
+    try {
+        info();
+        convolutionTest();
+    } catch (af::exception& e) {
+        fprintf(stderr, "%s\n", e.what());
+    }
+    return 0;
+}

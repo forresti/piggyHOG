@@ -34,7 +34,8 @@ int main(int argc, char **argv) {
     
     Func ori;
     //ori(x, y) = atan2( cast<double>(gradY_rgb(x, y, mag_argmax(x,y))), cast<double>(gradX_rgb(x, y, mag_argmax(x,y))) );
-    ori(x,y) = Halide::atan2(mag(x,y), mag(x,y)); //dummy
+    //ori(x,y) = Halide::atan2(mag(x,y), mag(x,y)); //dummy
+    //atan2 is not a member of Halide
 
     mag.compile_to_file("gradient", input);   
 
