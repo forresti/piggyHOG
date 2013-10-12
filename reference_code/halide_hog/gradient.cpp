@@ -22,21 +22,19 @@ int main(int argc, char **argv) {
     gradY_rgb(x, y, ch) = cast<float>(clamped(x, y+1, ch)) - cast<float>(clamped(x, y-1, ch));
 
     Func mag_rgb;
-    mag_rgb(x, y, ch) = (gradX_rgb(x,y,ch)*gradX_rgb(x,y,ch) + gradY_rgb(x,y,ch)*gradY_rgb(x,y,ch)); //uint8_t cast is temporary
+    mag_rgb(x, y, ch) = gradX_rgb(x,y,ch)*gradX_rgb(x,y,ch) + gradY_rgb(x,y,ch)*gradY_rgb(x,y,ch); //uint8_t cast is temporary
 
     Func mag_argmax; //idx of channel with max gradient
     //mag_argmax(x, y) = mag_rgb(x, y, 0); //placeholder
     mag_argmax(x, y) = select( (mag_rgb(x,y,0)>mag_rgb(x,y,1) && mag_rgb(x,y,0)>mag_rgb(x,y,2)), 0,  //argmax=0 if ch0>ch1 and ch0>ch2 
                                select( (mag_rgb(x,y,1)>mag_rgb(x,y,0) && mag_rgb(x,y,1)>mag_rgb(x,y,2)), 1, 2) ); //argmax=1 if ch1>ch0 and ch2>ch0, else argmax=2
 
-    Func mag_argmax_uchar; //temp
-    mag_argmax_uchar(x, y) = 50*(mag_argmax(x, y)); //temp
 
 
     //gradX_rgb.compile_to_file("gradient", input, output); 
     //gradX_rgb.compile_to_file("gradient", input); //temporary
     //mag_rgb.compile_to_file("gradient", input); //I want a 1-channel float output buffer...how do I do this?
-    mag_argmax_uchar.compile_to_file("gradient", input);   
+    mag_argmax.compile_to_file("gradient", input);   
 
 //TODO: how I set things up so that 'output' is a separate space from 'input'?
 
