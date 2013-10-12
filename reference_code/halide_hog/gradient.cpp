@@ -29,12 +29,14 @@ int main(int argc, char **argv) {
     mag_argmax(x, y) = select( (mag_rgb(x,y,0)>mag_rgb(x,y,1) && mag_rgb(x,y,0)>mag_rgb(x,y,2)), 0,  //argmax=0 if ch0>ch1 and ch0>ch2 
                                select( (mag_rgb(x,y,1)>mag_rgb(x,y,0) && mag_rgb(x,y,1)>mag_rgb(x,y,2)), 1, 2) ); //argmax=1 if ch1>ch0 and ch2>ch0, else argmax=2
 
+    Func mag;
+    mag(x, y) = mag_rgb(x, y, mag_argmax(x,y)); //this is expensive for some reason...
+    
+    Func ori;
+    //ori(x, y) = atan2(gradY_rgb(x, y, mag_argmax(x,y)), gradX_rgb(x, y, mag_argmax(x,y)));
 
+    mag.compile_to_file("gradient", input);   
 
-    //gradX_rgb.compile_to_file("gradient", input, output); 
-    //gradX_rgb.compile_to_file("gradient", input); //temporary
-    //mag_rgb.compile_to_file("gradient", input); //I want a 1-channel float output buffer...how do I do this?
-    mag_argmax.compile_to_file("gradient", input);   
 
 //TODO: how I set things up so that 'output' is a separate space from 'input'?
 
