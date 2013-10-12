@@ -32,9 +32,9 @@ array gradient_builtin(array input){
     gradX = abs(gradX)*2; //do 'abs' so that img makes sense as [0 to 255]
     gradY = abs(gradY)*2;
 
-    //saveimage("gradX_arrayfire.jpg", gradX);
-    //saveimage("gradY_arrayfire.jpg", gradY);
-    return gradX;
+    saveimage("gradX_arrayfire.jpg", gradX);
+    saveimage("gradY_arrayfire.jpg", gradY);
+    return gradY;
 }
 
 array gradient_gfor(array input){
