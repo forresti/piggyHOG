@@ -20,6 +20,11 @@ array gradient(array input){
 
     grad(gradX, gradY, input);
 
+    //output doesn't look very good. (some sort of ugly shadow effect). 
+    // I wonder if this grad() function doesn't understand 3-channel.
+
+    printf("%d,%d\n", gradX.dims(0), gradX.dims(1)); 
+
     return gradX;
 }
 
