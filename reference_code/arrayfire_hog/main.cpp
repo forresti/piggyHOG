@@ -39,6 +39,7 @@ int main(int argc, char** argv) {
 
         double start_gradient = read_timer();
         array result = gradient(input);
+        cudaDeviceSynchronize();
         double time_gradient = read_timer() - start_gradient;
         printf("computed gradient in %f ms \n", time_gradient);
 
