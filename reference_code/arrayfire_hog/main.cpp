@@ -33,24 +33,22 @@ array gradient_builtin(array input){
 }
 
 array gradient_gfor(array input){
-    //array gradX, gradY;
-    array gradX_ch0(input(span, span, 0));
-
     int width = input.dims(1);
     int height = input.dims(0);
+
+    //array gradX, gradY;
+    array gradX_ch0(input(span, span, 0));
+    array gradX(height, width, 3, f32);
 
     //TODO: gfor loop
     for(int x=0; x<width; x++){
         for(int y=0; y<height; y++){
-            //gradX(x, y) = input(x, y, 0); //test -- just yank out first channel
-            //gradX_ch0(y,x) = input(y,x,0);
-            //gradX_ch0(y,x) = input(CLAMP(y,0,height), CLAMP(x,0,width), 0);
-            gradX_ch0(y,x) = input(CLAMP(y,0,height-1), CLAMP(x+1,0,width-1), 0) - 
+            gradX(y,x,0) = input(CLAMP(y,0,height-1), CLAMP(x+1,0,width-1), 0) - 
                              input(CLAMP(y,0,height-1), CLAMP(x-1,0,width-1), 0);
         }
     }
 
-    return gradX_ch0;
+    return gradX;
 }
 
 int main(int argc, char** argv) {
