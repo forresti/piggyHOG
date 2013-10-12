@@ -26,7 +26,8 @@ array gradient_builtin(array input){
 
     //printf("size of gradX_rgb: %d, %d, %d\n", gradX_rgb.dims(0), gradX_rgb.dims(1), gradX_rgb.dims(2)); 
     //return gradX_rgb;
-    return gradX_ch0;
+    //return gradX_ch0;
+    return input_ch0;
 }
 
 array gradient_gfor(array input){
@@ -44,7 +45,6 @@ array gradient_gfor(array input){
 
     return gradX;
 }
-
 
 int main(int argc, char** argv) {
     //deviceset(1);
