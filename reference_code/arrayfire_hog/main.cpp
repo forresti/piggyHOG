@@ -31,19 +31,18 @@ array gradient_builtin(array input){
 }
 
 array gradient_gfor(array input){
-    array gradX, gradY;
-    //gradX = constant(n,n,1);
+    //array gradX, gradY;
+    array gradX_ch0(input(span, span, 0));
 
-#if 0
     //TODO: gfor loop
     for(int x=0; x<input.dims(1); x++){
         for(int y=0; y<input.dims(0); y++){
-            gradX(x, y) = input(x, y, 0); //test -- just yank out first channel
+            //gradX(x, y) = input(x, y, 0); //test -- just yank out first channel
+            gradX_ch0(y,x) = input(y,x,0);
         }
     }
-#endif
 
-    return gradX;
+    return gradX_ch0;
 }
 
 int main(int argc, char** argv) {
