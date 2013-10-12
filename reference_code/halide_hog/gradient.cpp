@@ -33,7 +33,8 @@ int main(int argc, char **argv) {
     mag(x, y) = mag_rgb(x, y, mag_argmax(x,y)); //this is expensive for some reason...
     
     Func ori;
-    ori(x, y) = atan2( cast<double>(gradY_rgb(x, y, mag_argmax(x,y))), cast<double>(gradX_rgb(x, y, mag_argmax(x,y))) );
+    //ori(x, y) = atan2( cast<double>(gradY_rgb(x, y, mag_argmax(x,y))), cast<double>(gradX_rgb(x, y, mag_argmax(x,y))) );
+    ori(x,y) = atan2(mag(x,y), mag(x,y)); //dummy
 
     mag.compile_to_file("gradient", input);   
 
