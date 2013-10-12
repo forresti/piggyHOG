@@ -9,7 +9,7 @@ using namespace std;
 double read_timer(){
     struct timeval start;
     gettimeofday( &start, NULL );
-    return (double)((start.tv_sec) + 1.0e-6 * (start.tv_usec)); //in seconds
+    return (double)((start.tv_sec) + 1.0e-6 * (start.tv_usec)) * 1000; //in milliseconds
 }
 
 //for now, just return the orientations. (TODO: return the magnitudes too ... I may need to pass magnitude and orientation output arrays by reference)
@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
         time_gradient = read_timer() - start_gradient;
         printf("[gfor] computed gradient in %f ms \n", time_gradient);
 
-        //saveimage("./gradient_gfor.jpg", result_gfor);
+        saveimage("./gradient_gfor.jpg", result_gfor);
 
 
     } catch (af::exception& e) {
