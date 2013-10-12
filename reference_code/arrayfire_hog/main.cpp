@@ -6,8 +6,7 @@
 using namespace af;
 using namespace std;
 
-double read_timer()
-{
+double read_timer(){
     struct timeval start;
     gettimeofday( &start, NULL );
     return (double)((start.tv_sec) + 1.0e-6 * (start.tv_usec)); //in seconds
@@ -21,13 +20,15 @@ array gradient_builtin(array input){
     //output doesn't look very good. (some sort of ugly shadow effect). 
     // I wonder if this grad() function doesn't understand 3-channel.
 
-    printf("%d, %d, %d\n", gradX.dims(0), gradX.dims(1), gradX.dims(2)); 
+
+    printf("size of gradX: %d, %d, %d\n", gradX.dims(0), gradX.dims(1), gradX.dims(2)); 
 
     return gradX;
 }
 
 array gradient_gfor(array input){
     array gradX, gradY;
+    //gradX = constant(n,n,1);
 
     //TODO: gfor loop
     for(int x=0; x<input.dims(1); x++){
@@ -48,6 +49,7 @@ int main(int argc, char** argv) {
     try {
         info();
         array input = loadimage("../../images_640x480/carsgraz_001.image.jpg");
+        printf("size of input: %d, %d, %d\n", input.dims(0), input.dims(1), input.dims(2));
 
     //builtin version
         double start_gradient = read_timer();
