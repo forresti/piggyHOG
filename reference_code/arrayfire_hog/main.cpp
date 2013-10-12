@@ -14,7 +14,8 @@ double read_timer(){
     return (double)((start.tv_sec) + 1.0e-6 * (start.tv_usec)) * 1000; //in milliseconds
 }
 
-array gradient_builtin(array input){
+//array gradient_builtin(array input){
+void gradient_builtin(array input){
     int width = input.dims(1);
     int height = input.dims(0);
     array gradX(height, width, 3, f32); //pre-allocate output
@@ -34,7 +35,7 @@ array gradient_builtin(array input){
 
     saveimage("gradX_arrayfire.jpg", gradX);
     saveimage("gradY_arrayfire.jpg", gradY);
-    return gradY;
+    //return gradY;
 }
 
 array gradient_gfor(array input){
@@ -67,17 +68,18 @@ int main(int argc, char** argv) {
         printf("size of input: %d, %d, %d\n", input.dims(0), input.dims(1), input.dims(2));
 
     //warmup
-        array dummy = gradient_builtin(input);
+        //array dummy = gradient_builtin(input);
         cudaDeviceSynchronize();
 
     //builtin version
         double start_gradient = read_timer();
-        array result_builtin = gradient_builtin(input);
+        //array result_builtin = gradient_builtin(input);
+        gradient_builtin(input);
         cudaDeviceSynchronize();
         double time_gradient = read_timer() - start_gradient;
         printf("[builtin] computed gradient in %f ms \n", time_gradient);
 
-        saveimage("./gradient_builtin.jpg", result_builtin);
+        //saveimage("./gradient_builtin.jpg", result_builtin);
 
 #if 0
     //gfor version
