@@ -14,26 +14,27 @@ double read_timer(){
     return (double)((start.tv_sec) + 1.0e-6 * (start.tv_usec)) * 1000; //in milliseconds
 }
 
-//for now, just return the orientations. (TODO: return the magnitudes too ... I may need to pass magnitude and orientation output arrays by reference)
 array gradient_builtin(array input){
     int width = input.dims(1);
     int height = input.dims(0);
+    array gradX(height, width, 3, f32); //pre-allocate output
+    array gradY(height, width, 3, f32); //I think even the input, by default, is f32.
 
-    array gradX(height, width, 3, f32); //I think even the input, by default, is f32.
-    array gradY(height, width, 3, f32);
-
-    array gradX_1ch, gradY_1ch; //tmp
+    //af::grad() doesn't like multichannel images, so do 1 channel at a time 
+    array gradX_1ch, gradY_1ch; //tmp results for 1 channel at a time
     for(int ch=0; ch<3; ch++){
         array input_1ch = input(span, span, ch);
-        grad(gradX_1ch, gradY_1ch, input_1ch);
+        af::grad(gradX_1ch, gradY_1ch, input_1ch);
         gradX(span, span, ch) = gradX_1ch; //output is some goofy thing that sorta has shadows.
-        gradY(span, span, ch) = gradY_1ch;
+        gradY(span, span, ch) = gradY_1ch; //output looks ok
     }
 
-    //grad(gradX_ch0, gradY_ch0, input_ch0); //output doesn't look very good. (some sort of ugly shadow effect). 
-    
-    //return gradX;
-    return gradY;
+    gradX = abs(gradX)*2; //do 'abs' so that img makes sense as [0 to 255]
+    gradY = abs(gradY)*2;
+
+    //saveimage("gradX_arrayfire.jpg", gradX);
+    //saveimage("gradY_arrayfire.jpg", gradY);
+    return gradX;
 }
 
 array gradient_gfor(array input){
