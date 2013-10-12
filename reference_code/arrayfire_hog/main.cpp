@@ -59,7 +59,9 @@ int main(int argc, char** argv) {
         array input = loadimage("../../images_640x480/carsgraz_001.image.jpg", true); //iscolor='true'
         printf("size of input: %d, %d, %d\n", input.dims(0), input.dims(1), input.dims(2));
 
-saveimage("input_copy.jpg", input); //see if I/O works ok
+    //warmup
+        array dummy = gradient_builtin(input);
+        cudaDeviceSynchronize();
 
     //builtin version
         double start_gradient = read_timer();
