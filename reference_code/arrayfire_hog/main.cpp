@@ -6,6 +6,8 @@
 using namespace af;
 using namespace std;
 
+#define CLAMP(x, lo, hi)  max(lo, min(x, hi)) 
+
 double read_timer(){
     struct timeval start;
     gettimeofday( &start, NULL );
@@ -34,11 +36,15 @@ array gradient_gfor(array input){
     //array gradX, gradY;
     array gradX_ch0(input(span, span, 0));
 
+    int width = input.dims(1);
+    int height = input.dims(0);
+
     //TODO: gfor loop
-    for(int x=0; x<input.dims(1); x++){
-        for(int y=0; y<input.dims(0); y++){
+    for(int x=0; x<width; x++){
+        for(int y=0; y<height; y++){
             //gradX(x, y) = input(x, y, 0); //test -- just yank out first channel
-            gradX_ch0(y,x) = input(y,x,0);
+            //gradX_ch0(y,x) = input(y,x,0);
+            gradX_ch0(y,x) = input(CLAMP(y,0,height), CLAMP(x,0,width), 0);
         }
     }
 
@@ -52,6 +58,8 @@ int main(int argc, char** argv) {
         info();
         array input = loadimage("../../images_640x480/carsgraz_001.image.jpg", true); //iscolor='true'
         printf("size of input: %d, %d, %d\n", input.dims(0), input.dims(1), input.dims(2));
+
+saveimage("input_copy.jpg", input); //see if I/O works ok
 
     //builtin version
         double start_gradient = read_timer();
