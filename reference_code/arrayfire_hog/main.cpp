@@ -14,16 +14,22 @@ double read_timer()
 }
 
 //for now, just return the orientations. (TODO: return the magnitudes too ... I may need to pass magnitude and orientation output arrays by reference)
-array gradient(array input){
-
+array gradient_builtin(array input){
     array gradX, gradY;
-
     grad(gradX, gradY, input);
 
     //output doesn't look very good. (some sort of ugly shadow effect). 
     // I wonder if this grad() function doesn't understand 3-channel.
 
     printf("%d, %d, %d\n", gradX.dims(0), gradX.dims(1), gradX.dims(2)); 
+
+    return gradX;
+}
+
+array gradient_gfor(array input){
+    array gradX, gradY;
+
+    //TODO: gfor loop
 
     return gradX;
 }
@@ -38,7 +44,7 @@ int main(int argc, char** argv) {
         array input = loadimage("../../images_640x480/carsgraz_001.image.jpg");
 
         double start_gradient = read_timer();
-        array result = gradient(input);
+        array result = gradient_builtin(input);
         cudaDeviceSynchronize();
         double time_gradient = read_timer() - start_gradient;
         printf("computed gradient in %f ms \n", time_gradient);
