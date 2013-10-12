@@ -20,47 +20,6 @@ static const float h_sobel[] = {
      0.0,  1.0,  2.0
 };
 
-array cuComplex_to_float(array input)
-{
-    //assert(input.iscomplex() == true);
-    //printf("iscomplex() = %d \n", input.iscomplex());
-    int width=input.dims(0); 
-    int height=input.dims(1);
-    array output(width, height, f32);
-    
-    for(int y=0; y<height; y++)
-    {
-        for(int x=0; x<width; x++)
-        {
-            //FIXME
-            //output(x,y)=input(x,y).r; //if this is really a cuComplex, it should have a .r real value
-        }
-    }
-
-    return output;
-}
-
-double fftTest(array img_gray)
-{
-    int kernelSize=3;
-    int paddedKernelWidth = img_gray.dims(0);
-    int paddedKernelHeight = img_gray.dims(1);
-    array dKernel = array(kernelSize, kernelSize, h_sobel);
-
-    double start = read_timer();
-    //array kernel_fft = fft2(dKernel, paddedKernelSize, paddedKernelSize);
-    array kernel_fft = fft2(dKernel, paddedKernelWidth, paddedKernelHeight);
-    array img_fft = fft2(img_gray);
-    array img_kernel_fft = img_fft*kernel_fft; //element-wise multiply
-    array img_convolved = ifft2(img_kernel_fft); //this is a cuComplex type
-    cudaDeviceSynchronize();
-    double responseTime = read_timer() - start;
-    //array float_img_convolved = cuComplex_to_float(img_convolved);
-    //array float_img_convolved = img_convolved.as(f32);
-    //saveimage("./Lena_convolved_FFT_ArrayFire.png", float_img_convolved);
-    return responseTime;
-}
-
 static double convolutionBenchmark(int kernelSize, array img_gray) 
 {
     vector<float> hKernel(kernelSize*kernelSize, 1/float(kernelSize*kernelSize));
@@ -82,18 +41,12 @@ int main(int argc, char** argv) {
 
     try {
         info();
-        //array img_gray = loadimage("../forrest_hacked_OpenCV_2_Cookbook_Code/9k_x_9k.png", false);
-        //array img_gray = loadimage("../benchmarking_codeGen_conv/Lena.pgm", false);
-        array img_gray = loadimage("./1920x1080.jpg");
+        array img_gray = loadimage("../../images_640x480/carsgraz_001.image.jpg");
 //        convolutionBenchmark(3, img_gray); //warmup
         int nRuns = 10;
         double execTime = 0;
         int imgCols = img_gray.dims(0); int imgRows = img_gray.dims(1);
-        for(int i=0; i<nRuns; i++)
-        {
-            execTime += fftTest(img_gray);
-        }
-        printf("FFT: imgSize = %dx%d, avg execTime = %f \n", imgCols, imgRows, execTime/nRuns);
+
         for(int kernelSize=2; kernelSize<9; kernelSize++)
         {
             execTime = 0;
