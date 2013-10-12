@@ -25,7 +25,7 @@ ifeq ($(HL_TARGET),ptx-debug)
 endif
 
 #TODO: find a way to automatically build gradient.o too
-all: gradient test
+all: gradient test helpers
 
 gradient: $(HALIDE_DIR) gradient.cpp
 	$(MAKE) -C $(HALIDE_DIR)/ bin/libHalide.a
@@ -35,8 +35,11 @@ gradient.o: gradient
 	./gradient
 
 # -O2 is faster than -O3 for this app (O3 unrolls too much)
-test: test.cpp gradient.o
+test: test.cpp gradient.o helpers.o
 	$(GXX) -msse2 -fopenmp -Wall -O2 -I $(HALIDE_DIR)/apps/support/ test.cpp gradient.o -o test -lpthread -ldl $(PNGFLAGS) $(CUDA_LDFLAGS)
+
+helpers.o: common/helpers.cpp common/helpers.h
+	$(CXX) $(CFLAGS) -c common/helpers.cpp 
 
 clean:
 	rm -f test gradient.o gradient
