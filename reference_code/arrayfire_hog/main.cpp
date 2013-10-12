@@ -14,21 +14,15 @@ double read_timer(){
 
 //for now, just return the orientations. (TODO: return the magnitudes too ... I may need to pass magnitude and orientation output arrays by reference)
 array gradient_builtin(array input){
-    array gradX_rgb(input); //deepcopy (is it any faster to preallocate zeros instead of copying?)
-    array gradY_rgb(input);
+    //array gradX_rgb(input); //deepcopy (is it any faster to preallocate zeros instead of copying?)
+    //array gradY_rgb(input);
+    //grad(gradX_rgb(span, span, 0), gradY_rgb(span, span, 0), input(span, span, 0)); //doesn't compile.
 
     array input_ch0 = input(span, span, 0);
     array gradX_ch0, gradY_ch0;
-    grad(gradX_ch0, gradY_ch0, input_ch0);
-
-
-    //grad(gradX_rgb(span, span, 0), gradY_rgb(span, span, 0), input(span, span, 0)); //doesn't compile.
-
+    grad(gradX_ch0, gradY_ch0, input_ch0); //output doesn't look very good. (some sort of ugly shadow effect). 
     //array gradX, gradY;
-    //grad(gradX, gradY, input);
-
-    //output doesn't look very good. (some sort of ugly shadow effect). 
-    // I wonder if this grad() function doesn't understand 3-channel.
+    //grad(gradX, gradY, input); //not happy with 3-channel.
 
     //printf("size of gradX_rgb: %d, %d, %d\n", gradX_rgb.dims(0), gradX_rgb.dims(1), gradX_rgb.dims(2)); 
     //return gradX_rgb;
