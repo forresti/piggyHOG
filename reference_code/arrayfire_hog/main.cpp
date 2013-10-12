@@ -31,7 +31,8 @@ void gradient_builtin(array input){
 int main(int argc, char** argv) {
     try {
         info();
-        array input = loadimage("../car.jpg", true); //iscolor='true'
+        array input = loadimage("../../images_640x480/carsgraz_001.image.jpg", true); //iscolor='true'
+        //array input = loadimage("../car.jpg", true); //iscolor='true'
         //array input = loadimage("../Lena.jpg", true); //iscolor='true'
         printf("size of input: %d, %d, %d\n", input.dims(0), input.dims(1), input.dims(2));
 
