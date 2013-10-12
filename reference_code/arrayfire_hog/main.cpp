@@ -37,14 +37,16 @@ array gradient_gfor(array input){
     int height = input.dims(0);
 
     //array gradX, gradY;
-    array gradX_ch0(input(span, span, 0));
+    array gradX_ch0(input(span, span, 0)); //using just 1 channel gives reasonable-looking output
     array gradX(height, width, 3, f32);
 
     //TODO: gfor loop
     for(int x=0; x<width; x++){
         for(int y=0; y<height; y++){
-            gradX(y,x,0) = input(CLAMP(y,0,height-1), CLAMP(x+1,0,width-1), 0) - 
-                             input(CLAMP(y,0,height-1), CLAMP(x-1,0,width-1), 0);
+            for(int ch=0; ch<3; ch++){
+                gradX(y,x,ch) = input(CLAMP(y,0,height-1), CLAMP(x+1,0,width-1), ch) - 
+                                input(CLAMP(y,0,height-1), CLAMP(x-1,0,width-1), ch);
+            }
         }
     }
 
