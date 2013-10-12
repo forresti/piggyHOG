@@ -14,8 +14,13 @@ double read_timer(){
 
 //for now, just return the orientations. (TODO: return the magnitudes too ... I may need to pass magnitude and orientation output arrays by reference)
 array gradient_builtin(array input){
-    array gradX, gradY;
-    grad(gradX, gradY, input);
+    array gradX_rgb(input); //deepcopy (is it any faster to preallocate zeros instead of copying?)
+    array gradY_rgb(input);
+
+    grad(gradX(span, span, 0), gradY(span, span, 0), input(span, span, 0));
+
+    //array gradX, gradY;
+    //grad(gradX, gradY, input);
 
     //output doesn't look very good. (some sort of ugly shadow effect). 
     // I wonder if this grad() function doesn't understand 3-channel.
@@ -65,7 +70,7 @@ int main(int argc, char** argv) {
         time_gradient = read_timer() - start_gradient;
         printf("[gfor] computed gradient in %f ms \n", time_gradient);
 
-        saveimage("./gradient_gfor.jpg", result_gfor);
+        //saveimage("./gradient_gfor.jpg", result_gfor);
 
 
     } catch (af::exception& e) {
