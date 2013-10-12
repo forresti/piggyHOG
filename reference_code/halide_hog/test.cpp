@@ -7,7 +7,6 @@
 
 #include "static_image.h"
 #include "image_io.h"
-#include "common/helpers.cpp"
 
 extern "C" {
 #include "gradient.h"
