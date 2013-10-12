@@ -30,26 +30,43 @@ array gradient_gfor(array input){
     array gradX, gradY;
 
     //TODO: gfor loop
+    for(int x=0; x<input.dims(1); x++){
+        for(int y=0; y<input.dims(0); y++){
+
+            gradX(x, y) = input(x, y, 0); //test -- just yank out first channel
+        }
+    }
+
 
     return gradX;
 }
 
 
 int main(int argc, char** argv) {
-    //cudaSetDevice(3);
     //deviceset(1);
 
     try {
         info();
         array input = loadimage("../../images_640x480/carsgraz_001.image.jpg");
 
+    //builtin version
         double start_gradient = read_timer();
-        array result = gradient_builtin(input);
+        array result_builtin = gradient_builtin(input);
         cudaDeviceSynchronize();
         double time_gradient = read_timer() - start_gradient;
-        printf("computed gradient in %f ms \n", time_gradient);
+        printf("[builtin] computed gradient in %f ms \n", time_gradient);
 
-        saveimage("./gradient.jpg", result);
+        saveimage("./gradient_builtin.jpg", result_builtin);
+
+    //gfor version
+        start_gradient = read_timer();
+        array result_gfor = gradient_gfor(input);
+        cudaDeviceSynchronize();
+        time_gradient = read_timer() - start_gradient;
+        printf("[gfor] computed gradient in %f ms \n", time_gradient);
+
+        saveimage("./gradient_gfor.jpg", result_gfor);
+
 
     } catch (af::exception& e) {
         fprintf(stderr, "%s\n", e.what());
