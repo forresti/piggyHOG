@@ -32,8 +32,8 @@ array gradient_builtin(array input){
     gradX = abs(gradX)*2; //do 'abs' so that img makes sense as [0 to 255]
     gradY = abs(gradY)*2;
 
-    saveimage("gradX_builtin.jpg", gradX);
-    saveimage("gradY_builtin.jpg", gradY);
+    //saveimage("gradX_builtin.jpg", gradX);
+    //saveimage("gradY_builtin.jpg", gradY);
     return gradY;
 }
 
@@ -79,8 +79,8 @@ array gradient_gfor(array input){
 
     gradX = abs(gradX);
     gradY = abs(gradY);
-    saveimage("gradX_gfor.jpg", gradX);
-    saveimage("gradY_gfor.jpg", gradY);
+    //saveimage("gradX_gfor.jpg", gradX);
+    //saveimage("gradY_gfor.jpg", gradY);
     return gradX;
 }
 
@@ -88,7 +88,8 @@ array bandwidth_gfor(array input){
     int width = input.dims(1);
     int height = input.dims(0);
     array input_copy(height, width, 3, f32); 
-   
+    cudaDeviceSynchronize();  
+ 
     double start_bwTest = read_timer(); 
     gfor(array ch, 3){
         //input_copy(span, span, ch) = input(span, span, ch); 
