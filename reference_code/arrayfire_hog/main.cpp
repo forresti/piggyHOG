@@ -32,8 +32,8 @@ array gradient_builtin(array input){
     gradX = abs(gradX)*2; //do 'abs' so that img makes sense as [0 to 255]
     gradY = abs(gradY)*2;
 
-    saveimage("gradX_arrayfire.jpg", gradX);
-    saveimage("gradY_arrayfire.jpg", gradY);
+    saveimage("gradX_builtin.jpg", gradX);
+    saveimage("gradY_builtin.jpg", gradY);
     return gradY;
 }
 
@@ -41,26 +41,35 @@ array gradient_gfor(array input){
     int width = input.dims(1);
     int height = input.dims(0);
 
-    //array gradX, gradY;
     //array gradX_ch0(input(span, span, 0)); //using just 1 channel gives reasonable-looking output
     array gradX(height, width, 3, f32);
+    array gradY(height, width, 3, f32); 
 
     //TODO: gfor loop
     for(int x=0; x<width; x++){
         for(int y=0; y<height; y++){
-            for(int ch=0; ch<3; ch++){
-                gradX(y,x,ch) = input(CLAMP(y,0,height-1), CLAMP(x+1,0,width-1), ch) - 
-                                input(CLAMP(y,0,height-1), CLAMP(x-1,0,width-1), ch); //TODO: cast this stuff to float
+            gfor(array ch, 3){
+            //for(int ch=0; ch<3; ch++){
+                gradX(y,x,ch) = input(y, CLAMP(x+1,0,width-1), ch) -
+                                input(y, CLAMP(x-1,0,width-1), ch); //this is already type float
+
+                gradY(y,x,ch) = input(CLAMP(y+1,0,height-1), x, ch) -
+                                input(CLAMP(y-1,0,height-1), x, ch); //this is already type float
+
+                //gradX(y,x,ch) = input(CLAMP(y,0,height-1), CLAMP(x+1,0,width-1), ch) - 
+                //                input(CLAMP(y,0,height-1), CLAMP(x-1,0,width-1), ch); 
             }
         }
     }
-
+    gradX = abs(gradX);
+    gradY = abs(gradY);
+    saveimage("gradX_gfor.jpg", gradX);
+    saveimage("gradY_gfor.jpg", gradY);
     return gradX;
 }
 
 int main(int argc, char** argv) {
     //deviceset(1);
-
     try {
         info();
         //array input = loadimage("../../images_640x480/carsgraz_001.image.jpg", true); //iscolor='true'
@@ -77,19 +86,15 @@ int main(int argc, char** argv) {
         cudaDeviceSynchronize();
         double time_gradient = read_timer() - start_gradient;
         printf("[builtin] computed gradient in %f ms \n", time_gradient);
+        //saveimage("./gradient_builtin.jpg", result_builtin);
 
-        saveimage("./gradient_builtin.jpg", result_builtin);
-
-#if 0
     //gfor version
         start_gradient = read_timer();
         array result_gfor = gradient_gfor(input);
         cudaDeviceSynchronize();
         time_gradient = read_timer() - start_gradient;
         printf("[gfor] computed gradient in %f ms \n", time_gradient);
-
-        saveimage("./gradient_gfor.jpg", result_gfor);
-#endif
+        //saveimage("./gradient_gfor.jpg", result_gfor);
 
     } catch (af::exception& e) {
         fprintf(stderr, "%s\n", e.what());
