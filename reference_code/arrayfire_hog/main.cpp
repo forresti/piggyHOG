@@ -90,11 +90,12 @@ array bandwidth_gfor(array input){
     array input_copy(height, width, 3, f32); 
     cudaDeviceSynchronize();  
  
-    double start_bwTest = read_timer(); 
+    double start_bwTest = read_timer();
     gfor(array ch, 3){
         //input_copy(span, span, ch) = input(span, span, ch); 
         input_copy(span, span, ch) = input(span, span, ch) * 0.5f;
     }
+    //input_copy = input * 0.5f; //seems to be evaluated lazily ... takes no time.
     cudaDeviceSynchronize();
     double time_bwTest = read_timer() - start_bwTest;
     double gb_to_copy = width * height * 3 * sizeof(float) / 1e9;
