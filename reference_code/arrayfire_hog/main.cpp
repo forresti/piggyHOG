@@ -41,11 +41,8 @@ array gradient_gfor(array input){
     int width = input.dims(1);
     int height = input.dims(0);
 
-    //array gradX_ch0(input(span, span, 0)); //using just 1 channel gives reasonable-looking output
     array gradX(height, width, 3, f32);
     array gradY(height, width, 3, f32); 
-
-    //TODO: gfor loop
 
 #if 0 //without gfor
     for(int x=0; x<width; x++){
@@ -54,18 +51,21 @@ array gradient_gfor(array input){
                 gradX(y,x,ch) = input(y, CLAMP(x+1,0,width-1), ch) -
                                 input(y, CLAMP(x-1,0,width-1), ch); //this is already type float
                 gradY(y,x,ch) = input(CLAMP(y+1,0,height-1), x, ch) -
-                                input(CLAMP(y-1,0,height-1), x, ch); //this is already type float
+                                input(CLAMP(y-1,0,height-1), x, ch); 
 
             }
         }
     }
 #endif
 #if 1 //GPU, with gfor
-    gfor(array x, width){
-        //gradX(span, x ,span) = input(span, CLAMP(x+1,0,width-1), span) -
+    //gfor(array x, width){
+    gfor(array y, height){
+        //gradX(span, x, span) = input(span, CLAMP(x+1,0,width-1), span) -
         //                       input(span, CLAMP(x-1,0,width-1), span);
-        //gradX(span, x ,span) = input(span, CLAMP(x+1,0,width-1), span); //just shift right
-        gradX(span, x ,span) = input(span, x, span);
+        //gradX(span, x, span) = input(span, CLAMP(x+1,0,width-1), span); //just shift right
+        //gradX(span, x, span) = input(span, x, span); //middle dim in parallel ... just copy. 'unspecified launch failure'
+        //aha, 'A(array, span, array) isn't supported. A(array, array, span) is supported." --http://forums.accelereyes.com/forums/viewtopic.php?f=17&t=6415
+        gradX(y, span, span) = input(y, span, span); 
     }
 #endif
 #if 0 //trivial gfor example, with inner dim in parallel.
