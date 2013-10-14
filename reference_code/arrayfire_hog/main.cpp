@@ -75,6 +75,8 @@ array gradient_gfor(array input){
 
 #endif
 
+//TODO: split array into its individual channels. 
+
     gradX = abs(gradX);
     gradY = abs(gradY);
     saveimage("gradX_gfor.jpg", gradX);
