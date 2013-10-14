@@ -47,23 +47,25 @@ array gradient_gfor(array input){
 
     //TODO: gfor loop
 
-    gfor(array x, width){
-    //for(int x=0; x<width; x++){
-        gfor(array y, height){
-        //for(int y=0; y<height; y++){
-            gfor(array ch, 3){
-            //for(int ch=0; ch<3; ch++){
+#if 0
+    for(int x=0; x<width; x++){
+        for(int y=0; y<height; y++){
+            for(int ch=0; ch<3; ch++){
                 gradX(y,x,ch) = input(y, CLAMP(x+1,0,width-1), ch) -
                                 input(y, CLAMP(x-1,0,width-1), ch); //this is already type float
-
                 gradY(y,x,ch) = input(CLAMP(y+1,0,height-1), x, ch) -
                                 input(CLAMP(y-1,0,height-1), x, ch); //this is already type float
 
-                //gradX(y,x,ch) = input(CLAMP(y,0,height-1), CLAMP(x+1,0,width-1), ch) - 
-                //                input(CLAMP(y,0,height-1), CLAMP(x-1,0,width-1), ch); 
             }
         }
     }
+#endif
+    gfor(array x, width){
+        gradX(span, x ,span) = input(span, CLAMP(x+1,0,width-1), span) -
+                               input(span, CLAMP(x-1,0,width-1), span);
+    }
+
+
     gradX = abs(gradX);
     gradY = abs(gradY);
     saveimage("gradX_gfor.jpg", gradX);
