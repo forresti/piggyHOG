@@ -91,7 +91,8 @@ array bandwidth_gfor(array input){
    
     double start_bwTest = read_timer(); 
     gfor(array ch, 3){
-        input_copy(span, span, ch) = input(span, span, ch); //TODO: multiply by 0.5 or something like that
+        //input_copy(span, span, ch) = input(span, span, ch); 
+        input_copy(span, span, ch) = input(span, span, ch) * 0.5f;
     }
     cudaDeviceSynchronize();
     double time_bwTest = read_timer() - start_bwTest;
@@ -99,7 +100,6 @@ array bandwidth_gfor(array input){
     double gb_per_sec = gb_to_copy / (time_bwTest/1000); //convert time_bwTest from ms to sec
 
     printf("[gfor] stream benchmark in %f ms, %f gb/s \n", time_bwTest, gb_per_sec);
-
     return input_copy;
 }
 
