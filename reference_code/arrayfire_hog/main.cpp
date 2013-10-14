@@ -57,7 +57,7 @@ array gradient_gfor(array input){
         }
     }
 #endif
-#if 1 //GPU, with gfor
+#if 0 //GPU, with gfor
     //gfor(array x, width){
     gfor(array y, height){
         //gradX(span, x, span) = input(span, CLAMP(x+1,0,width-1), span) -
@@ -68,7 +68,7 @@ array gradient_gfor(array input){
         gradX(y, span, span) = input(y, span, span); 
     }
 #endif
-#if 0 //trivial gfor example, with inner dim in parallel.
+#if 1 //trivial gfor example, with inner dim in parallel.
     gfor(array ch, 3){
         gradX(span, span, ch) = input(span, span, ch);
     }
@@ -82,6 +82,25 @@ array gradient_gfor(array input){
     saveimage("gradX_gfor.jpg", gradX);
     saveimage("gradY_gfor.jpg", gradY);
     return gradX;
+}
+
+array bandwidth_gfor(array input){
+    int width = input.dims(1);
+    int height = input.dims(0);
+    array input_copy(height, width, 3, f32); 
+   
+    double start_bwTest = read_timer(); 
+    gfor(array ch, 3){
+        input_copy(span, span, ch) = input(span, span, ch); //TODO: multiply by 0.5 or something like that
+    }
+    cudaDeviceSynchronize();
+    double time_bwTest = read_timer() - start_bwTest;
+    double gb_to_copy = width * height * 3 * sizeof(float) / 1e9;
+    double gb_per_sec = gb_to_copy / (time_bwTest/1000); //convert time_bwTest from ms to sec
+
+    printf("[gfor] stream benchmark in %f ms, %f gb/s \n", time_bwTest, gb_per_sec);
+
+    return input_copy;
 }
 
 int main(int argc, char** argv) {
@@ -111,6 +130,9 @@ int main(int argc, char** argv) {
         time_gradient = read_timer() - start_gradient;
         printf("[gfor] computed gradient in %f ms \n", time_gradient);
         //saveimage("./gradient_gfor.jpg", result_gfor);
+
+    //bandwidth test
+        array input_copy = bandwidth_gfor(input);
 
     } catch (af::exception& e) {
         fprintf(stderr, "%s\n", e.what());
