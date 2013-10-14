@@ -60,13 +60,20 @@ array gradient_gfor(array input){
         }
     }
 #endif
-#if 1 //GPU, with gfor
+#if 0 //GPU, with gfor
     gfor(array x, width){
         //gradX(span, x ,span) = input(span, CLAMP(x+1,0,width-1), span) -
         //                       input(span, CLAMP(x-1,0,width-1), span);
         gradX(span, x ,span) = input(span, CLAMP(x+1,0,width-1), span); //just shift right
     }
 #endif
+#if 1 //trivial gfor example, with inner dim in parallel.
+    gfor(array ch, 3){
+        gradX(span, span, ch) = input(span, span, ch);
+    }
+
+#endif
+
     gradX = abs(gradX);
     gradY = abs(gradY);
     saveimage("gradX_gfor.jpg", gradX);
