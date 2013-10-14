@@ -46,8 +46,11 @@ array gradient_gfor(array input){
     array gradY(height, width, 3, f32); 
 
     //TODO: gfor loop
-    for(int x=0; x<width; x++){
-        for(int y=0; y<height; y++){
+
+    gfor(array x, width){
+    //for(int x=0; x<width; x++){
+        gfor(array y, height){
+        //for(int y=0; y<height; y++){
             gfor(array ch, 3){
             //for(int ch=0; ch<3; ch++){
                 gradX(y,x,ch) = input(y, CLAMP(x+1,0,width-1), ch) -
