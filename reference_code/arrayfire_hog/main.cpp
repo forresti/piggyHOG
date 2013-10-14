@@ -134,8 +134,10 @@ int main(int argc, char** argv) {
         //saveimage("./gradient_gfor.jpg", result_gfor);
 
     //bandwidth test
-        array input_copy = bandwidth_gfor(input);
-
+        int n_iter = 10;
+        for(int i=0; i<n_iter; i++){
+            array input_copy = bandwidth_gfor(input);
+        }
     } catch (af::exception& e) {
         fprintf(stderr, "%s\n", e.what());
     }
