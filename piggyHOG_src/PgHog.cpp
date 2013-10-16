@@ -63,7 +63,7 @@ PgHog::~PgHog(){
 
 //temp debug function declarations
 void writeGradToFile(Mat oriImg, Mat gradImg);
-void writeHogCellsToFile(PgHogContainer hogResult);
+//void writeHogCellsToFile(PgHogContainer hogResult);
 
 //compute the gradient and magnitude at one image location, store the results in oriImg and magImg
 inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
@@ -268,7 +268,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     Mat magImg(img.rows, img.cols, CV_32FC1);
 
     //hogResult first holds HOG Cells, then is normalized into HOG Blocks.
-    PgHogContainer hogResult;
+    PgHogContainer hogResult; //TODO: allocate on the stack.
     hogResult.padx = 11; //temporary 
     hogResult.pady = 6;
     //TODO: require padx>=1 and pady>=1. (is this enough to avoid the need for guards on block normalization?) 
@@ -374,9 +374,10 @@ void writeGradToFile(Mat oriImg, Mat magImg){
     imwrite("PgHog_magnitudes.jpg", magImg); 
 }
 
+#if 0
 void writeHogCellsToFile(PgHogContainer hogResult){
     ostringstream fname;
     fname << "piggyHOG_results/level" << 0 << ".csv";
     writeCsv_3d_Hog_Float(hogResult.hog, hogResult.paddedWidth, hogResult.paddedHeight, hogResult.depth, fname.str());
 }
-
+#endif
