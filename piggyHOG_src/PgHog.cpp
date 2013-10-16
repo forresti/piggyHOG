@@ -102,15 +102,15 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
 
 //compute one HOG cell, storing the results in hogResult
 // only compute the contrast-sensitive features (0 to 360 degrees)
-inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer hogResult){
+inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogContainer* hogResult){
     //populate this HOG cell by linearly interpolating the oriented gradients 
     //the 'center' of the hog cell is: (hogX+sbin/2, hogY+sbin/2).
     //we do (x,y)=(+/-sbin, +/-sbin) pixels from the center of the hog cell.
 
     const int sbin=4;
-    //int sbin = hogResult.spatialBinSize;
-    int hogX_internal = hogX + hogResult.padx; //skip over padding on left side of hogResult.hog
-    int hogY_internal = hogY + hogResult.pady; //skip over padding at the top of hogResult.hog
+    //int sbin = hogResult->spatialBinSize;
+    int hogX_internal = hogX + hogResult->padx; //skip over padding on left side of hogResult->hog
+    int hogY_internal = hogY + hogResult->pady; //skip over padding at the top of hogResult->hog
 
     int pixelX_start = hogX*sbin - sbin*0.5f;
     pixelX_start = clamp(pixelX_start, 0, magImg.cols-1); //not exactly the right logic ... should actually skip the indices that fall off the edge, instead of clamping
@@ -120,8 +120,8 @@ inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogCo
     pixelY_start = clamp(pixelY_start, 0, magImg.rows-1);
     //int pixelY_end = pixelY_start + 2*sbin;
 
-    int hogOutputIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth +
-                       hogX_internal * hogResult.depth;
+    int hogOutputIdx = hogY_internal * hogResult->paddedWidth * hogResult->depth +
+                       hogX_internal * hogResult->depth;
     
     //for(int pixelY = pixelY_start; pixelY < pixelY_end; pixelY++){
     //    for(int pixelX = pixelX_start; pixelX < pixelX_end; pixelX++){ 
@@ -140,9 +140,9 @@ inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogCo
             int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
             float mag = magImg.at<float>(pixelY, pixelX);
 
-            //hogResult.hog[hogOutputIdx + oriBin_signed] += 1; //test
-            //hogResult.hog[hogOutputIdx + oriBin_signed] += mag * 2.0f; //test
-            hogResult.hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY;
+            //hogResult->hog[hogOutputIdx + oriBin_signed] += 1; //test
+            //hogResult->hog[hogOutputIdx + oriBin_signed] += mag * 2.0f; //test
+            hogResult->hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY;
         }
     }
 
@@ -150,45 +150,45 @@ inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogCo
 }
 
 //compute contrast-insensitive features (0 to 180 degrees)
-// assume that hogCell() has already been performed on hogResult.
-inline void PgHog::hogCell_unsigned(int hogX, int hogY, PgHogContainer hogResult){
-    int hogX_internal = hogX + hogResult.padx; //skip over padding on left side of hogResult.hog
-    int hogY_internal = hogY + hogResult.pady; //skip over padding at the top of hogResult.hog
-    int hogOutputIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth +
-                       hogX_internal * hogResult.depth;
+// assume that hogCell() has already been performed on hogResult->
+inline void PgHog::hogCell_unsigned(int hogX, int hogY, PgHogContainer* hogResult){
+    int hogX_internal = hogX + hogResult->padx; //skip over padding on left side of hogResult->hog
+    int hogY_internal = hogY + hogResult->pady; //skip over padding at the top of hogResult->hog
+    int hogOutputIdx = hogY_internal * hogResult->paddedWidth * hogResult->depth +
+                       hogX_internal * hogResult->depth;
 
     //pool contrast-sensitive features to contrast-insensitive
     for(int i=0; i<9; i++){
-        hogResult.hog[hogOutputIdx + 18 + i] = hogResult.hog[hogOutputIdx + 0 + i] + //0 to 180
-                                               hogResult.hog[hogOutputIdx + 9 + i];  //180 to 360
+        hogResult->hog[hogOutputIdx + 18 + i] = hogResult->hog[hogOutputIdx + 0 + i] + //0 to 180
+                                               hogResult->hog[hogOutputIdx + 9 + i];  //180 to 360
     }
 }
 
 //compute the norm of one hog cell (sum up its 'energy'), store it in normImg
-// assume that hogCell() has already been performed on hogResult.
-inline void PgHog::hogCell_gradientEnergy(int hogX, int hogY, PgHogContainer hogResult, Mat &normImg){
-    int hogX_internal = hogX + hogResult.padx; //skip over padding on left side of hogResult.hog
-    int hogY_internal = hogY + hogResult.pady; //skip over padding at the top of hogResult.hog
+// assume that hogCell() has already been performed on hogResult->
+inline void PgHog::hogCell_gradientEnergy(int hogX, int hogY, PgHogContainer* hogResult, Mat &normImg){
+    int hogX_internal = hogX + hogResult->padx; //skip over padding on left side of hogResult->hog
+    int hogY_internal = hogY + hogResult->pady; //skip over padding at the top of hogResult->hog
 
-    int hogIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth +
-                 hogX_internal * hogResult.depth;
+    int hogIdx = hogY_internal * hogResult->paddedWidth * hogResult->depth +
+                 hogX_internal * hogResult->depth;
  
     //sum up the (0 to 360 degree) hog cells
     float norm = 0.0f;
     for(int i=0; i<18; i++){
-        norm += hogResult.hog[hogIdx+i] * hogResult.hog[hogIdx+i]; //squared -- will do sqrt in hogBlock_normalize()
+        norm += hogResult->hog[hogIdx+i] * hogResult->hog[hogIdx+i]; //squared -- will do sqrt in hogBlock_normalize()
     }
     normImg.at<float>(hogY_internal, hogX_internal) = norm;
 }
 
 //normalize HOG Cells (contrast-sensitive and contrast-insensitive features) into HOG Blocks
 //produces *one* HOG Block based on (hogY, hogX) and its neighbors
-inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResult, Mat normImg){
+inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer* hogResult, Mat normImg){
 
     //TODO: calculate the normalization factors with convolution implementation? (sacrifice locality for reuse?)
 
-    int hogX_internal = hogX + hogResult.padx; //skip over padding on left side of hogResult.hog
-    int hogY_internal = hogY + hogResult.pady; //skip over padding at the top of hogResult.hog
+    int hogX_internal = hogX + hogResult->padx; //skip over padding on left side of hogResult->hog
+    int hogY_internal = hogY + hogResult->pady; //skip over padding at the top of hogResult->hog
 
     //TODO: clamp hogX_internal and hogY_internal to a minimum of 1, to avoid falling off the edge?
 
@@ -214,8 +214,8 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResu
                         normImg.at<float>(hogY_internal+1, hogX_internal+1) + eps);
 
 
-    int hogIdx = hogY_internal * hogResult.paddedWidth * hogResult.depth + 
-                 hogX_internal * hogResult.depth;  //the location in hogResult.hog to update
+    int hogIdx = hogY_internal * hogResult->paddedWidth * hogResult->depth + 
+                 hogX_internal * hogResult->depth;  //the location in hogResult->hog to update
     
     float t0 = 0.0f; //for texture features
     float t1 = 0.0f;
@@ -224,13 +224,13 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResu
 
     //contrast sensitive features (0 to 360 degrees)
     for(int i=0; i<18; i++){
-        float currFeature = hogResult.hog[hogIdx + i]; //contrast-sensitive feature in bin range 0 to 17
+        float currFeature = hogResult->hog[hogIdx + i]; //contrast-sensitive feature in bin range 0 to 17
         float h0 = min(currFeature * n0, 0.2f);
         float h1 = min(currFeature * n1, 0.2f);
         float h2 = min(currFeature * n2, 0.2f);
         float h3 = min(currFeature * n3, 0.2f);
 
-        hogResult.hog[hogIdx + i] = (h0 + h1 + h2 + h3) * 0.5f; //TODO: check on numerical results 
+        hogResult->hog[hogIdx + i] = (h0 + h1 + h2 + h3) * 0.5f; //TODO: check on numerical results 
 
         t0 += h0; //precompute texture features
         t1 += h1;
@@ -242,23 +242,23 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer hogResu
     for(int i=0; i<9; i++){    
         //TODO: good candidate for vectorization, if compute bound?
 
-        float currFeature = hogResult.hog[hogIdx + i + 18]; //contrast-insensitive feature in bin range 18 to 26
+        float currFeature = hogResult->hog[hogIdx + i + 18]; //contrast-insensitive feature in bin range 18 to 26
         float h0 = min(currFeature * n0, 0.2f); 
         float h1 = min(currFeature * n1, 0.2f);
         float h2 = min(currFeature * n2, 0.2f); 
         float h3 = min(currFeature * n3, 0.2f);
 
-        hogResult.hog[hogIdx + i + 18] = (h0 + h1 + h2 + h3) * 0.5f; //TODO: check on numerical results 
+        hogResult->hog[hogIdx + i + 18] = (h0 + h1 + h2 + h3) * 0.5f; //TODO: check on numerical results 
     }
 
     //texture features
-    hogResult.hog[hogIdx + 27] = t0 * 0.2357f; //FIXME: some of these are greater than 0.4, seems wrong.
-    hogResult.hog[hogIdx + 28] = t1 * 0.2357f;
-    hogResult.hog[hogIdx + 29] = t2 * 0.2357f;
-    hogResult.hog[hogIdx + 30] = t3 * 0.2357f;
+    hogResult->hog[hogIdx + 27] = t0 * 0.2357f; //FIXME: some of these are greater than 0.4, seems wrong.
+    hogResult->hog[hogIdx + 28] = t1 * 0.2357f;
+    hogResult->hog[hogIdx + 29] = t2 * 0.2357f;
+    hogResult->hog[hogIdx + 30] = t3 * 0.2357f;
 }
 
-PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
+PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
   //setup
     assert(img.type() == CV_8UC3);
     int sbin = spatialBinSize; //shorthand
@@ -268,31 +268,31 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     Mat magImg(img.rows, img.cols, CV_32FC1);
 
     //hogResult first holds HOG Cells, then is normalized into HOG Blocks.
-    PgHogContainer hogResult; //TODO: allocate on the stack.
-    hogResult.padx = 11; //temporary 
-    hogResult.pady = 6;
+    PgHogContainer *hogResult = (PgHogContainer*)malloc(sizeof(PgHogContainer)); //TODO: make PgHogContainer a class, and use new/delete.
+    hogResult->padx = 11; //temporary 
+    hogResult->pady = 6;
     //TODO: require padx>=1 and pady>=1. (is this enough to avoid the need for guards on block normalization?) 
-    hogResult.width = round((float)img.cols / (float)spatialBinSize);
-    hogResult.height = round((float)img.rows / (float)spatialBinSize);
-    hogResult.paddedWidth = hogResult.width + 2*hogResult.padx;
-    hogResult.paddedHeight = hogResult.height + 2*hogResult.pady;
-    hogResult.depth = 32;
-    hogResult.spatialBinSize = spatialBinSize;
-    //hogResult.hog = (float*)malloc(hogResult.paddedWidth * hogResult.paddedHeight * hogResult.depth * sizeof(float));
-    hogResult.hog = (float*)calloc(hogResult.paddedWidth * hogResult.paddedHeight * hogResult.depth, sizeof(float));    
+    hogResult->width = round((float)img.cols / (float)spatialBinSize);
+    hogResult->height = round((float)img.rows / (float)spatialBinSize);
+    hogResult->paddedWidth = hogResult->width + 2*hogResult->padx;
+    hogResult->paddedHeight = hogResult->height + 2*hogResult->pady;
+    hogResult->depth = 32;
+    hogResult->spatialBinSize = spatialBinSize;
+    //hogResult->hog = (float*)malloc(hogResult->paddedWidth * hogResult->paddedHeight * hogResult->depth * sizeof(float));
+    hogResult->hog = (float*)calloc(hogResult->paddedWidth * hogResult->paddedHeight * hogResult->depth, sizeof(float));    
 
     //TODO: store normalization results
-    //float* norm = malloc(hogResult.paddedWidth * hogResult.paddedHeight * sizeof(float)); 
-    Mat normImg(hogResult.paddedHeight, hogResult.paddedWidth, CV_32FC1);
+    //float* norm = malloc(hogResult->paddedWidth * hogResult->paddedHeight * sizeof(float)); 
+    Mat normImg(hogResult->paddedHeight, hogResult->paddedWidth, CV_32FC1);
 
     const int unrollX = 8;
     const int unrollY = 4;
   //extract features
-    //for(int hogY = 0; hogY < hogResult.height; hogY++){
-    //    for(int hogX = 0; hogX < hogResult.width; hogX++){
+    //for(int hogY = 0; hogY < hogResult->height; hogY++){
+    //    for(int hogX = 0; hogX < hogResult->width; hogX++){
 
-    for(int hogY_tile = 0; hogY_tile < hogResult.height; hogY_tile += unrollY){
-      for(int hogX_tile = 0; hogX_tile < hogResult.width; hogX_tile += unrollX){
+    for(int hogY_tile = 0; hogY_tile < hogResult->height; hogY_tile += unrollY){
+      for(int hogX_tile = 0; hogX_tile < hogResult->width; hogX_tile += unrollX){
 
         for(int hogY_inner = 0; hogY_inner < unrollY; hogY_inner++){
           for(int hogX_inner = 0; hogX_inner < unrollX; hogX_inner++){ 
@@ -300,7 +300,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
             int hogX = hogX_tile + hogX_inner;
             int hogY = hogY_tile + hogY_inner;
 
-            if(hogX >= hogResult.width || hogY >= hogResult.height)
+            if(hogX >= hogResult->width || hogY >= hogResult->height)
                 continue;
 
             //calculate gradients 
@@ -320,7 +320,7 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
             }
 
             //HOG block normalization
-            //note: there are no 'if hogX>0' guards, because the hogResult.hog and normImg are padded.
+            //note: there are no 'if hogX>0' guards, because the hogResult->hog and normImg are padded.
             //      also, hogBlock_normalize() has a forward dependency to its right and bottom neighbors, so we do hogX-2, hogY-2
             hogBlock_normalize(hogX-2, hogY-2, hogResult, normImg); //TODO: think about edge cases
 #endif
@@ -334,13 +334,13 @@ PgHogContainer PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     //writeHogCellsToFile(hogResult);
 }
 
-vector<PgHogContainer> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
+vector<PgHogContainer*> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
 
     int interval = 10;
     float sc = pow(2, 1 / (float)interval);
     vector<Mat> imgPyramid(interval*2); //100% down to 25% of orig size (two octaves, 10 scales per octave)
     int nLevels = 40; //TODO: compute this based on img size
-    vector<PgHogContainer> hogPyramid(nLevels); //do I need a copy constructor for PgHogContainer?
+    vector<PgHogContainer*> hogPyramid(nLevels); //do I need a copy constructor for PgHogContainer?
 
 //TODO: pass padx, pady into extract_HOG_oneScale()    
 
@@ -378,6 +378,6 @@ void writeGradToFile(Mat oriImg, Mat magImg){
 void writeHogCellsToFile(PgHogContainer hogResult){
     ostringstream fname;
     fname << "piggyHOG_results/level" << 0 << ".csv";
-    writeCsv_3d_Hog_Float(hogResult.hog, hogResult.paddedWidth, hogResult.paddedHeight, hogResult.depth, fname.str());
+    writeCsv_3d_Hog_Float(hogResult->hog, hogResult->paddedWidth, hogResult->paddedHeight, hogResult->depth, fname.str());
 }
 #endif

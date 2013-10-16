@@ -7,6 +7,8 @@
 #include "PgHog.h"
 using namespace std;
 
+#if 0
+//TODO: switch to PgHogContainer*
 void writeHogCellsToFile(vector<PgHogContainer> hogPyramid){
 
     for(int level = 0; level < hogPyramid.size(); level++){
@@ -15,6 +17,7 @@ void writeHogCellsToFile(vector<PgHogContainer> hogPyramid){
         writeCsv_3d_Hog_Float(hogPyramid[level].hog, hogPyramid[level].paddedWidth, hogPyramid[level].paddedHeight, hogPyramid[level].depth, fname.str());
     }
 }
+#endif
 
 int main (int argc, char **argv)
 {
@@ -26,14 +29,14 @@ int main (int argc, char **argv)
     double start_timer = read_timer();
 
     //int spatialBinSize = 4;
-    //PgHogContainer hogResult = pghog.extract_HOG_oneScale(img, spatialBinSize);
+    //PgHogContainer* hogResult = pghog.extract_HOG_oneScale(img, spatialBinSize);
 
-    vector<PgHogContainer> hogPyramid = pghog.extract_HOG_pyramid(img, 11, 6);
+    vector<PgHogContainer*> hogPyramid = pghog.extract_HOG_pyramid(img, 11, 6);
 
     double time_one_scale = read_timer() - start_timer;
     printf("time for [whatever's implemented so far] for 1 scale: %f ms \n", time_one_scale);
 
-    writeHogCellsToFile(hogPyramid);
+    //writeHogCellsToFile(hogPyramid);
 
     return 0;
 }
