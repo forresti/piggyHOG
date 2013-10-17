@@ -7,17 +7,15 @@
 #include "PgHog.h"
 using namespace std;
 
-#if 0
-//TODO: switch to PgHogContainer*
-void writeHogCellsToFile(vector<PgHogContainer> hogPyramid){
+void writeHogCellsToFile(vector<PgHogContainer*> hogPyramid){
 
     for(int level = 0; level < hogPyramid.size(); level++){
         ostringstream fname;
         fname << "piggyHOG_results/level" << level << ".csv";
-        writeCsv_3d_Hog_Float(hogPyramid[level].hog, hogPyramid[level].paddedWidth, hogPyramid[level].paddedHeight, hogPyramid[level].depth, fname.str());
+        printf("hogPyramid[level]->paddedWidth = %d \n", hogPyramid[level]->paddedWidth); //segfault
+        writeCsv_3d_Hog_Float(hogPyramid[level]->hog, hogPyramid[level]->paddedWidth, hogPyramid[level]->paddedHeight, hogPyramid[level]->depth, fname.str());
     }
 }
-#endif
 
 int main (int argc, char **argv)
 {
@@ -36,7 +34,7 @@ int main (int argc, char **argv)
     double time_one_scale = read_timer() - start_timer;
     printf("time for [whatever's implemented so far] for 1 scale: %f ms \n", time_one_scale);
 
-    //writeHogCellsToFile(hogPyramid);
+    writeHogCellsToFile(hogPyramid);
 
     return 0;
 }
