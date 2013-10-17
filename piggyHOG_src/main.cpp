@@ -12,7 +12,7 @@ void writeHogCellsToFile(vector<PgHogContainer*> hogPyramid){
     for(int level = 0; level < hogPyramid.size(); level++){
         ostringstream fname;
         fname << "piggyHOG_results/level" << level << ".csv";
-        printf("hogPyramid[level]->paddedWidth = %d \n", hogPyramid[level]->paddedWidth); //segfault
+        //printf("hogPyramid[level]->paddedWidth = %d \n", hogPyramid[level]->paddedWidth); //segfault
         writeCsv_3d_Hog_Float(hogPyramid[level]->hog, hogPyramid[level]->paddedWidth, hogPyramid[level]->paddedHeight, hogPyramid[level]->depth, fname.str());
     }
 }

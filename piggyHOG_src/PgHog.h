@@ -40,6 +40,8 @@ class PgHog{
         //void hogBlock(...) //compute HOG block location at one x,y location (indexing into HOG cells)
         void hogBlock_normalize(int hogX, int hogY, PgHogContainer* hogResult, Mat normImg);
         
+        //add binary place features around padded border of a HOG image
+        void hogPlaceFeatures_border(PgHogContainer* hogResult);
 
     private:
         //arctan lookup table 

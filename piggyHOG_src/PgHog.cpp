@@ -258,6 +258,24 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer* hogRes
     hogResult->hog[hogIdx + 30] = t3 * 0.2357f;
 }
 
+//add binary place features around padded border of a HOG image
+inline void PgHog::hogPlaceFeatures_border(PgHogContainer* hogResult){
+
+    for(int hogY=0; hogY < hogResult->pady; hogY++){
+        for(int hogX=0; hogX < hogResult->padx; hogX++){
+            int topLeftIdx =      hogX                     + (hogY * hogResult->paddedWidth);
+            int topRightIdx =    (hogX + hogResult->width) + (hogY * hogResult->paddedWidth);
+            int bottomLeftIdx =   hogX                     + ((hogY + hogResult->height) * hogResult->paddedWidth);
+            int bottomRightIdx = (hogX + hogResult->width) + ((hogY + hogResult->height) * hogResult->paddedWidth);
+            
+            hogResult->hog[topLeftIdx]     = 1.0f;
+            hogResult->hog[topRightIdx]    = 1.0f;
+            hogResult->hog[bottomLeftIdx]  = 1.0f;
+            hogResult->hog[bottomRightIdx] = 1.0f;
+        }
+    }
+}
+
 PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
   //setup
     assert(img.type() == CV_8UC3);
@@ -324,11 +342,12 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
             //      also, hogBlock_normalize() has a forward dependency to its right and bottom neighbors, so we do hogX-2, hogY-2
             hogBlock_normalize(hogX-2, hogY-2, hogResult, normImg); //TODO: think about edge cases
 #endif
-            //TODO: binary truncation features
           }
         }
       }
     }
+
+    hogPlaceFeatures_border(hogResult); //binary truncation features
 
     //writeGradToFile(oriImg, magImg);
     //writeHogCellsToFile(hogResult);
@@ -340,7 +359,7 @@ vector<PgHogContainer*> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
     int interval = 10;
     float sc = pow(2, 1 / (float)interval);
     vector<Mat> imgPyramid(interval*2); //100% down to 25% of orig size (two octaves, 10 scales per octave)
-    int nLevels = 40; //TODO: compute this based on img size
+    int nLevels = 30; //TODO: compute this based on img size
     vector<PgHogContainer*> hogPyramid(nLevels); //do I need a copy constructor for PgHogContainer?
 
 //TODO: pass padx, pady into extract_HOG_oneScale()    
@@ -361,8 +380,6 @@ vector<PgHogContainer*> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
         //TODO: more small pyra levels?    
 
     }
-
-printf("hogPyramid[level]->paddedWidth = %d \n", (*hogPyramid[0]).paddedWidth); //segfault
 
     return hogPyramid;
 }
