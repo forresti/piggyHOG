@@ -332,6 +332,7 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 
     //writeGradToFile(oriImg, magImg);
     //writeHogCellsToFile(hogResult);
+    return hogResult;
 }
 
 vector<PgHogContainer*> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
@@ -362,7 +363,6 @@ vector<PgHogContainer*> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
     }
 
 printf("hogPyramid[level]->paddedWidth = %d \n", (*hogPyramid[0]).paddedWidth); //segfault
-
 
     return hogPyramid;
 }
