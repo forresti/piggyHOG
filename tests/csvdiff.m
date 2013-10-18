@@ -58,6 +58,6 @@ function visHog(hog)
     addpath('../vis');
     w = foldHOG(hog);
     %visualizeHOG(double(max(0,w)));
-    visualizeHOG(double(  min(max(0,w), 0.4) )); %Forrest -- cap the values at 1. (to ignore the goofy border condition in piggyHOG)
+    visualizeHOG(double(  min(max(0,w), 0.4) )); %Forrest -- cap the values at 0.4. (to ignore the goofy border condition in piggyHOG)
 end
 

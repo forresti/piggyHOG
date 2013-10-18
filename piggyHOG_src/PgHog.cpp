@@ -145,8 +145,6 @@ inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogCo
             hogResult->hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY;
         }
     }
-
-    //TODO: calculate the sum of this bin and store it (for normalization)
 }
 
 //compute contrast-insensitive features (0 to 180 degrees)
@@ -296,7 +294,6 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     hogResult->paddedHeight = hogResult->height + 2*hogResult->pady;
     hogResult->depth = 32;
     hogResult->spatialBinSize = spatialBinSize;
-    //hogResult->hog = (float*)malloc(hogResult->paddedWidth * hogResult->paddedHeight * hogResult->depth * sizeof(float));
     hogResult->hog = (float*)calloc(hogResult->paddedWidth * hogResult->paddedHeight * hogResult->depth, sizeof(float));    
 
     Mat normImg(hogResult->paddedHeight, hogResult->paddedWidth, CV_32FC1); //store normalization results
@@ -330,9 +327,9 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 #if  1
             //HOG cell binning
             if(hogX>0 && hogY>0){
-                hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult); //constrast sensitive features
-                hogCell_gradientEnergy(hogX-1, hogY-1, hogResult, normImg); //sum of each hog cell's contrast sensitive (0-360) bins
-                hogCell_unsigned(hogX-1, hogY-1, hogResult); //contrast-insensitive features
+                hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult); //hog[0:17] = constrast sensitive features
+                hogCell_gradientEnergy(hogX-1, hogY-1, hogResult, normImg); //normImg = sum of each hog cell's contrast sensitive (0-360) bins
+                hogCell_unsigned(hogX-1, hogY-1, hogResult); //hog[18:27] = contrast-insensitive features
             }
 
             //HOG block normalization
@@ -344,6 +341,19 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
         }
       }
     }
+
+    //clean up rightmost columns
+    for(int hogY = 1; hogY < hogResult->height; hogY++){ 
+        for(int hogX = hogResult->width; hogX < hogResult->width+2; hogX++){
+            if(hogX == hogResult->width){ //first iteration only
+             //   hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult); //hog[0:17] = constrast sensitive features
+             //   hogCell_gradientEnergy(hogX-1, hogY-1, hogResult, normImg); //normImg = sum of each hog cell's contrast sensitive (0-360) bins
+             //   hogCell_unsigned(hogX-1, hogY-1, hogResult); //hog[18:27] = contrast-insensitive features
+            }
+            hogBlock_normalize(hogX-2, hogY-2, hogResult, normImg);
+        }
+    }
+
 
     hogPlaceFeatures_border(hogResult); //binary truncation features
 
@@ -363,7 +373,7 @@ vector<PgHogContainer*> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
 //TODO: pass padx, pady into extract_HOG_oneScale()    
 
     //omp_set_num_threads(5); //hmm, default thread count seems best
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for(int i=0; i<interval; i++){
         float downsampleFactor = 1/pow(sc, i);
         //printf("downsampleFactor = %f \n", downsampleFactor);
