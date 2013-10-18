@@ -6,9 +6,9 @@ OBJS = main.o  helpers.o
 EXENAME = main
 
 CC = g++
-CCOPTS = -c  -g -O0 `pkg-config opencv --cflags`
+CCOPTS = -c  -g -O3 -fopenmp `pkg-config opencv --cflags`
 LINK = g++
-LINKOPTS = `pkg-config opencv --libs`
+LINKOPTS = -lgomp `pkg-config opencv --libs`
 
 all : $(EXENAME)
 
