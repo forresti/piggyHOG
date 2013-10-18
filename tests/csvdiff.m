@@ -1,7 +1,7 @@
 function csvdiff()
     %for h=1:10:41
     %for h=1:30
-    for h=20:20
+    for h=1:1
         %experimentalCsv_fname = ['./ffld_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
         experimentalCsv_fname = ['./piggyHOG_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
         %experimentalCsv_fname = ['./piotr_results/carsgraz_001.image_scale_' int2str(h) '.csv'];
@@ -38,20 +38,23 @@ function mydiff(experimentalCsv_fname, referenceCsv_fname, h)
         visHog(referenceResult) %the visualizaion of this makes no sense...just like a big plaid checkerboard. something's wrong.
     figure(h+100)
         visHog(experimentalResult)
+keyboard
 end
 
 % @param hogCsv = hog in [d w*h] that we've read from a CSV. 
 % csv [d w*h] -> matlab data layout [h w d]
+%   ...and, matlab seems to take a [d w*h] csv and load it as [w*h d]
 function hog = unpackHog(hogCsv)
     hogDims = hogCsv(1, 1:3);
     d = hogDims(1); % [d w h] = my CSV dims format in both C++ and Matlab
     w = hogDims(2);
     h = hogDims(3);
 
+  %this is probably more complicated than necessary
     hog_2d = hogCsv(2:end, :); %skip the [d w h] dims header
+    hog_2d = permute(hog_2d, [2 1]); %[w*h d] to [d w*h]
     hog_3d = reshape(hog_2d, [d w h]); % [d w*h] -> C++ style [d w h] layout
     hog = permute(hog_3d, [3 2 1]); % Matlab style [h w d] layout
-    %hog = reshape(hog_2d, [w h d]);   %from csvdiff_piotr_cpp.m -- just a test
 end
 
 function visHog(hog)
