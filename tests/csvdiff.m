@@ -13,12 +13,10 @@ end
 %TODO: rename 'h' to 'level'
 function mydiff(experimentalCsv_fname, referenceCsv_fname, h)
     referenceResult = csvread(referenceCsv_fname);
-    referenceResult = unpackHog(referenceResult);
-    %referenceResult = referenceResult(2:end, :); %remove header (which shows dims)
+    referenceResult = unpackHog(referenceResult); %TODO: just pass a CSV filename into unpackHog().
 
     experimentalResult = csvread(experimentalCsv_fname);
     experimentalResult = unpackHog(experimentalResult);
-    %experimentalResult = experimentalResult(2:end, :); %remove header (which shows dims)
 
     thresh = 0.1;
     diff = abs(experimentalResult - referenceResult);
@@ -38,7 +36,6 @@ function mydiff(experimentalCsv_fname, referenceCsv_fname, h)
         visHog(referenceResult) %the visualizaion of this makes no sense...just like a big plaid checkerboard. something's wrong.
     figure(h+100)
         visHog(experimentalResult)
-keyboard
 end
 
 % @param hogCsv = hog in [d w*h] that we've read from a CSV. 
@@ -60,8 +57,7 @@ end
 function visHog(hog)
     addpath('../vis');
     w = foldHOG(hog);
-    visualizeHOG(double(max(0,w)));
-    %[path, imgname, ext] = fileparts(curr_img);
-    %print(gcf, '-dpng', '-r0', [output_dir '/' imgname '_scale_' int2str(level) ext]);
+    %visualizeHOG(double(max(0,w)));
+    visualizeHOG(double(  min(max(0,w), 0.4) )); %Forrest -- cap the values at 1. (to ignore the goofy border condition in piggyHOG)
 end
 
