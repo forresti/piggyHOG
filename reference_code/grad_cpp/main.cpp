@@ -1,5 +1,3 @@
-
-//#include <cuda.h>
 #include <opencv2/opencv.hpp>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,11 +5,11 @@
 #include <string.h>
 #include "helpers.h"
 using namespace std;
+using namespace cv;
 
 int main (int argc, char **argv)
 {
-    cv::Mat x;
-    printf("%f \n", foo(1.2345));
+    Mat img = imread("../../images_640x480/carsgraz_001.image.jpg");
 
     return 0;
 }
