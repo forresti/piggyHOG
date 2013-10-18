@@ -1,13 +1,14 @@
 function csvdiff()
     %for h=1:10:41
     %for h=1:30
-    for h=1:1
-        %experimentalCsv_fname = ['./ffld_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
-        experimentalCsv_fname = ['./piggyHOG_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
+    for h=20:20
+        experimentalCsv_fname = ['./ffld_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
+        %experimentalCsv_fname = ['./piggyHOG_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
         %experimentalCsv_fname = ['./piotr_results/carsgraz_001.image_scale_' int2str(h) '.csv'];
         referenceCsv_fname = ['./voc5_features_results/carsgraz_001.image_scale_' int2str(h) '.csv']; %VOC5 is our baseline reference 
         mydiff(experimentalCsv_fname, referenceCsv_fname, h)
     end
+end
 
 %TODO: rename 'h' to 'level'
 function mydiff(experimentalCsv_fname, referenceCsv_fname, h)
@@ -33,10 +34,11 @@ function mydiff(experimentalCsv_fname, referenceCsv_fname, h)
     %display(['    nnz(diff) = ' num2str(nnz(diff))])
     display(['    percent mismatches above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)/resultSize * 100) '%'])
 
-figure(h)
-    visHog(referenceResult)
-figure(h+100)
-    visHog(experimentalResult)
+    figure(h)
+        visHog(referenceResult) %the visualizaion of this makes no sense...just like a big plaid checkerboard. something's wrong.
+    figure(h+100)
+        visHog(experimentalResult)
+end
 
 % @param hogCsv = hog in [d w*h] that we've read from a CSV. 
 % csv [d w*h] -> matlab data layout [h w d]
@@ -49,6 +51,8 @@ function hog = unpackHog(hogCsv)
     hog_2d = hogCsv(2:end, :); %skip the [d w h] dims header
     hog_3d = reshape(hog_2d, [d w h]); % [d w*h] -> C++ style [d w h] layout
     hog = permute(hog_3d, [3 2 1]); % Matlab style [h w d] layout
+    %hog = reshape(hog_2d, [w h d]);   %from csvdiff_piotr_cpp.m -- just a test
+end
 
 function visHog(hog)
     addpath('../vis');
@@ -56,5 +60,5 @@ function visHog(hog)
     visualizeHOG(double(max(0,w)));
     %[path, imgname, ext] = fileparts(curr_img);
     %print(gcf, '-dpng', '-r0', [output_dir '/' imgname '_scale_' int2str(level) ext]);
-
+end
 
