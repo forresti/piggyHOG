@@ -343,17 +343,17 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     }
 
     //clean up rightmost columns
-    for(int hogY = 1; hogY < hogResult->height; hogY++){ 
+    for(int hogY = 0; hogY < hogResult->height+2; hogY++){ 
         for(int hogX = hogResult->width; hogX < hogResult->width+2; hogX++){
-            if(hogX == hogResult->width){ //first iteration only
-             //   hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult); //hog[0:17] = constrast sensitive features
-             //   hogCell_gradientEnergy(hogX-1, hogY-1, hogResult, normImg); //normImg = sum of each hog cell's contrast sensitive (0-360) bins
-             //   hogCell_unsigned(hogX-1, hogY-1, hogResult); //hog[18:27] = contrast-insensitive features
-            }
             hogBlock_normalize(hogX-2, hogY-2, hogResult, normImg);
         }
     }
-
+    //cleanup bottom rows
+    for(int hogY = hogResult->height; hogY < hogResult->height+2; hogY++){
+        for(int hogX = 0; hogX < hogResult->width+2; hogX++){
+            hogBlock_normalize(hogX-2, hogY-2, hogResult, normImg);
+        }
+    }
 
     hogPlaceFeatures_border(hogResult); //binary truncation features
 
