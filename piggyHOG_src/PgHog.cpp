@@ -186,7 +186,6 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer* hogRes
 
     //TODO: clamp hogX_internal and hogY_internal to a minimum of 1, to avoid falling off the edge?
 
-    //TODO: use const here (like ffld)? -- does const matter here?
     float n0 = 1 / sqrt(normImg.at<float>(hogY_internal-1, hogX_internal-1) + //top-left 
                         normImg.at<float>(hogY_internal-1, hogX_internal  ) + 
                         normImg.at<float>(hogY_internal  , hogX_internal-1) + 
