@@ -107,8 +107,8 @@ inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogCo
     //the 'center' of the hog cell is: (hogX+sbin/2, hogY+sbin/2).
     //we do (x,y)=(+/-sbin, +/-sbin) pixels from the center of the hog cell.
 
-    const int sbin=4;
-    //int sbin = hogResult->spatialBinSize;
+    //const int sbin=4;
+    int sbin = hogResult->spatialBinSize;
     int hogX_internal = hogX + hogResult->padx; //skip over padding on left side of hogResult->hog
     int hogY_internal = hogY + hogResult->pady; //skip over padding at the top of hogResult->hog
 
@@ -299,9 +299,7 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     //hogResult->hog = (float*)malloc(hogResult->paddedWidth * hogResult->paddedHeight * hogResult->depth * sizeof(float));
     hogResult->hog = (float*)calloc(hogResult->paddedWidth * hogResult->paddedHeight * hogResult->depth, sizeof(float));    
 
-    //TODO: store normalization results
-    //float* norm = malloc(hogResult->paddedWidth * hogResult->paddedHeight * sizeof(float)); 
-    Mat normImg(hogResult->paddedHeight, hogResult->paddedWidth, CV_32FC1);
+    Mat normImg(hogResult->paddedHeight, hogResult->paddedWidth, CV_32FC1); //store normalization results
 
     const int unrollX = 8;
     const int unrollY = 4;
