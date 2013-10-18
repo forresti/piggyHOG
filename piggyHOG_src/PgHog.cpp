@@ -95,7 +95,6 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255]; //these are already scaled to range of 0-18
     max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
-    //printf("x = %d, y = %d, gradX = %f, gradY = %f, ori = %f, max_mag = %f \n", x, y, gradX, gradY, ori, max_mag);
     oriImg.at<float>(y, x) = ori;
     magImg.at<float>(y, x) = max_mag;
 }
@@ -135,13 +134,10 @@ inline void PgHog::hogCell(int hogX, int hogY, Mat &oriImg, Mat &magImg, PgHogCo
             //this pixel's contribution (weight) to our hog cell 
             float weightX = 1.0f - ((float)abs(sbin - offsetX + 0.5f) / sbin); //when offset=0, we're at -sbin from hog cell's center. when offset=2*sbin-1, we're +sbin from the center. the +0.5 is because we're indexing from top-left of cell, not from center of cell.
             float weightY = 1.0f - ((float)abs(sbin - offsetY + 0.5f) / sbin); // TODO: remove division by sbin 
-            //printf("weightX = %f, weightY = %f \n", weightX, weightY);
 
             int oriBin_signed = (int)oriImg.at<float>(pixelY, pixelX); //TODO: just make oriImg a uchar img
             float mag = magImg.at<float>(pixelY, pixelX);
 
-            //hogResult->hog[hogOutputIdx + oriBin_signed] += 1; //test
-            //hogResult->hog[hogOutputIdx + oriBin_signed] += mag * 2.0f; //test
             hogResult->hog[hogOutputIdx + oriBin_signed] += mag * weightX * weightY;
         }
     }
@@ -373,7 +369,7 @@ vector<PgHogContainer*> PgHog::extract_HOG_pyramid(Mat img, int padx, int pady){
 //TODO: pass padx, pady into extract_HOG_oneScale()    
 
     //omp_set_num_threads(5); //hmm, default thread count seems best
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for(int i=0; i<interval; i++){
         float downsampleFactor = 1/pow(sc, i);
         //printf("downsampleFactor = %f \n", downsampleFactor);
