@@ -8,8 +8,8 @@ function csvdiff()
         referenceCsv_fname = ['./voc5_features_results/carsgraz_001.image_scale_' int2str(h) '.csv']; %VOC5 is our baseline reference 
         mydiff(experimentalCsv_fname, referenceCsv_fname, h)
     end
-end
 
+%TODO: rename 'h' to 'level'
 function mydiff(experimentalCsv_fname, referenceCsv_fname, h)
     referenceResult = csvread(referenceCsv_fname);
     referenceResult = unpackHog(referenceResult);
@@ -21,17 +21,22 @@ function mydiff(experimentalCsv_fname, referenceCsv_fname, h)
 
     thresh = 0.1;
     diff = abs(experimentalResult - referenceResult);
-    [inHeight_voc5 inWidth_voc5] = size(referenceResult);
-    [inHeight inWidth] = size(experimentalResult);
 
+    [inHeight_voc5 inWidth_voc5] = size(referenceResult); %TODO: remove this clunky size calculation
+    [inHeight inWidth] = size(experimentalResult);
     resultSize = inHeight * inWidth;
+
     display(['hog[' int2str(h) ']:'])
     %display(['    size(referenceResult) = ' mat2str(referenceResult(1, 1:3))]) %CSV header that shows dims
     %display(['    size(experimentalResult) = ' mat2str(experimentalResult(1, 1:3))]) 
 
     %display(['    nnz(diff) = ' num2str(nnz(diff))])
     display(['    percent mismatches above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)/resultSize * 100) '%'])
-end
+
+figure(h)
+    visHog(referenceResult)
+figure(h+100)
+    visHog(experimentalResult)
 
 % @param hogCsv = hog in [d w*h] that we've read from a CSV. 
 % csv [d w*h] -> matlab data layout [h w d]
@@ -44,5 +49,12 @@ function hog = unpackHog(hogCsv)
     hog_2d = hogCsv(2:end, :); %skip the [d w h] dims header
     hog_3d = reshape(hog_2d, [d w h]); % [d w*h] -> C++ style [d w h] layout
     hog = permute(hog_3d, [3 2 1]); % Matlab style [h w d] layout
-end
+
+function visHog(hog)
+    addpath('../vis');
+    w = foldHOG(hog);
+    visualizeHOG(double(max(0,w)));
+    %[path, imgname, ext] = fileparts(curr_img);
+    %print(gcf, '-dpng', '-r0', [output_dir '/' imgname '_scale_' int2str(level) ext]);
+
 
