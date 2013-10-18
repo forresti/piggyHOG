@@ -2,8 +2,8 @@ function csvdiff()
     %for h=1:10:41
     %for h=1:30
     for h=20:20
-        experimentalCsv_fname = ['./ffld_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
-        %experimentalCsv_fname = ['./piggyHOG_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
+        %experimentalCsv_fname = ['./ffld_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
+        experimentalCsv_fname = ['./piggyHOG_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
         %experimentalCsv_fname = ['./piotr_results/carsgraz_001.image_scale_' int2str(h) '.csv'];
         referenceCsv_fname = ['./voc5_features_results/carsgraz_001.image_scale_' int2str(h) '.csv']; %VOC5 is our baseline reference 
         mydiff(experimentalCsv_fname, referenceCsv_fname, h)

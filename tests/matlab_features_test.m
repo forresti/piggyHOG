@@ -18,6 +18,8 @@ function matlab_features_test(hogMethod)
 
     printHogSizes(pyra)
     display('writing HOG features to CSV files...');
+%top_hog = pyra.feat{1};
+%save('tmp_voc5_top_level_notTransposed.mat', 'top_hog');
 
     transpose_and_writeCsv(pyra, output_dir, curr_img)
     %visHog(pyra, output_dir, curr_img)
