@@ -1,20 +1,23 @@
 function csvdiff()
     %for h=1:10:41
-    for h=1:30
-        %experimentalCsv = ['./ffld_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
-        experimentalCsv = ['./piggyHOG_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
-        %experimentalCsv = ['./piotr_results/carsgraz_001.image_scale_' int2str(h) '.csv'];
-        referenceCsv = ['./voc5_features_results/carsgraz_001.image_scale_' int2str(h) '.csv']; %VOC5 is our baseline reference 
-        mydiff(experimentalCsv, referenceCsv, h)
+    %for h=1:30
+    for h=1:1
+        %experimentalCsv_fname = ['./ffld_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
+        experimentalCsv_fname = ['./piggyHOG_results/level' int2str(h-1) '.csv']; %h-1 for C++ 0-indexing
+        %experimentalCsv_fname = ['./piotr_results/carsgraz_001.image_scale_' int2str(h) '.csv'];
+        referenceCsv_fname = ['./voc5_features_results/carsgraz_001.image_scale_' int2str(h) '.csv']; %VOC5 is our baseline reference 
+        mydiff(experimentalCsv_fname, referenceCsv_fname, h)
     end
 end
 
-function mydiff(experimentalCsv, referenceCsv, h)
-    referenceResult = csvread(referenceCsv);
-    referenceResult = referenceResult(2:end, :); %remove header (which shows dims)
+function mydiff(experimentalCsv_fname, referenceCsv_fname, h)
+    referenceResult = csvread(referenceCsv_fname);
+    referenceResult = unpackHog(referenceResult);
+    %referenceResult = referenceResult(2:end, :); %remove header (which shows dims)
 
-    experimentalResult = csvread(experimentalCsv);
-    experimentalResult = experimentalResult(2:end, :); %remove header (which shows dims)
+    experimentalResult = csvread(experimentalCsv_fname);
+    experimentalResult = unpackHog(experimentalResult);
+    %experimentalResult = experimentalResult(2:end, :); %remove header (which shows dims)
 
     thresh = 0.1;
     diff = abs(experimentalResult - referenceResult);
@@ -26,18 +29,20 @@ function mydiff(experimentalCsv, referenceCsv, h)
     %display(['    size(referenceResult) = ' mat2str(referenceResult(1, 1:3))]) %CSV header that shows dims
     %display(['    size(experimentalResult) = ' mat2str(experimentalResult(1, 1:3))]) 
 
-    %display(['    size(referenceResult) = ' mat2str(size(referenceResult)) ' = ' num2str(inHeight_voc5*inWidth_voc5)])
-    %display(['    size(experimentalResult) = ' mat2str(size(experimentalResult)) ' = ' num2str(resultSize)])
-
     %display(['    nnz(diff) = ' num2str(nnz(diff))])
     display(['    percent mismatches above ' num2str(thresh) ' = ' num2str(nnz(diff>=thresh)/resultSize * 100) '%'])
-keyboard
 end
 
-%if one of the HOG results is bigger than the other, trim it down.
-% naive: just taking the top-left corner when trimming.
-%[referenceResult experimentalResult] = trimToMinSize(referenceResult, experimentalResult)
-    %[h w d] = reshape.... %ah, crap, need the original dims.
-    %minWidth = 
+% @param hogCsv = hog in [d w*h] that we've read from a CSV. 
+% csv [d w*h] -> matlab data layout [h w d]
+function hog = unpackHog(hogCsv)
+    hogDims = hogCsv(1, 1:3);
+    d = hogDims(1); % [d w h] = my CSV dims format in both C++ and Matlab
+    w = hogDims(2);
+    h = hogDims(3);
 
+    hog_2d = hogCsv(2:end, :); %skip the [d w h] dims header
+    hog_3d = reshape(hog_2d, [d w h]); % [d w*h] -> C++ style [d w h] layout
+    hog = permute(hog_3d, [3 2 1]); % Matlab style [h w d] layout
+end
 
