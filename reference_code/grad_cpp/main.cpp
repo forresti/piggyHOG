@@ -53,7 +53,7 @@ inline void grad_naive(Mat img, Mat &oriImg, Mat &magImg){
 
 
 //roughly the grad impl that I've been using in piggyHOG
-inline void grad_stream(Mat img, Mat &oriImg, Mat &magImg){
+inline void grad_stream(Mat img, Mat &gradY_img, Mat &gradX_img){
 
     //TODO: index x and y from 0, and clamp?
 
@@ -61,50 +61,35 @@ inline void grad_stream(Mat img, Mat &oriImg, Mat &magImg){
     {
         for(int x=1; x < (img.cols - 1); x++)
         {
-            float gradX;
-            float gradY;
-            float max_mag = 0.0f; //TODO: check range ... can this be uchar?
+            short int gradX;
+            short int gradY;
+            //float max_mag = 0.0f; //TODO: check range ... can this be uchar?
+            int max_mag = 0;
 
             for(int channel=0; channel<3; channel++){
-                float tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel]; //TODO: cast pixels to float (to avoid overflow/underflow?)
-                //float tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
+                short tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel]; //TODO: cast pixels to float (to avoid overflow/underflow?)
+                short tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
 
-                //indexing the data directly instead of using .at -- doesn't help with perf.
-                //float tmp_gradX = img.data[y*img.cols*3 + (x+1)*3 + channel] - img.data[y*img.cols*3 + (x-1)*3 + channel];
-                //float tmp_gradY = img.data[(y+1)*img.cols*3 + x*3 + channel] - img.data[(y-1)*img.cols*3 + x*3 + channel];
-                //float tmp_mag = tmp_gradX*tmp_gradX + tmp_gradY*tmp_gradY;
-                float tmp_mag = tmp_gradX; //stub TODO: remove
+                int tmp_mag = tmp_gradX; //stub TODO: remove
 
                 if(tmp_mag > max_mag){
                     gradX = tmp_gradX;
-                    //gradY = tmp_gradY;
+                    gradY = tmp_gradY;
                     max_mag = tmp_mag;
                 }
             }
-            //this is the gradient angle
-            //float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
-            //float ori = cv::fastAtan2((double)gradY, (double)gradX);
-            //float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255]; //these are already scaled to range of 0-18
-
-            //float ori = gradY; //stub
-            //max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
-
-            //oriImg.at<float>(y, x) = ori;
-            //magImg.at<float>(y, x) = max_mag;
-            oriImg.at<float>(y, x) = gradY;
-            magImg.at<float>(y, x) = gradX;
+            gradX_img.at<short>(y, x) = gradX;
+            gradY_img.at<short>(y, x) = gradY;
         }
     }
 }
 
-
-
 void writeGradToFile(Mat oriImg, Mat magImg, string detailName){
     oriImg.convertTo(oriImg, CV_8UC1, 255.);
-    imwrite("PgHog_orientations.jpg", oriImg);
+    imwrite((detailName + "_orientations.jpg"), oriImg);
 
     //magImg.convertTo(magImg, CV_8UC1, 255.);
-    imwrite("PgHog_magnitudes.jpg", magImg);
+    imwrite((detailName + "_magnitudes.jpg"), magImg);
 }
 
 void init_atan2_table(){
@@ -141,12 +126,20 @@ int main (int argc, char **argv)
     }
     double naive_time = (read_timer() - start_timer) / n_iter;
     printf("avg grad_naive time = %f ms \n", naive_time);
-
     writeGradToFile(oriImg, magImg, "naive");
+
+    Mat gradX_img(img.rows, img.cols, CV_16SC1); //short int
+    Mat gradY_img(img.rows, img.cols, CV_16SC1);
+    start_timer = read_timer();
+    for(int i=0; i<10; i++){
+        grad_stream(img, gradY_img, gradX_img);
+    }
+    double stream_time = (read_timer() - start_timer) / n_iter;
+    printf("avg grad_stream time = %f ms \n", stream_time);
+    imwrite("gradX_stream.jpg", gradX_img);
+    //imwrite("PgHog_orientations.jpg", oriImg);
 
     return 0;
 }
-
-
 
 
