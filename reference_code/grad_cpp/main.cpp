@@ -55,8 +55,6 @@ inline void grad_naive(Mat img, Mat &oriImg, Mat &magImg){
 //roughly the grad impl that I've been using in piggyHOG
 inline void grad_stream(Mat img, Mat &gradY_img, Mat &gradX_img){
 
-    //TODO: index x and y from 0, and clamp?
-
     for(int y=1; y < (img.rows - 1); y++) //avoid going off the edge of the img
     {
         for(int x=1; x < (img.cols - 1); x++)
@@ -67,19 +65,20 @@ inline void grad_stream(Mat img, Mat &gradY_img, Mat &gradX_img){
             int max_mag = 0;
 
             for(int channel=0; channel<3; channel++){
-                short tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel]; 
-                //short tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
+                //short tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel]; 
+                short tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
 
-                int tmp_mag = tmp_gradX; //stub TODO: remove
+                //int tmp_mag = tmp_gradX*tmp_gradX + tmp_gradY*tmp_gradY;
+                int tmp_mag = tmp_gradY; //stub TODO: remove
 
                 if(tmp_mag > max_mag){
-                    gradX = tmp_gradX;
-                    //gradY = tmp_gradY;
+                    //gradX = tmp_gradX;
+                    gradY = tmp_gradY;
                     max_mag = tmp_mag;
                 }
             }
-            gradX_img.at<short>(y, x) = gradX;
-            //gradY_img.at<short>(y, x) = gradY;
+            //gradX_img.at<short>(y, x) = gradX;
+            gradY_img.at<short>(y, x) = gradY;
         }
     }
 }
@@ -137,7 +136,8 @@ int main (int argc, char **argv)
     double stream_time = (read_timer() - start_timer) / n_iter;
     printf("avg grad_stream time = %f ms \n", stream_time);
     imwrite("gradX_stream.jpg", gradX_img);
-    //imwrite("PgHog_orientations.jpg", oriImg);
+    imwrite("gradY_stream.jpg", gradY_img);
+
 
     return 0;
 }
