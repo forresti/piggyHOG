@@ -53,8 +53,14 @@ inline void grad_naive(Mat img, Mat &oriImg, Mat &magImg){
 
 //simplify to the point of approximating a stream benchmark
 inline void grad_stream(Mat img, Mat &gradY_img, Mat &gradX_img){
+
+    cv::Vec3b y_left, y_middle, y_right;
+
     for(int y=1; y < (img.rows - 1); y++) //avoid going off the edge of the img
     {
+        y_left = img.at<cv::Vec3b>(y-1,1); //after first iteration, do one fetch per iteration
+        y_middle = img.at<cv::Vec3b>(y,1);
+
         for(int x=1; x < (img.cols - 1); x++)
         {
 #if 1 //basic gradient that looks sorta like stream
@@ -64,8 +70,9 @@ inline void grad_stream(Mat img, Mat &gradY_img, Mat &gradX_img){
             int max_mag = 0;
 
             //prefetch 3 pixels
-            cv::Vec3b y_left = img.at<cv::Vec3b>(y-1,x);
-            cv::Vec3b y_right = img.at<cv::Vec3b>(y+1,x);
+            y_left = y_middle; //from prev iteration
+            y_middle = y_right;
+            y_right = img.at<cv::Vec3b>(y+1,x);
 
             for(int channel=0; channel<3; channel++){
                 //short tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel]; 
