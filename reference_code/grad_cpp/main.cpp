@@ -48,7 +48,8 @@ inline void grad_naive(Mat img, Mat &oriImg, Mat &magImg){
             float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255]; //these are already scaled to range of 0-18
 
             //float ori = gradY; //stub
-            max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
+            //max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
+            max_mag = gradX; //stub
 
             oriImg.at<float>(y, x) = ori;
             magImg.at<float>(y, x) = max_mag;
