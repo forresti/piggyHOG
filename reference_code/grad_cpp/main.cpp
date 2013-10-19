@@ -8,6 +8,8 @@ using namespace std;
 using namespace cv;
 #define eps 0.0001
 
+float ATAN2_TABLE[512][512]; 
+
 static inline int clamp(int idx, int min_idx, int max_idx){
     return max(min_idx, min(idx, max_idx));
 }
@@ -43,9 +45,9 @@ inline void grad_naive(Mat img, Mat &oriImg, Mat &magImg){
             //this is the gradient angle
             //float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
             //float ori = cv::fastAtan2((double)gradY, (double)gradX);
-            //float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255]; //these are already scaled to range of 0-18
+            float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255]; //these are already scaled to range of 0-18
 
-            float ori = gradY; //stub
+            //float ori = gradY; //stub
             max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
             oriImg.at<float>(y, x) = ori;
@@ -64,8 +66,28 @@ void writeGradToFile(Mat oriImg, Mat magImg, string detailName){
     imwrite("PgHog_magnitudes.jpg", magImg);
 }
 
+void init_atan2_table(){
+    for (int dy = -255; dy <= 255; ++dy) { //pixels are 0 to 255, so gradient values are -255 to 255
+        for (int dx = -255; dx <= 255; ++dx) {
+            // Angle in the range [-pi, pi]
+            double angle = atan2(static_cast<double>(dy), static_cast<double>(dx));
+
+            // Convert it to the range [9.0, 27.0]
+            angle = angle * (9.0 / M_PI) + 18.0;
+
+            // Convert it to the range [0, 18)
+            if (angle >= 18.0)
+                angle -= 18.0;
+
+            ATAN2_TABLE[dy + 255][dx + 255] = max(angle, 0.0);
+        }
+    }
+}
+
 int main (int argc, char **argv)
 {
+    init_atan2_table();
+
     Mat img = imread("../../images_640x480/carsgraz_001.image.jpg");
     Mat oriImg(img.rows, img.cols, CV_32FC1); //TODO: replace with aligned mem?
     Mat magImg(img.rows, img.cols, CV_32FC1);
