@@ -30,8 +30,8 @@ inline void grad_naive(Mat img, Mat &oriImg, Mat &magImg){
                 //float tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
 
                 //indexing the data directly instead of using .at -- doesn't help with perf.
-                float tmp_gradX = img.data[y*img.rows*3 + (x+1)*3 + channel] - img.data[y*img.rows*3 + (x-1)*3 + channel];
-                float tmp_gradY = img.data[(y+1)*img.rows*3 + x*3 + channel] - img.data[(y-1)*img.rows*3 + x*3 + channel];
+                float tmp_gradX = img.data[y*img.cols*3 + (x+1)*3 + channel] - img.data[y*img.cols*3 + (x-1)*3 + channel];
+                float tmp_gradY = img.data[(y+1)*img.cols*3 + x*3 + channel] - img.data[(y-1)*img.cols*3 + x*3 + channel];
                 float tmp_mag = tmp_gradX*tmp_gradX + tmp_gradY*tmp_gradY;
 
                 if(tmp_mag > max_mag){
@@ -40,7 +40,6 @@ inline void grad_naive(Mat img, Mat &oriImg, Mat &magImg){
                     max_mag = tmp_mag;
                 }
             }
-#if 0
             //this is the gradient angle
             //float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
             float ori = cv::fastAtan2((double)gradY, (double)gradX);
@@ -49,9 +48,8 @@ inline void grad_naive(Mat img, Mat &oriImg, Mat &magImg){
 
             oriImg.at<float>(y, x) = ori;
             magImg.at<float>(y, x) = max_mag;
-#endif
-            oriImg.at<float>(y, x) = gradY;
-            magImg.at<float>(y, x) = gradX;
+//            oriImg.at<float>(y, x) = gradY;
+//            magImg.at<float>(y, x) = gradX;
         }
     }
 }
