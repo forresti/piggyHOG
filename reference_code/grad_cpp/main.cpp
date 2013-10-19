@@ -51,14 +51,14 @@ inline void grad_naive(Mat img, Mat &oriImg, Mat &magImg){
     }
 }
 
-
-//roughly the grad impl that I've been using in piggyHOG
+//simplify to the point of approximating a stream benchmark
 inline void grad_stream(Mat img, Mat &gradY_img, Mat &gradX_img){
 
     for(int y=1; y < (img.rows - 1); y++) //avoid going off the edge of the img
     {
         for(int x=1; x < (img.cols - 1); x++)
         {
+#if 0 //basic gradient that looks sorta like stream
             short int gradX;
             short int gradY;
             //float max_mag = 0.0f; //TODO: check range ... can this be uchar?
@@ -79,6 +79,13 @@ inline void grad_stream(Mat img, Mat &gradY_img, Mat &gradX_img){
             }
             //gradX_img.at<short>(y, x) = gradX;
             gradY_img.at<short>(y, x) = gradY;
+#endif
+
+#if 1 //trivial stream benchmark
+            for(int channel=0; channel<3; channel++){
+                gradY_img.at<short>(y, x) += img.at<cv::Vec3b>(y,x)[channel];
+            }
+#endif
         }
     }
 }
