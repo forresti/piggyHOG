@@ -45,16 +45,15 @@ inline void grad_naive(Mat img, Mat &oriImg, Mat &magImg){
             //this is the gradient angle
             //float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
             //float ori = cv::fastAtan2((double)gradY, (double)gradX);
-            float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255]; //these are already scaled to range of 0-18
+            //float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255]; //these are already scaled to range of 0-18
 
             //float ori = gradY; //stub
             //max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
-            max_mag = gradX; //stub
 
-            oriImg.at<float>(y, x) = ori;
-            magImg.at<float>(y, x) = max_mag;
-//            oriImg.at<float>(y, x) = gradY;
-//            magImg.at<float>(y, x) = gradX;
+            //oriImg.at<float>(y, x) = ori;
+            //magImg.at<float>(y, x) = max_mag;
+            oriImg.at<float>(y, x) = gradY;
+            magImg.at<float>(y, x) = gradX;
         }
     }
 }
