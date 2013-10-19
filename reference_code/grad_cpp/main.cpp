@@ -57,15 +57,20 @@ inline void grad_stream(Mat img, Mat &gradY_img, Mat &gradX_img){
     {
         for(int x=1; x < (img.cols - 1); x++)
         {
-#if 0 //basic gradient that looks sorta like stream
+#if 1 //basic gradient that looks sorta like stream
             short int gradX;
             short int gradY;
             //float max_mag = 0.0f; //TODO: check range ... can this be uchar?
             int max_mag = 0;
 
+            //prefetch 3 pixels
+            cv::Vec3b y_left = img.at<cv::Vec3b>(y-1,x);
+            cv::Vec3b y_right = img.at<cv::Vec3b>(y+1,x);
+
             for(int channel=0; channel<3; channel++){
                 //short tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel]; 
-                short tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
+                //short tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
+                short tmp_gradY = y_right[channel] - y_left[channel];
 
                 //int tmp_mag = tmp_gradX*tmp_gradX + tmp_gradY*tmp_gradY;
                 int tmp_mag = tmp_gradY; //stub TODO: remove
@@ -80,15 +85,15 @@ inline void grad_stream(Mat img, Mat &gradY_img, Mat &gradX_img){
             gradY_img.at<short>(y, x) = gradY;
 #endif
 
-#if 1 //trivial stream benchmark
+#if 0 //trivial stream benchmark
             cv::Vec3b prefetchRGB = img.at<cv::Vec3b>(y,x);
-            short tmpResult = 0;
+            //short tmpResult = 0;
             for(int channel=0; channel<3; channel++){
                 //gradY_img.at<short>(y, x) += img.at<cv::Vec3b>(y,x)[channel];
-                //gradY_img.at<short>(y, x) += prefetchRGB[channel];
-                tmpResult += prefetchRGB[channel];
+                gradY_img.at<short>(y, x) += prefetchRGB[channel];
+                //tmpResult += prefetchRGB[channel];
             }
-            gradY_img.at<short>(y, x) = tmpResult;
+            //gradY_img.at<short>(y, x) = tmpResult;
 #endif
         }
     }
