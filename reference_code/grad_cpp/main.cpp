@@ -67,19 +67,19 @@ inline void grad_stream(Mat img, Mat &gradY_img, Mat &gradX_img){
             int max_mag = 0;
 
             for(int channel=0; channel<3; channel++){
-                short tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel]; //TODO: cast pixels to float (to avoid overflow/underflow?)
-                short tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
+                short tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel]; 
+                //short tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
 
                 int tmp_mag = tmp_gradX; //stub TODO: remove
 
                 if(tmp_mag > max_mag){
                     gradX = tmp_gradX;
-                    gradY = tmp_gradY;
-                    max_mag = tmp_mag;
+                    //gradY = tmp_gradY;
+                    //max_mag = tmp_mag;
                 }
             }
             gradX_img.at<short>(y, x) = gradX;
-            gradY_img.at<short>(y, x) = gradY;
+            //gradY_img.at<short>(y, x) = gradY;
         }
     }
 }
