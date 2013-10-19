@@ -82,10 +82,13 @@ inline void grad_stream(Mat img, Mat &gradY_img, Mat &gradX_img){
 
 #if 1 //trivial stream benchmark
             cv::Vec3b prefetchRGB = img.at<cv::Vec3b>(y,x);
+            short tmpResult = 0;
             for(int channel=0; channel<3; channel++){
                 //gradY_img.at<short>(y, x) += img.at<cv::Vec3b>(y,x)[channel];
-                gradY_img.at<short>(y, x) += prefetchRGB[channel];
+                //gradY_img.at<short>(y, x) += prefetchRGB[channel];
+                tmpResult += prefetchRGB[channel];
             }
+            gradY_img.at<short>(y, x) = tmpResult;
 #endif
         }
     }
