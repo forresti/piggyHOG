@@ -53,7 +53,6 @@ inline void grad_naive(Mat img, Mat &oriImg, Mat &magImg){
 
 //simplify to the point of approximating a stream benchmark
 inline void grad_stream(Mat img, Mat &gradY_img, Mat &gradX_img){
-
     for(int y=1; y < (img.rows - 1); y++) //avoid going off the edge of the img
     {
         for(int x=1; x < (img.cols - 1); x++)
@@ -82,8 +81,10 @@ inline void grad_stream(Mat img, Mat &gradY_img, Mat &gradX_img){
 #endif
 
 #if 1 //trivial stream benchmark
+            cv::Vec3b prefetchRGB = img.at<cv::Vec3b>(y,x);
             for(int channel=0; channel<3; channel++){
-                gradY_img.at<short>(y, x) += img.at<cv::Vec3b>(y,x)[channel];
+                //gradY_img.at<short>(y, x) += img.at<cv::Vec3b>(y,x)[channel];
+                gradY_img.at<short>(y, x) += prefetchRGB[channel];
             }
 #endif
         }
@@ -119,20 +120,22 @@ void init_atan2_table(){
 int main (int argc, char **argv)
 {
     init_atan2_table();
-
+    double start_timer;
     Mat img = imread("../../images_640x480/carsgraz_001.image.jpg");
     Mat oriImg(img.rows, img.cols, CV_32FC1); //TODO: replace with aligned mem?
     Mat magImg(img.rows, img.cols, CV_32FC1);
 
     int n_iter = 10;
 
-    double start_timer = read_timer();
+#if 0
+    start_timer = read_timer();
     for(int i=0; i<10; i++){
         grad_naive(img, oriImg, magImg);    
     }
     double naive_time = (read_timer() - start_timer) / n_iter;
     printf("avg grad_naive time = %f ms \n", naive_time);
     writeGradToFile(oriImg, magImg, "naive");
+#endif
 
     Mat gradX_img(img.rows, img.cols, CV_16SC1); //short int
     Mat gradY_img(img.rows, img.cols, CV_16SC1);
