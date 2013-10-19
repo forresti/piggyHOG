@@ -31,14 +31,53 @@ inline void grad_naive(Mat img, Mat &oriImg, Mat &magImg){
                 float tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel]; //TODO: cast pixels to float (to avoid overflow/underflow?)
                 float tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
 
-                //indexing the data directly instead of using .at -- doesn't help with perf.
-                //float tmp_gradX = img.data[y*img.cols*3 + (x+1)*3 + channel] - img.data[y*img.cols*3 + (x-1)*3 + channel];
-                //float tmp_gradY = img.data[(y+1)*img.cols*3 + x*3 + channel] - img.data[(y-1)*img.cols*3 + x*3 + channel];
                 float tmp_mag = tmp_gradX*tmp_gradX + tmp_gradY*tmp_gradY;
 
                 if(tmp_mag > max_mag){
                     gradX = tmp_gradX;
                     gradY = tmp_gradY;
+                    max_mag = tmp_mag;
+                }
+            }
+            //this is the gradient angle
+            //float ori = atan2((double)gradY, (double)gradX); //does float vs. double matter here? 
+            //float ori = cv::fastAtan2((double)gradY, (double)gradX);
+            float ori = ATAN2_TABLE[(int)gradY + 255][(int)gradX + 255]; //these are already scaled to range of 0-18
+            max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
+
+            oriImg.at<float>(y, x) = ori;
+            magImg.at<float>(y, x) = max_mag;
+        }
+    }
+}
+
+
+//roughly the grad impl that I've been using in piggyHOG
+inline void grad_stream(Mat img, Mat &oriImg, Mat &magImg){
+
+    //TODO: index x and y from 0, and clamp?
+
+    for(int y=1; y < (img.rows - 1); y++) //avoid going off the edge of the img
+    {
+        for(int x=1; x < (img.cols - 1); x++)
+        {
+            float gradX;
+            float gradY;
+            float max_mag = 0.0f; //TODO: check range ... can this be uchar?
+
+            for(int channel=0; channel<3; channel++){
+                float tmp_gradX = img.at<cv::Vec3b>(y,x+1)[channel] - img.at<cv::Vec3b>(y,x-1)[channel]; //TODO: cast pixels to float (to avoid overflow/underflow?)
+                //float tmp_gradY = img.at<cv::Vec3b>(y+1,x)[channel] - img.at<cv::Vec3b>(y-1,x)[channel];
+
+                //indexing the data directly instead of using .at -- doesn't help with perf.
+                //float tmp_gradX = img.data[y*img.cols*3 + (x+1)*3 + channel] - img.data[y*img.cols*3 + (x-1)*3 + channel];
+                //float tmp_gradY = img.data[(y+1)*img.cols*3 + x*3 + channel] - img.data[(y-1)*img.cols*3 + x*3 + channel];
+                //float tmp_mag = tmp_gradX*tmp_gradX + tmp_gradY*tmp_gradY;
+                float tmp_mag = tmp_gradX; //stub TODO: remove
+
+                if(tmp_mag > max_mag){
+                    gradX = tmp_gradX;
+                    //gradY = tmp_gradY;
                     max_mag = tmp_mag;
                 }
             }
@@ -57,6 +96,8 @@ inline void grad_naive(Mat img, Mat &oriImg, Mat &magImg){
         }
     }
 }
+
+
 
 void writeGradToFile(Mat oriImg, Mat magImg, string detailName){
     oriImg.convertTo(oriImg, CV_8UC1, 255.);
