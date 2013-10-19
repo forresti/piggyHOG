@@ -75,7 +75,7 @@ inline void grad_stream(Mat img, Mat &gradY_img, Mat &gradX_img){
                 if(tmp_mag > max_mag){
                     gradX = tmp_gradX;
                     //gradY = tmp_gradY;
-                    //max_mag = tmp_mag;
+                    max_mag = tmp_mag;
                 }
             }
             gradX_img.at<short>(y, x) = gradX;
