@@ -26,11 +26,11 @@ double read_timer();
 std::string forrestGetImgType(int imgTypeInt);
 
 //no notion of RGB ... just a series of values (pixelType = char, short int, int, etc)
-template <class pixelType>
 class ForrestImg{
   public:
-    pixelType img;
+    PIXEL_TYPE data;
     int width;
+    int stride; //width+padding. note that this is row-major.
     int height;
 };
 

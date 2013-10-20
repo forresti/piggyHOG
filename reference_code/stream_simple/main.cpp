@@ -7,16 +7,26 @@
 using namespace std;
 using namespace cv;
 
+//note: ForrestImg's PIXEL_TYPE is defined in helpers.h
+void stream_simple(ForrestImg& img, ForrestImg& outImg){
 
-//template <class pixelType>
-void stream_simple(ForrestImg img){
+    assert(img.width == outImg.width);
+    assert(img.height == outImg.height);
 
-
+    for(int y=0; y<img.width; y++){
+        for(int x=0; x<width; x++){
+            outImg.data[y * outImg.stride + x] = img.data[y*img.stride + x]
+        }
+    }
 }
 
+//TODO: init img with some arbitrary values
 
 int main (int argc, char **argv)
 {
+    ForrestImg img;
+    ForrestImg outImg;
+
     int n_iter = 10;
 
     double start_timer = read_timer();
