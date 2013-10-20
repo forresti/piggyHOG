@@ -41,6 +41,7 @@ printf("stide = %d \n", stride);
     double start_timer = read_timer();
     for(int i=0; i<n_iter; i++){
         stream_simple(img, outImg);
+        //memcpy(outImg.data, img.data, height * stride * sizeof(PIXEL_TYPE));
     }
     double stream_time = (read_timer() - start_timer) / n_iter;
     printf("avg stream time = %f ms \n", stream_time);
