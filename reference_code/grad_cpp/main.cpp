@@ -153,11 +153,14 @@ int main (int argc, char **argv)
     writeGradToFile(oriImg, magImg, "naive");
 #endif
 
+    Mat img_4channel;
+    img.convertTo(img_4channel, CV_8UC4);
     Mat gradX_img(img.rows, img.cols, CV_16SC1); //short int
     Mat gradY_img(img.rows, img.cols, CV_16SC1);
     start_timer = read_timer();
     for(int i=0; i<10; i++){
-        grad_stream(img, gradY_img, gradX_img);
+        //grad_stream(img, gradY_img, gradX_img);
+        grad_stream(img_4channel, gradY_img, gradX_img);
     }
     double stream_time = (read_timer() - start_timer) / n_iter;
     printf("avg grad_stream time = %f ms \n", stream_time);
