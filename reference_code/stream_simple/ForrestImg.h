@@ -3,7 +3,7 @@
 #include "helpers.h"
 using namespace cv;
 
-#define PIXEL_TYPE int //you modify this 
+#define PIXEL_TYPE uchar //you modify this 
 
 //no notion of RGB ... just a series of values (pixelType = char, short int, int, etc)
 class ForrestImg{

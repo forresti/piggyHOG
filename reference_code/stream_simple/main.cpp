@@ -36,7 +36,7 @@ printf("stide = %d \n", stride);
     ForrestImg img(height, width, stride);
     ForrestImg outImg(height, width, stride);
 
-    int n_iter = 100;
+    int n_iter = 1000;
 
     double start_timer = read_timer();
     for(int i=0; i<n_iter; i++){
@@ -44,8 +44,10 @@ printf("stide = %d \n", stride);
         //memcpy(outImg.data, img.data, height * stride * sizeof(PIXEL_TYPE));
     }
     double stream_time = (read_timer() - start_timer) / n_iter;
-    printf("avg stream time = %f ms \n", stream_time);
-
+    double gb_to_copy = width * height * 3 * sizeof(PIXEL_TYPE) / 1e9;
+    double gb_per_sec = gb_to_copy / (stream_time/1000); //convert stream_time from ms to sec
+    printf("avg stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec);
+    
 
     return 0;
 }
