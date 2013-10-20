@@ -153,8 +153,10 @@ int main (int argc, char **argv)
     writeGradToFile(oriImg, magImg, "naive");
 #endif
 
+cout << "img type = " << forrestGetImgType(img.type()) << endl;
     Mat img_4channel;
     img.convertTo(img_4channel, CV_8UC4);
+cout << "img_4channel type = " << forrestGetImgType(img_4channel.type()) << endl;
     Mat gradX_img(img.rows, img.cols, CV_16SC1); //short int
     Mat gradY_img(img.rows, img.cols, CV_16SC1);
     start_timer = read_timer();

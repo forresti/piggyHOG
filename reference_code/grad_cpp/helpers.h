@@ -19,6 +19,7 @@ using namespace cv;
 
 
 double read_timer();
+std::string forrestGetImgType(int imgTypeInt);
 
 #endif
 
