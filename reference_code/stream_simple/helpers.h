@@ -7,9 +7,6 @@
 using namespace std;
 using namespace cv;
 
-#define PIXEL_TYPE uchar //you modify this
-
-
 //macros from voc-release5 fconvsse.cc
 #define IS_ALIGNED(ptr) ((((uintptr_t)(ptr)) & 0xF) == 0) 
 
