@@ -25,7 +25,7 @@ void stream_simple(ForrestImg& img, ForrestImg& outImg){
 
 int main (int argc, char **argv)
 {
-    int ALIGN_IN_BYTES = 16;
+    int ALIGN_IN_BYTES = 256;
 
     int height = 640;
     int width = 480*3;
