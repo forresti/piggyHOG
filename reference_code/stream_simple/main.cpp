@@ -7,6 +7,14 @@
 using namespace std;
 using namespace cv;
 
+
+//template <class pixelType>
+void stream_simple(ForrestImg img){
+
+
+}
+
+
 int main (int argc, char **argv)
 {
     int n_iter = 10;
