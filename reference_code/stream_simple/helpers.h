@@ -4,8 +4,6 @@
 #include <sys/time.h>
 #include <stdint.h> //for uintptr_t
 
-#define PIXEL_TYPE uchar 
-
 using namespace std;
 using namespace cv;
 
@@ -24,15 +22,6 @@ using namespace cv;
 
 double read_timer();
 std::string forrestGetImgType(int imgTypeInt);
-
-//no notion of RGB ... just a series of values (pixelType = char, short int, int, etc)
-class ForrestImg{
-  public:
-    PIXEL_TYPE data;
-    int width;
-    int stride; //width+padding. note that this is row-major.
-    int height;
-};
 
 #endif
 

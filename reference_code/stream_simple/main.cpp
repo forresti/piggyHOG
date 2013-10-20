@@ -3,19 +3,20 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include "ForrestImg.h"
 #include "helpers.h"
 using namespace std;
 using namespace cv;
 
-//note: ForrestImg's PIXEL_TYPE is defined in helpers.h
+//note: ForrestImg's PIXEL_TYPE is defined in ForrestImg.h
 void stream_simple(ForrestImg& img, ForrestImg& outImg){
 
     assert(img.width == outImg.width);
     assert(img.height == outImg.height);
 
-    for(int y=0; y<img.width; y++){
-        for(int x=0; x<width; x++){
-            outImg.data[y * outImg.stride + x] = img.data[y*img.stride + x]
+    for(int y=0; y<img.height; y++){
+        for(int x=0; x<img.width; x++){
+            outImg.data[y * outImg.stride + x] = img.data[y*img.stride + x];
         }
     }
 }
@@ -24,12 +25,23 @@ void stream_simple(ForrestImg& img, ForrestImg& outImg){
 
 int main (int argc, char **argv)
 {
-    ForrestImg img;
-    ForrestImg outImg;
+    int ALIGN_IN_BYTES = 16;
+
+    int height = 640;
+    int width = 480*3;
+    int stride = width + (ALIGN_IN_BYTES - width%ALIGN_IN_BYTES); //thanks: http://stackoverflow.com/questions/2403631
+
+printf("stide = %d \n", stride);
+
+    ForrestImg img(height, width, stride);
+    ForrestImg outImg(height, width, stride);
 
     int n_iter = 10;
 
     double start_timer = read_timer();
+    for(int i=0; i<n_iter; i++){
+        stream_simple(img, outImg);
+    }
     double stream_time = (read_timer() - start_timer) / n_iter;
     printf("avg stream time = %f ms \n", stream_time);
 
