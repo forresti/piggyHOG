@@ -21,12 +21,10 @@ void stream_simple(ForrestImg& img, ForrestImg& outImg){
     }
 }
 
-//TODO: init img with some arbitrary values
-
 void fill_img_with_garbage(ForrestImg& img){
     for(int y=0; y<img.height; y++){
         for(int x=0; x<img.width; x++){
-            img.data[y*img.stride + x] = (PIXEL_TYPE)(y*img.stride + x); //junk data
+            img.data[y*img.stride + x] = (PIXEL_TYPE)((y*img.stride + x)%256); //junk data
         }
     }
 }

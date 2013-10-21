@@ -3,7 +3,7 @@
 #include "helpers.h"
 using namespace cv;
 
-#define PIXEL_TYPE float //you modify this 
+#define PIXEL_TYPE short int //you modify this 
 //#define PIXEL_TYPE __m128
 
 //no notion of RGB ... just a series of values (pixelType = char, short int, int, etc)
