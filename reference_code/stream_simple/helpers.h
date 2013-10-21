@@ -3,6 +3,8 @@
 #include <opencv2/opencv.hpp>
 #include <sys/time.h>
 #include <stdint.h> //for uintptr_t
+#include <immintrin.h> //256-bit AVX
+#include <xmmintrin.h> //for other SSE-like stuff
 
 using namespace std;
 using namespace cv;
