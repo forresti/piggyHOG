@@ -23,6 +23,14 @@ void stream_simple(ForrestImg& img, ForrestImg& outImg){
 
 //TODO: init img with some arbitrary values
 
+void fill_img_with_garbage(ForrestImg& img){
+    for(int y=0; y<img.height; y++){
+        for(int x=0; x<img.width; x++){
+            img.data[y*img.stride + x] = (PIXEL_TYPE)(y*img.stride + x); //junk data
+        }
+    }
+}
+
 int main (int argc, char **argv)
 {
     int ALIGN_IN_BYTES = 256;
@@ -35,6 +43,7 @@ printf("stide = %d \n", stride);
 
     ForrestImg img(height, width, stride);
     ForrestImg outImg(height, width, stride);
+    fill_img_with_garbage(img);
 
     int n_iter = 1000;
 
