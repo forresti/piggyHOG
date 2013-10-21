@@ -44,7 +44,6 @@ printf("stide = %d \n", stride);
     ForrestImg img(height, width, stride);
     ForrestImg outImg(height, width, stride);
     fill_img_with_garbage(img);
-
     int n_iter = 1000;
 
     double start_timer = read_timer();
