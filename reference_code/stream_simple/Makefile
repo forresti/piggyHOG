@@ -6,9 +6,9 @@ OBJS = main.o  helpers.o ForrestImg.o
 EXENAME = main
 
 CC = g++
-CCOPTS = -c  -g -O3 -fopenmp `pkg-config opencv --cflags` -mavx -msse2avx
+CCOPTS = -c  -g -O3 -fopenmp -mavx -msse2avx
 LINK = g++
-LINKOPTS = -lgomp `pkg-config opencv --libs`
+LINKOPTS = -lgomp 
 
 all : $(EXENAME)
 
