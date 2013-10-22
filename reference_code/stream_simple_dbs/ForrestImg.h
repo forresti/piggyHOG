@@ -3,13 +3,9 @@
 #include "helpers.h"
 //using namespace cv;
 
-#define PIXEL_TYPE int //you modify this 
-typedef PIXEL_TYPE pixel_t;
-
-//#define PIXEL_TYPE int //you modify this 
-
-
-//#define PIXEL_TYPE __m128
+#define pixel_t char //you modify this 
+//#define pixel_t float //you modify this 
+//#define pixel_t __m128
 
 //no notion of RGB ... just a series of values (pixelType = char, short int, int, etc)
 class ForrestImg{
@@ -17,7 +13,7 @@ class ForrestImg{
     ForrestImg(int height, int width, int stride);
     ~ForrestImg();
 
-    PIXEL_TYPE* data;
+    pixel_t* data;
     int width;
     int stride; //width+padding. note that this is row-major.
     int height;

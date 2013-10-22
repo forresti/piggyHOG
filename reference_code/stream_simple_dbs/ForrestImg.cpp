@@ -9,8 +9,8 @@ ForrestImg::ForrestImg(int in_height, int in_width, int in_stride){
 
     //TODO: calloc?
     //TODO: align?
-    //data = (PIXEL_TYPE*)malloc(width * stride * sizeof(PIXEL_TYPE)); 
-    data = (PIXEL_TYPE*)malloc_aligned(32, width * stride * sizeof(PIXEL_TYPE));
+    //data = (pixel_t*)malloc(width * stride * sizeof(pixel_t)); 
+    data = (pixel_t*)malloc_aligned(32, width * stride * sizeof(pixel_t));
 }
 
 ForrestImg::~ForrestImg(){
