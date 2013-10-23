@@ -35,11 +35,12 @@ int main (int argc, char **argv)
 {
     int ALIGN_IN_BYTES = 256;
 
-    int height = 640;
-    int width = 480*3;
+    int height = 480;
+    int width = 640*3;
     int stride = width + (ALIGN_IN_BYTES - width%ALIGN_IN_BYTES); //thanks: http://stackoverflow.com/questions/2403631
+    //int stride = width;
 
-printf("stide = %d \n", stride);
+printf("stride = %d \n", stride);
 
     ForrestImg img(height, width, stride);
     ForrestImg outImg(height, width, stride);
@@ -52,7 +53,7 @@ printf("stide = %d \n", stride);
         //memcpy(outImg.data, img.data, height * stride * sizeof(pixel_t));
     }
     double stream_time = (read_timer() - start_timer) / n_iter;
-    double gb_to_copy = width * height * 3 * sizeof(pixel_t) / 1e9;
+    double gb_to_copy = width * height * sizeof(pixel_t) / 1e9;
     double gb_per_sec = gb_to_copy / (stream_time/1000); //convert stream_time from ms to sec
     printf("avg stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec);
     
