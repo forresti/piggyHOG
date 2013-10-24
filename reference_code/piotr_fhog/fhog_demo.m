@@ -18,3 +18,11 @@ end
 hogFps = nRuns/toc;
 disp(['fhog: ' num2str(hogFps) ' fps'])
 
+
+tic
+for i=1:nRuns
+    [M,O] = gradientMag( I,0,0,0,1 );
+end
+gradFps = nRuns/toc;
+disp(['gradient only fps: ' num2str(gradFps) ' fps'])
+
