@@ -73,7 +73,7 @@ pady_(0), interval_(0)
     vector<double> scales(maxScale+1);
 	
 	int i;
-#pragma omp parallel for private(i)
+//#pragma omp parallel for private(i)
     //i=0;
 	for (i = 0; i < interval; ++i) 
     {
@@ -367,6 +367,7 @@ void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 		const uint8_t * line = reinterpret_cast<const uint8_t *>(image.scanLine(y));
 		const uint8_t * linem = reinterpret_cast<const uint8_t *>(image.scanLine(ym));
 		
+        #pragma omp parallel for
 		for (int x = 0; x < width; ++x) {
 			const int xp = min(x + 1, width - 1);
 			const int xm = max(x - 1, 0);
