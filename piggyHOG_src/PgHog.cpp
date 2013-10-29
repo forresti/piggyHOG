@@ -352,6 +352,7 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
     hogPlaceFeatures_border(hogResult); //binary truncation features
 
     //writeGradToFile(oriImg, magImg);
+    writeCsv_2dFloat((float*)&magImg.data[0], magImg.rows, magImg.cols, "magImg.csv");
     return hogResult;
 }
 
