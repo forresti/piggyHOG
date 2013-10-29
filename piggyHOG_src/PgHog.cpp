@@ -63,7 +63,6 @@ PgHog::~PgHog(){
 
 //temp debug function declarations
 void writeGradToFile(Mat oriImg, Mat gradImg);
-//void writeHogCellsToFile(PgHogContainer hogResult);
 
 //compute the gradient and magnitude at one image location, store the results in oriImg and magImg
 inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
@@ -96,7 +95,7 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
     oriImg.at<float>(y, x) = ori;
-    magImg.at<float>(y, x) = max_mag;
+    magImg.at<uchar>(y, x) = max_mag;
 }
 
 //compute one HOG cell, storing the results in hogResult
@@ -276,7 +275,8 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 
     //TODO: possibly go down to 8-bit char
     Mat oriImg(img.rows, img.cols, CV_32FC1); //TODO: replace with aligned mem?
-    Mat magImg(img.rows, img.cols, CV_32FC1);
+    //Mat magImg(img.rows, img.cols, CV_32FC1);
+    Mat magImg(img.rows, img.cols, CV_8UC1); //TEST -- to check whether OpenCV is normalizing float img when writing it to file
 
     //hogResult first holds HOG Cells, then is normalized into HOG Blocks.
     PgHogContainer *hogResult = (PgHogContainer*)malloc(sizeof(PgHogContainer)); //TODO: make PgHogContainer a class, and use new/delete.
@@ -319,7 +319,7 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
                 }
             }
 
-#if  1
+#if 0
             //HOG cell binning
             if(hogX>0 && hogY>0){
                 hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult); //hog[0:17] = constrast sensitive features
@@ -352,8 +352,7 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 
     hogPlaceFeatures_border(hogResult); //binary truncation features
 
-    //writeGradToFile(oriImg, magImg);
-    //writeHogCellsToFile(hogResult);
+    writeGradToFile(oriImg, magImg);
     return hogResult;
 }
 
@@ -397,10 +396,3 @@ void writeGradToFile(Mat oriImg, Mat magImg){
     imwrite("PgHog_magnitudes.jpg", magImg); 
 }
 
-#if 0
-void writeHogCellsToFile(PgHogContainer hogResult){
-    ostringstream fname;
-    fname << "piggyHOG_results/level" << 0 << ".csv";
-    writeCsv_3d_Hog_Float(hogResult->hog, hogResult->paddedWidth, hogResult->paddedHeight, hogResult->depth, fname.str());
-}
-#endif

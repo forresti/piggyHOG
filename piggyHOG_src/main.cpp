@@ -43,7 +43,7 @@ void test_pyramid(){
 int main (int argc, char **argv)
 {
     test_oneLevel();
-    test_pyramid();
+//    test_pyramid();
 
     return 0;
 }
