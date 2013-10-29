@@ -95,7 +95,7 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
     oriImg.at<float>(y, x) = ori;
-    magImg.at<uchar>(y, x) = max_mag;
+    magImg.at<float>(y, x) = max_mag;
 }
 
 //compute one HOG cell, storing the results in hogResult
@@ -275,8 +275,7 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 
     //TODO: possibly go down to 8-bit char
     Mat oriImg(img.rows, img.cols, CV_32FC1); //TODO: replace with aligned mem?
-    //Mat magImg(img.rows, img.cols, CV_32FC1);
-    Mat magImg(img.rows, img.cols, CV_8UC1); //TEST -- to check whether OpenCV is normalizing float img when writing it to file
+    Mat magImg(img.rows, img.cols, CV_32FC1);
 
     //hogResult first holds HOG Cells, then is normalized into HOG Blocks.
     PgHogContainer *hogResult = (PgHogContainer*)malloc(sizeof(PgHogContainer)); //TODO: make PgHogContainer a class, and use new/delete.
@@ -319,7 +318,7 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
                 }
             }
 
-#if 0
+#if 1
             //HOG cell binning
             if(hogX>0 && hogY>0){
                 hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult); //hog[0:17] = constrast sensitive features
@@ -352,7 +351,7 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 
     hogPlaceFeatures_border(hogResult); //binary truncation features
 
-    writeGradToFile(oriImg, magImg);
+    //writeGradToFile(oriImg, magImg);
     return hogResult;
 }
 
