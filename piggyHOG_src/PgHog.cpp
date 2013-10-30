@@ -95,7 +95,8 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
     oriImg.at<float>(y, x) = ori;
-    magImg.at<float>(y, x) = max_mag;
+//    magImg.at<float>(y, x) = max_mag;
+    magImg.at<float>(y, x) = img.at<cv::Vec3b>(y,x)[1] / 3.2; //TODO: remove (test)
 }
 
 //compute one HOG cell, storing the results in hogResult
@@ -351,7 +352,7 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
 
     hogPlaceFeatures_border(hogResult); //binary truncation features
 
-    //writeGradToFile(oriImg, magImg);
+    writeGradToFile(oriImg, magImg);
     writeCsv_2dFloat((float*)&magImg.data[0], magImg.rows, magImg.cols, "magImg.csv");
     return hogResult;
 }
@@ -392,7 +393,7 @@ void writeGradToFile(Mat oriImg, Mat magImg){
     oriImg.convertTo(oriImg, CV_8UC1, 255.);
     imwrite("PgHog_orientations.jpg", oriImg);
     
-    //magImg.convertTo(magImg, CV_8UC1, 255.);
+    //magImg.convertTo(magImg, CV_8UC1, 1.);
     imwrite("PgHog_magnitudes.jpg", magImg); 
 }
 
