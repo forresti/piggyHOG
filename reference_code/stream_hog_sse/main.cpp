@@ -16,8 +16,8 @@ void naive_fixedpt_gradient(int height, int width, int stride, int n_channels_in
     assert(n_channels_output == 1);
     const int n_ch = 3; //hard-coded copy of n_channels_input
 
-    int mag_ch[3];
-    //int16_t mag_ch[3];
+    //int mag_ch[3];
+    int16_t mag_ch[3];
     int16_t gradX_ch[3];
     int16_t gradY_ch[3];
     int16_t ori_ch[3];
@@ -32,9 +32,6 @@ void naive_fixedpt_gradient(int height, int width, int stride, int n_channels_in
             gradY_ch[1] = (int16_t)img[y*stride + x + 1*height*stride + stride] - (int16_t)img[y*stride + x + 1*height*stride - stride];
             gradY_ch[2] = (int16_t)img[y*stride + x + 2*height*stride + stride] - (int16_t)img[y*stride + x + 2*height*stride - stride];
 
-            //mag_ch[0] = (gradX_ch[0]>>1)*(gradX_ch[0]>>1) + (gradY_ch[0]>>1)*(gradY_ch[0]>>1);     //TODO: check for overflow
-            //mag_ch[1] = (gradX_ch[1]>>1)*(gradX_ch[1]>>1) + (gradY_ch[1]>>1)*(gradY_ch[1]>>1); 
-            //mag_ch[2] = (gradX_ch[2]>>1)*(gradX_ch[2]>>1) + (gradY_ch[2]>>1)*(gradY_ch[2]>>1); 
             mag_ch[0] = gradX_ch[0]*gradX_ch[0] + gradY_ch[0]*gradY_ch[0];
             mag_ch[1] = gradX_ch[1]*gradX_ch[1] + gradY_ch[1]*gradY_ch[1];
             mag_ch[2] = gradX_ch[2]*gradX_ch[2] + gradY_ch[2]*gradY_ch[2];
@@ -52,19 +49,24 @@ void naive_fixedpt_gradient(int height, int width, int stride, int n_channels_in
                     mag_argmax = i;
                 }
             }
-
+#if 1 //real code
             int mag_max_sqrt = sqrt(mag_max);
 
             if(mag_max_sqrt > 256){ //2^17 = 362
                 printf("x=%d, y=%d, mag_max_sqrt = %d \n", x, y, mag_max_sqrt);
             }
-
             //vectorization falls down in the following lines:
             outMag[y*stride + x] = mag_max_sqrt;
             gradX = gradX_ch[mag_argmax];
             gradY = gradY_ch[mag_argmax];
             //outOri[y*stride + x] = ATAN2_TABLE[gradY + 255][gradX + 255]; //FIXME: this can be positive or negative
             outOri[y*stride + x] = abs(ATAN2_TABLE[gradY + 255][gradX + 255]) * 10; //for visual effect 
+#endif
+#if 0 //dummy code
+            //outOri[y*stride + x] = gradX_ch[0];
+            //outOri[y*stride + x] = gradX_ch[mag_argmax];
+            outMag[y*stride + x] = mag_max;
+#endif
         }
     }
 }
@@ -92,11 +94,11 @@ int main (int argc, char **argv)
 {
     init_lookup_table();
     int ALIGN_IN_BYTES = 256;
-    int n_iter = 1; //not really "iterating" -- just number of times to run the experiment
+    int n_iter = 1000; //not really "iterating" -- just number of times to run the experiment
     //int stride = width + (ALIGN_IN_BYTES - width%ALIGN_IN_BYTES); //thanks: http://stackoverflow.com/questions/2403631
     //SimpleImg img(height, width, stride, n_channels);
 
-    SimpleImg img("carsgraz_001.image.jpg");
+    SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
 
     //[mag, ori] = naive_fixedpt_gradient(img)
     SimpleImg mag(img.height, img.width, img.stride, 1); //out img has just 1 channel
