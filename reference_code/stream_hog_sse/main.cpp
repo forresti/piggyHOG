@@ -44,8 +44,11 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
                 yHi = _mm_load_si128( (__m128i*)(&img[y*stride + x + channel*height*stride + 2*stride]) );
 
                 //convert yLo and yHi to 16 bits
-                yLo_0 = _mm_unpacklo_epi8(yLo, _mm_setzero_si128()); //unsigned cast to 16-bit ints 
-                yHi_0 = _mm_unpacklo_epi8(yHi, _mm_setzero_si128());
+                yLo_0 = _mm_unpacklo_epi8(yLo, _mm_setzero_si128()); //unsigned cast to 16-bit ints -- bottom bits 
+                yHi_0 = _mm_unpacklo_epi8(yHi, _mm_setzero_si128()); 
+                yLo_1 = _mm_unpackhi_epi8(yLo, _mm_setzero_si128()); //unsigned cast to 16-bit ints -- top bits
+                yHi_1 = _mm_unpackhi_epi8(yHi, _mm_setzero_si128());
+
                 //might also need to do _mm_cvtepu8_epi16
 
                 gradX_ch[channel] =  _mm_sub_epi8(xHi, xLo); //overflows ... need 16-bit
