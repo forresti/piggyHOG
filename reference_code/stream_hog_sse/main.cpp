@@ -42,7 +42,6 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
                 gradX_ch[channel] =  _mm_sub_epi8(xHi, xLo); //overflows ... need 16-bit
 
                 _mm_storeu_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+8] = gradX_ch[channel] -- just a test, doesnt make much sense
-                //_mm_storeu_si128( (__m128i*)(&outOri[y*stride + x]), xHi );
             }
         }
     }
