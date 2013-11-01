@@ -24,9 +24,14 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
     assert(sizeof(__m128i) == 16);
     int loadSize = sizeof(__m128i); // 16 bytes = 128 bits
 
-    __m128i xLo, xHi, yLo, yHi;
+    __m128i xLo, xHi, yLo, yHi; //packed 8-bit
+    __m128i xLo_0, xHi_0, yLo_0, yHi_0; //bottom bits: upcast from 8-bit to 16-bit
+    __m128i xLo_1, xHi_1, yLo_1, yHi_1; //top bits: upcast from 8-bit to 16-bit
     __m128i gradX_ch[3];
-    __m128i gradY_ch[3];
+    __m128i gradY_ch[3]; //packed 8-bit
+    __m128i gradY_ch_0[3]; //bottom bits: upcast from 8-bit to 16-bit
+    __m128i gradY_ch_1[3]; //top bits: upcast from 8-bit to 16-bit
+
     for(int y=2; y<height-2; y++){
         for(int x=0; x < stride-2; x+=loadSize){ //(stride-2) to avoid falling off the end when doing (location+2) to get xHi
 
@@ -35,16 +40,22 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
                 xLo = _mm_loadu_si128( (__m128i*)(&img[y*stride + x + channel*height*stride    ]) ); //load eight 1-byte unsigned char pixels
                 xHi = _mm_loadu_si128( (__m128i*)(&img[y*stride + x + channel*height*stride + 2]) ); //index as chars, THEN cast to __m128i*  
 
+                xLo_0 = _mm_unpacklo_epi8(xLo, _mm_setzero_si128()); //unsigned cast to 16-bit ints 
+                xHi_0 = _mm_unpacklo_epi8(xHi, _mm_setzero_si128());
+
+                //might also need to do _mm_cvtepu8_epi16
+
                 yLo = _mm_load_si128( (__m128i*)(&img[y*stride + x + channel*height*stride           ]) ); //y-dim is a long stride, easier to do aligned loads
                 yHi = _mm_load_si128( (__m128i*)(&img[y*stride + x + channel*height*stride + 2*stride]) );
-                //..._2*stride
-
-                //TODO: yLo, yHi
 
                 //TODO: convert xLo and xHi to 16-bit signed ints
 
                 gradX_ch[channel] =  _mm_sub_epi8(xHi, xLo); //overflows ... need 16-bit
-                gradY_ch[channel] =  _mm_sub_epi8(yHi, yLo); //overflows ... need 16-bit
+                //gradY_ch[channel] =  _mm_sub_epi8(yHi, yLo); //overflows ... need 16-bit
+                gradY_ch_0[channel] =  _mm_sub_epi16(yHi_0, yLo_0);
+                //gradY_ch_1[channel] =  _mm_sub_epi16(yHi_1, yLo_1); 
+                gradY_ch_1[channel] = _mm_setzero_si128(); //tmp
+                gradY_ch[channel] = _mm_packs_epi16(gradY_ch_0[channel], gradY_ch_1[channel]);
 
                 //_mm_storeu_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+8] = gradX_ch[channel] -- just a test, doesnt make much sense
                 _mm_storeu_si128( (__m128i*)(&outOri[y*stride + x]), gradY_ch[channel] );
