@@ -28,20 +28,26 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
     __m128i gradX_ch[3];
     __m128i gradY_ch[3];
     for(int y=2; y<height-2; y++){
-        for(int x=2; x < stride; x+=loadSize){
+        for(int x=0; x < stride-2; x+=loadSize){ //(stride-2) to avoid falling off the end when doing (location+2) to get xHi
 
             for(int channel=0; channel<3; channel++){ //TODO: unroll channels
                 //xLo = _mm_loadu_pu8(&img[y*stride + x + channel*height*stride - 1]);    //load eight 1-byte unsigned char pixels
-                xLo = _mm_loadu_si128( (__m128i*)(&img[y*stride + x + channel*height*stride - 1]) ); //load eight 1-byte unsigned char pixels
-                xHi = _mm_loadu_si128( (__m128i*)(&img[y*stride + x + channel*height*stride + 1]) ); //index as chars, THEN cast to __m128i*  
+                xLo = _mm_loadu_si128( (__m128i*)(&img[y*stride + x + channel*height*stride    ]) ); //load eight 1-byte unsigned char pixels
+                xHi = _mm_loadu_si128( (__m128i*)(&img[y*stride + x + channel*height*stride + 2]) ); //index as chars, THEN cast to __m128i*  
+
+                yLo = _mm_load_si128( (__m128i*)(&img[y*stride + x + channel*height*stride           ]) ); //y-dim is a long stride, easier to do aligned loads
+                yHi = _mm_load_si128( (__m128i*)(&img[y*stride + x + channel*height*stride + 2*stride]) );
+                //..._2*stride
 
                 //TODO: yLo, yHi
 
                 //TODO: convert xLo and xHi to 16-bit signed ints
 
                 gradX_ch[channel] =  _mm_sub_epi8(xHi, xLo); //overflows ... need 16-bit
+                gradY_ch[channel] =  _mm_sub_epi8(yHi, yLo); //overflows ... need 16-bit
 
-                _mm_storeu_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+8] = gradX_ch[channel] -- just a test, doesnt make much sense
+                //_mm_storeu_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+8] = gradX_ch[channel] -- just a test, doesnt make much sense
+                _mm_storeu_si128( (__m128i*)(&outOri[y*stride + x]), gradY_ch[channel] );
             }
         }
     }
