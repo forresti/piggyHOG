@@ -16,24 +16,34 @@ void naive_fixedpt_gradient(int height, int width, int stride, int n_channels_in
     assert(n_channels_output == 1);
     const int n_ch = 3; //hard-coded copy of n_channels_input
 
-    //int mag_ch[3];
-    int16_t mag_ch[3];
+
+    long int xLo[3]; //input data for gradX
+    long int xHi[3];
+    long int yLo[3]; //input data for gradY
+    long int yHi[3];
+    int loadSize = 8; //long int
+
+    int mag_ch[3];
+    //int16_t mag_ch[3];
     int16_t gradX_ch[3];
     int16_t gradY_ch[3];
     int16_t ori_ch[3];
-
-    int dataSize = 8; //long int
     
+    long int* img_long_int = reinterpret_cast<long int*>(img);
 
     for(int y=2; y<height-2; y++){
         //for(int x=2; x < width-2; x++){ //replaced with unrolling
-        for(int x_tile=2; x_tile < (stride-dataSize); x_tile+=dataSize){
+        //for(int x_tile=2; x_tile < (stride-loadSize); x_tile+=loadSize){
+        for(int x_tile=2; x_tile < (stride/loadSize); x_tile++){
             //TODO: load a 8-byte long int for each grad_ch
+            xLo[0] = img_long_int[y*(stride/loadSize) + x_tile +                 - 1];
+            xHi[0] = img_long_int[y*(stride/loadSize) + x_tile +                 + 1]; 
 
-            for(int x_inner=0; x_inner < dataSize; x_inner++){
-                int x = x_tile + x_inner;
+            for(int x_inner=0; x_inner < loadSize; x_inner++){
+                int x = (x_tile-1)*loadSize + x_inner + 1; //(x_tile-1)...+1 -> because we're starting from x_tile=2 instead of x_tile=0
  
-                gradX_ch[0] = (int16_t)img[y*stride + x +                 + 1] - (int16_t)img[y*stride + x                   - 1];
+                //gradX_ch[0] = (int16_t)img[y*stride + x +                 + 1] - (int16_t)img[y*stride + x                   - 1];
+                gradX_ch[0] = reinterpret_cast<unsigned char*>(xHi)[x_inner] - reinterpret_cast<unsigned char*>(xLo)[x_inner]; //test loading larger words
                 gradX_ch[1] = (int16_t)img[y*stride + x + 1*height*stride + 1] - (int16_t)img[y*stride + x + 1*height*stride - 1];
                 gradX_ch[2] = (int16_t)img[y*stride + x + 2*height*stride + 1] - (int16_t)img[y*stride + x + 2*height*stride - 1];
 
