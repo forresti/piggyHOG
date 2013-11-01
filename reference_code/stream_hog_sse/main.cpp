@@ -22,51 +22,62 @@ void naive_fixedpt_gradient(int height, int width, int stride, int n_channels_in
     int16_t gradY_ch[3];
     int16_t ori_ch[3];
 
+    int dataSize = 8; //long int
+    
+
     for(int y=2; y<height-2; y++){
-        for(int x=2; x < width-2; x++){
-            gradX_ch[0] = (int16_t)img[y*stride + x +                 + 1] - (int16_t)img[y*stride + x                   - 1];
-            gradX_ch[1] = (int16_t)img[y*stride + x + 1*height*stride + 1] - (int16_t)img[y*stride + x + 1*height*stride - 1];
-            gradX_ch[2] = (int16_t)img[y*stride + x + 2*height*stride + 1] - (int16_t)img[y*stride + x + 2*height*stride - 1];
+        //for(int x=2; x < width-2; x++){ //replaced with unrolling
+        for(int x_tile=2; x_tile < (stride-dataSize); x_tile+=dataSize){
+            //TODO: load a 8-byte long int for each grad_ch
 
-            gradY_ch[0] = (int16_t)img[y*stride + x +                 + stride] - (int16_t)img[y*stride + x                   - stride];
-            gradY_ch[1] = (int16_t)img[y*stride + x + 1*height*stride + stride] - (int16_t)img[y*stride + x + 1*height*stride - stride];
-            gradY_ch[2] = (int16_t)img[y*stride + x + 2*height*stride + stride] - (int16_t)img[y*stride + x + 2*height*stride - stride];
+            for(int x_inner=0; x_inner < dataSize; x_inner++){
+                int x = x_tile + x_inner;
+ 
+                gradX_ch[0] = (int16_t)img[y*stride + x +                 + 1] - (int16_t)img[y*stride + x                   - 1];
+                gradX_ch[1] = (int16_t)img[y*stride + x + 1*height*stride + 1] - (int16_t)img[y*stride + x + 1*height*stride - 1];
+                gradX_ch[2] = (int16_t)img[y*stride + x + 2*height*stride + 1] - (int16_t)img[y*stride + x + 2*height*stride - 1];
 
-            mag_ch[0] = gradX_ch[0]*gradX_ch[0] + gradY_ch[0]*gradY_ch[0];
-            mag_ch[1] = gradX_ch[1]*gradX_ch[1] + gradY_ch[1]*gradY_ch[1];
-            mag_ch[2] = gradX_ch[2]*gradX_ch[2] + gradY_ch[2]*gradY_ch[2];
+                gradY_ch[0] = (int16_t)img[y*stride + x +                 + stride] - (int16_t)img[y*stride + x                   - stride];
+                gradY_ch[1] = (int16_t)img[y*stride + x + 1*height*stride + stride] - (int16_t)img[y*stride + x + 1*height*stride - stride];
+                gradY_ch[2] = (int16_t)img[y*stride + x + 2*height*stride + stride] - (int16_t)img[y*stride + x + 2*height*stride - stride];
 
-            int16_t gradX, gradY;
-            int mag_max = 0;
-            int16_t mag_argmax = 0;
+                mag_ch[0] = gradX_ch[0]*gradX_ch[0] + gradY_ch[0]*gradY_ch[0];
+                mag_ch[1] = gradX_ch[1]*gradX_ch[1] + gradY_ch[1]*gradY_ch[1];
+                mag_ch[2] = gradX_ch[2]*gradX_ch[2] + gradY_ch[2]*gradY_ch[2];
 
-            for(int i=0; i<3; i++){
-                if(mag_max < mag_ch[i]){
-                    //if(mag_ch[i] > 32000){ //check for overflow
-                    //    printf("x=%d, y=%d, mag_ch[%d] = %d \n", x, y, i, mag_ch[i]);
-                    //}
-                    mag_max = mag_ch[i]; //vectorized
-                    mag_argmax = i;
+                int16_t gradX, gradY;
+                int mag_max = 0;
+                int16_t mag_argmax = 0;
+
+                for(int i=0; i<3; i++){
+                    if(mag_max < mag_ch[i]){
+                        //if(mag_ch[i] > 32000){ //check for overflow
+                        //    printf("x=%d, y=%d, mag_ch[%d] = %d \n", x, y, i, mag_ch[i]);
+                        //}
+                        mag_max = mag_ch[i]; //vectorized
+                        mag_argmax = i;
+                    }
                 }
-            }
-#if 1 //real code
-            int mag_max_sqrt = sqrt(mag_max);
+                #if 1 //real code
+                int mag_max_sqrt = sqrt(mag_max);
 
-            if(mag_max_sqrt > 256){ //2^17 = 362
-                printf("x=%d, y=%d, mag_max_sqrt = %d \n", x, y, mag_max_sqrt);
+                if(mag_max_sqrt > 256){ //2^17 = 362
+                    printf("x=%d, y=%d, mag_max_sqrt = %d \n", x, y, mag_max_sqrt);
+                }
+                //vectorization falls down in the following lines:
+                outMag[y*stride + x] = mag_max_sqrt;
+                gradX = gradX_ch[mag_argmax];
+                gradY = gradY_ch[mag_argmax];
+                //outOri[y*stride + x] = ATAN2_TABLE[gradY + 255][gradX + 255]; //FIXME: this can be positive or negative
+                outOri[y*stride + x] = abs(ATAN2_TABLE[gradY + 255][gradX + 255]) * 10; //for visual effect 
+                #endif
+
+                #if 0 //dummy code
+                //outOri[y*stride + x] = gradX_ch[0];
+                //outOri[y*stride + x] = gradX_ch[mag_argmax];
+                outMag[y*stride + x] = mag_max;
+                #endif
             }
-            //vectorization falls down in the following lines:
-            outMag[y*stride + x] = mag_max_sqrt;
-            gradX = gradX_ch[mag_argmax];
-            gradY = gradY_ch[mag_argmax];
-            //outOri[y*stride + x] = ATAN2_TABLE[gradY + 255][gradX + 255]; //FIXME: this can be positive or negative
-            outOri[y*stride + x] = abs(ATAN2_TABLE[gradY + 255][gradX + 255]) * 10; //for visual effect 
-#endif
-#if 0 //dummy code
-            //outOri[y*stride + x] = gradX_ch[0];
-            //outOri[y*stride + x] = gradX_ch[mag_argmax];
-            outMag[y*stride + x] = mag_max;
-#endif
         }
     }
 }
