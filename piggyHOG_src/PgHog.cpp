@@ -95,8 +95,7 @@ inline void PgHog::gradient(int x, int y, Mat img, Mat &oriImg, Mat &magImg){
     max_mag = sqrt(max_mag); //we've been using magnitude-squared so far
 
     oriImg.at<float>(y, x) = ori;
-//    magImg.at<float>(y, x) = max_mag;
-    magImg.at<float>(y, x) = img.at<cv::Vec3b>(y,x)[1] / 3.2; //TODO: remove (test)
+    magImg.at<float>(y, x) = max_mag;
 }
 
 //compute one HOG cell, storing the results in hogResult
