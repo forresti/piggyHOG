@@ -3,19 +3,57 @@
 #include <math.h>
 #include <string.h>
 #include <cassert>
+#include <xmmintrin.h>
+#include <pmmintrin.h> //for _mm_hadd_pd()
 
 #include "SimpleImg.h"
 #include "helpers.h"
 using namespace std;
 char ATAN2_TABLE[512][512]; //signed char (values are -18 to 18)
 
-//no attempt at vectorization...just checking correctness.
-void naive_fixedpt_gradient(int height, int width, int stride, int n_channels_input, int n_channels_output,
+__m128i max_channel_ori(__m128i ori_ch[3], __m128i mag_ch[3]){
+    __m128i ori_max;
+    //stub
+    return ori_max;
+}
+
+void gradient_sse(int height, int width, int stride, int n_channels_input, int n_channels_output,
                             pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag){
     assert(n_channels_input == 3);
     assert(n_channels_output == 1);
-    const int n_ch = 3; //hard-coded copy of n_channels_input
+    assert(sizeof(__m128i) == 16);
+    int loadSize = sizeof(__m128i); // 16 bytes = 128 bits
 
+    __m128i xLo, xHi, yLo, yHi;
+    __m128i gradX_ch[3];
+    __m128i gradY_ch[3];
+    for(int y=2; y<height-2; y++){
+        for(int x=2; x < stride; x+=loadSize){
+
+            for(int channel=0; channel<3; channel++){ //TODO: unroll channels
+                //xLo = _mm_loadu_pu8(&img[y*stride + x + channel*height*stride - 1]);    //load eight 1-byte unsigned char pixels
+                xLo = _mm_loadu_si128( (__m128i*)(&img[y*stride + x + channel*height*stride - 1]) ); //load eight 1-byte unsigned char pixels
+                xHi = _mm_loadu_si128( (__m128i*)(&img[y*stride + x + channel*height*stride + 1]) ); //index as chars, THEN cast to __m128i*  
+
+                //TODO: yLo, yHi
+
+                //TODO: convert xLo and xHi to 16-bit signed ints
+
+                gradX_ch[channel] =  _mm_sub_epi8(xHi, xLo); //overflows ... need 16-bit
+
+                _mm_storeu_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+8] = gradX_ch[channel] -- just a test, doesnt make much sense
+                //_mm_storeu_si128( (__m128i*)(&outOri[y*stride + x]), xHi );
+            }
+        }
+    }
+}
+
+
+//no attempt at vectorization...just checking correctness.
+void gradient_wideload_unvectorized(int height, int width, int stride, int n_channels_input, int n_channels_output,
+                            pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag){
+    assert(n_channels_input == 3);
+    assert(n_channels_output == 1);
 
     long int xLo[3]; //input data for gradX
     long int xHi[3];
@@ -121,12 +159,13 @@ int main (int argc, char **argv)
 
     SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
 
-    //[mag, ori] = naive_fixedpt_gradient(img)
+    //[mag, ori] = gradient_wideload_unvectorized(img)
     SimpleImg mag(img.height, img.width, img.stride, 1); //out img has just 1 channel
     SimpleImg ori(img.height, img.width, img.stride, 1); //out img has just 1 channel
     double start_timer = read_timer();
     for(int i=0; i<n_iter; i++){
-        naive_fixedpt_gradient(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
+        //gradient_wideload_unvectorized(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
+        gradient_sse(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
     }
     mag.simple_csvwrite("mag.csv");
     mag.simple_imwrite("mag.jpg");
