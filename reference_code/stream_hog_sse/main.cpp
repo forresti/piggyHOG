@@ -53,8 +53,11 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
     __m128i xLo_1, xHi_1, yLo_1, yHi_1; //top bits: upcast from 8-bit to 16-bit
     __m128i gradX_ch[3];
     __m128i gradY_ch[3]; //packed 8-bit
+    __m128i gradX_ch_0[3]; //bottom bits: upcast from 8-bit to 16-bit
+    __m128i gradX_ch_1[3]; //top bits: upcast from 8-bit to 16-bit
     __m128i gradY_ch_0[3]; //bottom bits: upcast from 8-bit to 16-bit
     __m128i gradY_ch_1[3]; //top bits: upcast from 8-bit to 16-bit
+
 
     for(int y=2; y<height-2; y++){
         for(int x=0; x < stride-2; x+=loadSize){ //(stride-2) to avoid falling off the end when doing (location+2) to get xHi
@@ -69,18 +72,20 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
                 upcast_8bit_to_16bit(xLo, xHi, yLo, yHi,
                                      xLo_0, xHi_0, yLo_0, yHi_0,
                                      xLo_1, xHi_1, yLo_1, yHi_1);
-                //might also need to do _mm_cvtepu8_epi16
 
-                gradX_ch[channel] =  _mm_sub_epi8(xHi, xLo); //overflows ... need 16-bit
+                //gradX_ch[channel] =  _mm_sub_epi8(xHi, xLo); //overflows ... need 16-bit
                 //gradY_ch[channel] =  _mm_sub_epi8(yHi, yLo); //overflows ... need 16-bit
+
+                gradX_ch_0[channel] =  _mm_sub_epi16(xHi_0, xLo_0); // xHi[0:3] - xLo[0:3]
+                gradX_ch_1[channel] =  _mm_sub_epi16(xHi_1, xLo_1);  // xHi[4:7] - xLo[4:7]
+                gradX_ch[channel] = _mm_packs_epi16(gradX_ch_0[channel], gradX_ch_1[channel]); //16-bit -> 8bit (temporary ... typically, we'd pack up the results later in the pipeline)
 
                 gradY_ch_0[channel] =  _mm_sub_epi16(yHi_0, yLo_0);
                 gradY_ch_1[channel] =  _mm_sub_epi16(yHi_1, yLo_1); 
                 gradY_ch[channel] = _mm_packs_epi16(gradY_ch_0[channel], gradY_ch_1[channel]); //temporary ... typically, we'd pack up the results later in the pipeline.
-                gradY_ch[channel] = _mm_cvtepi16_epu8(gradY_ch[channel]);
 
-                //_mm_storeu_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+8] = gradX_ch[channel] -- just a test, doesnt make much sense
-                _mm_storeu_si128( (__m128i*)(&outOri[y*stride + x]), gradY_ch[channel] );
+                _mm_storeu_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+7] = gradX_ch[channel] -- just a test, doesnt make much sense
+                _mm_storeu_si128( (__m128i*)(&outMag[y*stride + x]), gradY_ch[channel] );
             }
         }
     }
