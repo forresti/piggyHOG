@@ -17,6 +17,25 @@ __m128i max_channel_ori(__m128i ori_ch[3], __m128i mag_ch[3]){
     return ori_max;
 }
 
+//enables us to load 8-bit values, but work in 16-bit. 
+//      TODO: struct for the inputs / outputs?
+void upcast_8bit_to_16bit(__m128i in_xLo,     __m128i in_xHi,     __m128i in_yLo,     __m128i in_yHi,
+                          __m128i &out_xLo_0, __m128i &out_xHi_0, __m128i &out_yLo_0, __m128i &out_yHi_0, //bottom bits, in 16-bit
+                          __m128i &out_xLo_1, __m128i &out_xHi_1, __m128i &out_yLo_1, __m128i &out_yHi_1) //top bits,    in 16-bit
+{
+    //convert inputs for gradY to 16 bits
+//    out_xLo_0 = _mm_unpacklo_epi8(in_xLo, _mm_setzero_si128()); //unsigned cast to 16-bit ints -- bottom bits 
+//    out_xHi_0 = _mm_unpacklo_epi8(in_xHi, _mm_setzero_si128()); 
+//    out_xLo_1 = _mm_unpackhi_epi8(in_xLo, _mm_setzero_si128()); //unsigned cast to 16-bit ints -- top bits
+//    out_xHi_1 = _mm_unpackhi_epi8(in_xHi, _mm_setzero_si128());
+
+    //convert inputs for gradY to 16 bits
+    out_yLo_0 = _mm_unpacklo_epi8(in_yLo, _mm_setzero_si128()); //unsigned cast to 16-bit ints -- bottom bits 
+    out_yHi_0 = _mm_unpacklo_epi8(in_yHi, _mm_setzero_si128()); 
+    out_yLo_1 = _mm_unpackhi_epi8(in_yLo, _mm_setzero_si128()); //unsigned cast to 16-bit ints -- top bits
+    out_xHi_1 = _mm_unpackhi_epi8(in_yHi, _mm_setzero_si128());
+
+}
 void gradient_sse(int height, int width, int stride, int n_channels_input, int n_channels_output,
                             pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag){
     assert(n_channels_input == 3);
@@ -42,20 +61,23 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
 
                 yLo = _mm_load_si128( (__m128i*)(&img[y*stride + x + channel*height*stride           ]) ); //y-dim is a long stride, easier to do aligned loads
                 yHi = _mm_load_si128( (__m128i*)(&img[y*stride + x + channel*height*stride + 2*stride]) );
-
+#if 0
                 //convert yLo and yHi to 16 bits
                 yLo_0 = _mm_unpacklo_epi8(yLo, _mm_setzero_si128()); //unsigned cast to 16-bit ints -- bottom bits 
                 yHi_0 = _mm_unpacklo_epi8(yHi, _mm_setzero_si128()); 
                 yLo_1 = _mm_unpackhi_epi8(yLo, _mm_setzero_si128()); //unsigned cast to 16-bit ints -- top bits
                 yHi_1 = _mm_unpackhi_epi8(yHi, _mm_setzero_si128());
-
+#endif
+#if 1
+                upcast_8bit_to_16bit(xLo, xHi, yLo, yHi,
+                                     xLo_0, xHi_0, yLo_0, yHi_0,
+                                     xLo_1, xHi_1, yLo_1, yHi_1);
                 //might also need to do _mm_cvtepu8_epi16
-
+#endif
                 gradX_ch[channel] =  _mm_sub_epi8(xHi, xLo); //overflows ... need 16-bit
                 //gradY_ch[channel] =  _mm_sub_epi8(yHi, yLo); //overflows ... need 16-bit
                 gradY_ch_0[channel] =  _mm_sub_epi16(yHi_0, yLo_0);
                 gradY_ch_1[channel] =  _mm_sub_epi16(yHi_1, yLo_1); 
-                //gradY_ch_1[channel] = _mm_setzero_si128(); //tmp
                 gradY_ch[channel] = _mm_packs_epi16(gradY_ch_0[channel], gradY_ch_1[channel]);
 
                 //_mm_storeu_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+8] = gradX_ch[channel] -- just a test, doesnt make much sense
