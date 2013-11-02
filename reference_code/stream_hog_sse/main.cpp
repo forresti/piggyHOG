@@ -54,7 +54,8 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
     __m128i gradX_ch[3],   gradY_ch[3];   //packed 8-bit
     __m128i gradX_ch_0[3], gradY_ch_0[3]; //bottom bits: upcast from 8-bit to 16-bit
     __m128i gradX_ch_1[3], gradY_ch_1[3]; //top bits: upcast from 8-bit to 16-bit
-
+    __m128i mag_ch_0[3]; //top bits
+    __m128i mag_ch_1[3]; //bottom bits
 
     for(int y=2; y<height-2; y++){
         for(int x=0; x < stride-2; x+=loadSize){ //(stride-2) to avoid falling off the end when doing (location+2) to get xHi
@@ -81,8 +82,12 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
                 gradY_ch_1[channel] =  _mm_sub_epi16(yHi_1, yLo_1); 
                 gradY_ch[channel] = _mm_packs_epi16(gradY_ch_0[channel], gradY_ch_1[channel]); //temporary ... typically, we'd pack up the results later in the pipeline.
 
-                _mm_storeu_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+7] = gradX_ch[channel] -- just a test, doesnt make much sense
-                _mm_storeu_si128( (__m128i*)(&outMag[y*stride + x]), gradY_ch[channel] );
+                //argh, _mm_mul_epi16 doesn't exist. we only seem to have _mm_mullo_epi16 and _mm_mulhi_epi16
+                //mag_ch_0[channel] = _mm_add_epi16( _mm_mul_epi16(gradX_ch_0[channel], gradX_ch_0[channel]), 
+                //                                   _mm_mul_epi16(gradX_ch_0[channel], gradX_ch_0[channel]) ); //gradX^2 + gradY^2
+
+                _mm_store_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+7] = gradX_ch[channel] -- just a test, doesnt make much sense
+                _mm_store_si128( (__m128i*)(&outMag[y*stride + x]), gradY_ch[channel] ); //aligned stores are easy here...it's all divisible by loadSize.
             }
         }
     }
