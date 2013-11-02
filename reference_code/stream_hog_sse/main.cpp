@@ -33,7 +33,7 @@ void upcast_8bit_to_16bit(__m128i in_xLo,     __m128i in_xHi,     __m128i in_yLo
     out_yLo_0 = _mm_unpacklo_epi8(in_yLo, _mm_setzero_si128()); //unsigned cast to 16-bit ints -- bottom bits 
     out_yHi_0 = _mm_unpacklo_epi8(in_yHi, _mm_setzero_si128()); 
     out_yLo_1 = _mm_unpackhi_epi8(in_yLo, _mm_setzero_si128()); //unsigned cast to 16-bit ints -- top bits
-    out_xHi_1 = _mm_unpackhi_epi8(in_yHi, _mm_setzero_si128());
+    out_yHi_1 = _mm_unpackhi_epi8(in_yHi, _mm_setzero_si128());
 
 }
 void gradient_sse(int height, int width, int stride, int n_channels_input, int n_channels_output,
