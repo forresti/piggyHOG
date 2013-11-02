@@ -51,12 +51,9 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
     __m128i xLo, xHi, yLo, yHi; //packed 8-bit
     __m128i xLo_0, xHi_0, yLo_0, yHi_0; //bottom bits: upcast from 8-bit to 16-bit
     __m128i xLo_1, xHi_1, yLo_1, yHi_1; //top bits: upcast from 8-bit to 16-bit
-    __m128i gradX_ch[3];
-    __m128i gradY_ch[3]; //packed 8-bit
-    __m128i gradX_ch_0[3]; //bottom bits: upcast from 8-bit to 16-bit
-    __m128i gradX_ch_1[3]; //top bits: upcast from 8-bit to 16-bit
-    __m128i gradY_ch_0[3]; //bottom bits: upcast from 8-bit to 16-bit
-    __m128i gradY_ch_1[3]; //top bits: upcast from 8-bit to 16-bit
+    __m128i gradX_ch[3],   gradY_ch[3];   //packed 8-bit
+    __m128i gradX_ch_0[3], gradY_ch_0[3]; //bottom bits: upcast from 8-bit to 16-bit
+    __m128i gradX_ch_1[3], gradY_ch_1[3]; //top bits: upcast from 8-bit to 16-bit
 
 
     for(int y=2; y<height-2; y++){
