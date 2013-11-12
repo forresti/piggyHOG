@@ -88,7 +88,7 @@ array bandwidth_gfor(array input){
     int width = input.dims(1);
     int height = input.dims(0);
     array input_copy(height, width, 3, f32); 
-    cudaDeviceSynchronize();  
+    af::sync();  
  
     double start_bwTest = read_timer();
     gfor(array ch, 3){
@@ -96,7 +96,7 @@ array bandwidth_gfor(array input){
         input_copy(span, span, ch) = input(span, span, ch) * 0.5f;
     }
     //input_copy = input * 0.5f; //seems to be evaluated lazily ... takes no time.
-    cudaDeviceSynchronize();
+    af::sync();
     double time_bwTest = read_timer() - start_bwTest;
     double gb_to_copy = width * height * 3 * sizeof(float) / 1e9;
     double gb_per_sec = gb_to_copy / (time_bwTest/1000); //convert time_bwTest from ms to sec
@@ -115,12 +115,12 @@ int main(int argc, char** argv) {
 
     //warmup
         array dummy = gradient_builtin(input);
-        cudaDeviceSynchronize();
+        af::sync();
 
     //builtin version
         double start_gradient = read_timer();
         array result_builtin = gradient_builtin(input);
-        cudaDeviceSynchronize();
+        af::sync();
         double time_gradient = read_timer() - start_gradient;
         printf("[builtin] computed gradient in %f ms \n", time_gradient);
         //saveimage("./gradient_builtin.jpg", result_builtin);
@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
     //gfor version
         start_gradient = read_timer();
         array result_gfor = gradient_gfor(input);
-        cudaDeviceSynchronize();
+        af::sync();
         time_gradient = read_timer() - start_gradient;
         printf("[gfor] computed gradient in %f ms \n", time_gradient);
         //saveimage("./gradient_gfor.jpg", result_gfor);

@@ -151,7 +151,7 @@ void gradient_wideload_unvectorized(int height, int width, int stride, int n_cha
                         mag_argmax = i;
                     }
                 }
-                #if 1 //real code
+                #if 0 //real code
                 int mag_max_sqrt = sqrt(mag_max);
 
                 if(mag_max_sqrt > 256){ //2^17 = 362
@@ -165,8 +165,9 @@ void gradient_wideload_unvectorized(int height, int width, int stride, int n_cha
                 outOri[y*stride + x] = abs(ATAN2_TABLE[gradY + 255][gradX + 255]) * 10; //for visual effect 
                 #endif
 
-                #if 0 //dummy code
-                //outOri[y*stride + x] = gradX_ch[0];
+                #if 1 //dummy code
+                outOri[y*stride + x] = gradX_ch[0];
+                //outOri[y*stride + x] = gradX_ch[0] + gradX_ch[1] + gradX_ch[2];
                 //outOri[y*stride + x] = gradX_ch[mag_argmax];
                 outMag[y*stride + x] = mag_max;
                 #endif
