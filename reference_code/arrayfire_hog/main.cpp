@@ -110,6 +110,7 @@ int main(int argc, char** argv) {
     try {
         info();
         //array input = loadimage("../../images_640x480/carsgraz_001.image.jpg", true); //iscolor='true'
+#if 0
         array input = loadimage("Lena.jpg", true); //iscolor='true'
         printf("size of input: %d, %d, %d\n", input.dims(0), input.dims(1), input.dims(2));
 
@@ -138,6 +139,7 @@ int main(int argc, char** argv) {
         for(int i=0; i<n_iter; i++){
             array input_copy = bandwidth_gfor(input);
         }
+#endif
     } catch (af::exception& e) {
         fprintf(stderr, "%s\n", e.what());
     }
