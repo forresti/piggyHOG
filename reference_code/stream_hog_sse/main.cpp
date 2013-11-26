@@ -42,11 +42,17 @@ void upcast_8bit_to_16bit(__m128i in_xLo,     __m128i in_xHi,     __m128i in_yLo
     //out_yHi_1 = _mm_cvtepu8_epi16(out_yHi_1);
 }
 
-//thanks: http://stackoverflow.com/questions/5508628
 inline __m128i abs_epi16(__m128i x) {
+    #if 0 //thanks: http://stackoverflow.com/questions/5508628
+
     __m128i my_zero = _mm_setzero_si128(); //seems to be generic for all (8-bit, 16-bit, 32-bit, ...) packed int formats
     __m128i minus_x = _mm_sub_epi16(my_zero, x);
     return _mm_max_epi16(minus_x, x);
+
+    #endif
+
+    //thanks: http://msdn.microsoft.com/en-us/library/bb531398(v=vs.90).aspx
+    return _mm_abs_epi16(x); //needs SSSE3
 }
 
 void gradient_sse(int height, int width, int stride, int n_channels_input, int n_channels_output,
