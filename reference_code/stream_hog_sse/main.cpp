@@ -56,22 +56,33 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
     assert(sizeof(__m128i) == 16);
     int loadSize = sizeof(__m128i); // 16 bytes = 128 bits
 
+    //input pixels
     __m128i xLo, xHi, yLo, yHi; //packed 8-bit
     __m128i xLo_0, xHi_0, yLo_0, yHi_0; //bottom bits: upcast from 8-bit to 16-bit
     __m128i xLo_1, xHi_1, yLo_1, yHi_1; //top bits: upcast from 8-bit to 16-bit
+
+    //gradients
     __m128i gradX_ch[3],   gradY_ch[3];   //packed 8-bit
     __m128i gradX_0_ch[3], gradY_0_ch[3]; //bottom bits: upcast from 8-bit to 16-bit
     __m128i gradX_1_ch[3], gradY_1_ch[3]; //top bits: upcast from 8-bit to 16-bit
+    __m128i gradMax_0, gradMax_1; //bottom bits, top bits
+
+    //magnitudes
     __m128i mag_ch[3]; //packed 8-bit
-    __m128i mag_0_ch[3]; //top bits
-    __m128i mag_1_ch[3]; //bottom bits
+    __m128i mag_0_ch[3]; //bottom bits
+    __m128i mag_1_ch[3]; //top bits
+    __m128i magMax, magMax_0, magMax_1; //packed 8-bit, bottom bits, top bits
+    __m128i magIsArgmax_0_ch[3], magIsArgmax_1_ch[3]; //bottom bits, top bits. boolean bitmask for "is this channel the mag argmax?"
 
     for(int y=2; y<height-2; y++){
         for(int x=0; x < stride-2; x+=loadSize){ //(stride-2) to avoid falling off the end when doing (location+2) to get xHi
 
+            magMax = magMax_0 = magMax_1 = _mm_setzero_si128();
+
             for(int channel=0; channel<3; channel++){ //TODO: unroll channels
-                //xLo = _mm_loadu_pu8(&img[y*stride + x + channel*height*stride - 1]);    //load eight 1-byte unsigned char pixels
-                xLo = _mm_loadu_si128( (__m128i*)(&img[y*stride + x + channel*height*stride    ]) ); //load eight 1-byte unsigned char pixels
+                magIsArgmax_0_ch[channel] = magIsArgmax_1_ch[channel] = _mm_setzero_si128(); 
+
+                xLo = _mm_loadu_si128( (__m128i*)(&img[y*stride + x + channel*height*stride    ]) ); //load sixteen 1-byte unsigned char pixels
                 xHi = _mm_loadu_si128( (__m128i*)(&img[y*stride + x + channel*height*stride + 2]) ); //index as chars, THEN cast to __m128i*  
 
                 yLo = _mm_load_si128( (__m128i*)(&img[y*stride + x + channel*height*stride           ]) ); //y-dim is a long stride, easier to do aligned loads
@@ -80,34 +91,45 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
                                      xLo_0, xHi_0, yLo_0, yHi_0,
                                      xLo_1, xHi_1, yLo_1, yHi_1);
 
-                //gradX_ch[channel] =  _mm_sub_epi8(xHi, xLo); //overflows ... need 16-bit
-                //gradY_ch[channel] =  _mm_sub_epi8(yHi, yLo); //overflows ... need 16-bit
-
-                gradX_0_ch[channel] =  _mm_sub_epi16(xHi_0, xLo_0); // xHi[0:3] - xLo[0:3]
-                gradX_1_ch[channel] =  _mm_sub_epi16(xHi_1, xLo_1);  // xHi[4:7] - xLo[4:7]
+                gradX_0_ch[channel] =  _mm_sub_epi16(xHi_0, xLo_0); // xHi[0:7] - xLo[0:7]
+                gradX_1_ch[channel] =  _mm_sub_epi16(xHi_1, xLo_1); // xHi[8:15] - xLo[8:15]
 
                 gradY_0_ch[channel] =  _mm_sub_epi16(yHi_0, yLo_0);
                 gradY_1_ch[channel] =  _mm_sub_epi16(yHi_1, yLo_1); 
 
-                #if 1 
                 //mag = abs(gradX) + abs(gradY)
                 // this is using the non-sqrt approach that has proved equally accurate to mag=sqrt(gradX^2 + gradY^2)
-                mag_0_ch[channel] = _mm_add_epi16( abs_epi16(gradX_0_ch[channel]), abs_epi16(gradY_0_ch[channel]) ); // abs(gradX[0:3]) + abs(gradY[0:3])
-                mag_1_ch[channel] = _mm_add_epi16( abs_epi16(gradX_1_ch[channel]), abs_epi16(gradY_1_ch[channel]) ); // abs(gradX[4:7]) + abs(gradY[4:7])
+                mag_0_ch[channel] = _mm_add_epi16( abs_epi16(gradX_0_ch[channel]), abs_epi16(gradY_0_ch[channel]) ); // abs(gradX[0:7]) + abs(gradY[0:7])
+                mag_1_ch[channel] = _mm_add_epi16( abs_epi16(gradX_1_ch[channel]), abs_epi16(gradY_1_ch[channel]) ); // abs(gradX[8:15]) + abs(gradY[8:15])
                 mag_ch[channel]   = _mm_packs_epi16(mag_0_ch[channel], mag_1_ch[channel]);
-                #endif
+
+                //magMax = max(mag_ch[0,1,2])
+                magMax_0 = _mm_max_epi16(magMax_0, mag_0_ch[channel]);
+                magMax_1 = _mm_max_epi16(magMax_1, mag_1_ch[channel]); 
 
                 gradX_ch[channel] = _mm_packs_epi16(gradX_0_ch[channel], gradX_1_ch[channel]); //16-bit -> 8bit (temporary ... typically, we'd pack up the results later in the pipeline)
                 gradY_ch[channel] = _mm_packs_epi16(gradY_0_ch[channel], gradY_1_ch[channel]); //temporary ... typically, we'd pack up the results later in the pipeline.
 
-                //argh, _mm_mul_epi16 doesn't exist. we only seem to have _mm_mullo_epi16 and _mm_mulhi_epi16
-                //mag_0_ch[channel] = _mm_add_epi16( _mm_mul_epi16(gradX_0_ch[channel], gradX_0_ch[channel]), 
-                //                                   _mm_mul_epi16(gradX_0_ch[channel], gradX_0_ch[channel]) ); //gradX^2 + gradY^2
 
-                _mm_store_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+7] = gradX_ch[channel] -- just a test, doesnt make much sense
+                _mm_store_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+15] = gradX_ch[channel] -- just a test, doesnt make much sense
                 //_mm_store_si128( (__m128i*)(&outMag[y*stride + x]), gradY_ch[channel] ); //aligned stores are easy here...it's all divisible by loadSize.
-                _mm_store_si128( (__m128i*)(&outMag[y*stride + x]), mag_ch[channel] );
+                //_mm_store_si128( (__m128i*)(&outMag[y*stride + x]), mag_ch[channel] );
             }
+
+            //gradMax uses the channel with the maximum magnitude.
+            for(int channel=0; channel<3; channel++){
+                //magArgmax = bitmask of max magnitude channel 
+                // not factoring in this channel's contributions to magMax. 
+                magIsArgmax_0_ch[channel] = _mm_cmpgt_epi16(mag_0_ch[channel], magMax_0);
+                magIsArgmax_1_ch[channel] = _mm_cmpgt_epi16(mag_1_ch[channel], magMax_1);
+
+                //TODO: tiebreaker. (ideally, we'd just have 1 channel that corresponds to magMax for each pixel)
+
+                
+            }
+
+            magMax = _mm_packs_epi16(magMax_0, magMax_1);
+            _mm_store_si128( (__m128i*)(&outMag[y*stride + x]), magMax );
         }
     }
 }
