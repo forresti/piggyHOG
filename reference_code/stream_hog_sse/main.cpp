@@ -42,19 +42,6 @@ void upcast_8bit_to_16bit(__m128i in_xLo,     __m128i in_xHi,     __m128i in_yLo
     //out_yHi_1 = _mm_cvtepu8_epi16(out_yHi_1);
 }
 
-inline __m128i abs_epi16(__m128i x) {
-    #if 0 //thanks: http://stackoverflow.com/questions/5508628
-
-    __m128i my_zero = _mm_setzero_si128(); //seems to be generic for all (8-bit, 16-bit, 32-bit, ...) packed int formats
-    __m128i minus_x = _mm_sub_epi16(my_zero, x);
-    return _mm_max_epi16(minus_x, x);
-
-    #endif
-
-    //thanks: http://msdn.microsoft.com/en-us/library/bb531398(v=vs.90).aspx
-    return _mm_abs_epi16(x); //needs SSSE3
-}
-
 void gradient_sse(int height, int width, int stride, int n_channels_input, int n_channels_output,
                             pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag){
     assert(n_channels_input == 3);
@@ -105,8 +92,8 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
 
                 //mag = abs(gradX) + abs(gradY)
                 // this is using the non-sqrt approach that has proved equally accurate to mag=sqrt(gradX^2 + gradY^2)
-                mag_0_ch[channel] = _mm_add_epi16( abs_epi16(gradX_0_ch[channel]), abs_epi16(gradY_0_ch[channel]) ); // abs(gradX[0:7]) + abs(gradY[0:7])
-                mag_1_ch[channel] = _mm_add_epi16( abs_epi16(gradX_1_ch[channel]), abs_epi16(gradY_1_ch[channel]) ); // abs(gradX[8:15]) + abs(gradY[8:15])
+                mag_0_ch[channel] = _mm_add_epi16( _mm_abs_epi16(gradX_0_ch[channel]), _mm_abs_epi16(gradY_0_ch[channel]) ); // abs(gradX[0:7]) + abs(gradY[0:7])
+                mag_1_ch[channel] = _mm_add_epi16( _mm_abs_epi16(gradX_1_ch[channel]), _mm_abs_epi16(gradY_1_ch[channel]) ); // abs(gradX[8:15]) + abs(gradY[8:15])
                 mag_ch[channel]   = _mm_packs_epi16(mag_0_ch[channel], mag_1_ch[channel]);
 
                 //magMax = max(mag_ch[0,1,2])
@@ -131,7 +118,8 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
 
                 //TODO: tiebreaker. (ideally, we'd just have 1 channel that corresponds to magMax for each pixel)
 
-                
+                //TODO: perhaps use bitmasked 'blend' instruction to help out:
+                // http://msdn.microsoft.com/en-us/library/bb531454(v=vs.90).aspx
             }
 
             magMax = _mm_packs_epi16(magMax_0, magMax_1);
