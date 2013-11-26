@@ -41,6 +41,14 @@ void upcast_8bit_to_16bit(__m128i in_xLo,     __m128i in_xHi,     __m128i in_yLo
     //out_yHi_0 = _mm_cvtepu8_epi16(out_yHi_0);
     //out_yHi_1 = _mm_cvtepu8_epi16(out_yHi_1);
 }
+
+//thanks: http://stackoverflow.com/questions/5508628
+inline __m128i abs_epi16(__m128i x) {
+    __m128i my_zero = _mm_setzero_si128(); //seems to be generic for all (8-bit, 16-bit, 32-bit, ...) packed int formats
+    __m128i minus_x = _mm_sub_epi16(my_zero, x);
+    return _mm_max_epi16(minus_x, x);
+}
+
 void gradient_sse(int height, int width, int stride, int n_channels_input, int n_channels_output,
                             pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag){
     assert(n_channels_input == 3);
@@ -52,10 +60,11 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
     __m128i xLo_0, xHi_0, yLo_0, yHi_0; //bottom bits: upcast from 8-bit to 16-bit
     __m128i xLo_1, xHi_1, yLo_1, yHi_1; //top bits: upcast from 8-bit to 16-bit
     __m128i gradX_ch[3],   gradY_ch[3];   //packed 8-bit
-    __m128i gradX_ch_0[3], gradY_ch_0[3]; //bottom bits: upcast from 8-bit to 16-bit
-    __m128i gradX_ch_1[3], gradY_ch_1[3]; //top bits: upcast from 8-bit to 16-bit
-    __m128i mag_ch_0[3]; //top bits
-    __m128i mag_ch_1[3]; //bottom bits
+    __m128i gradX_0_ch[3], gradY_0_ch[3]; //bottom bits: upcast from 8-bit to 16-bit
+    __m128i gradX_1_ch[3], gradY_1_ch[3]; //top bits: upcast from 8-bit to 16-bit
+    __m128i mag_ch[3]; //packed 8-bit
+    __m128i mag_0_ch[3]; //top bits
+    __m128i mag_1_ch[3]; //bottom bits
 
     for(int y=2; y<height-2; y++){
         for(int x=0; x < stride-2; x+=loadSize){ //(stride-2) to avoid falling off the end when doing (location+2) to get xHi
@@ -74,20 +83,30 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
                 //gradX_ch[channel] =  _mm_sub_epi8(xHi, xLo); //overflows ... need 16-bit
                 //gradY_ch[channel] =  _mm_sub_epi8(yHi, yLo); //overflows ... need 16-bit
 
-                gradX_ch_0[channel] =  _mm_sub_epi16(xHi_0, xLo_0); // xHi[0:3] - xLo[0:3]
-                gradX_ch_1[channel] =  _mm_sub_epi16(xHi_1, xLo_1);  // xHi[4:7] - xLo[4:7]
-                gradX_ch[channel] = _mm_packs_epi16(gradX_ch_0[channel], gradX_ch_1[channel]); //16-bit -> 8bit (temporary ... typically, we'd pack up the results later in the pipeline)
+                gradX_0_ch[channel] =  _mm_sub_epi16(xHi_0, xLo_0); // xHi[0:3] - xLo[0:3]
+                gradX_1_ch[channel] =  _mm_sub_epi16(xHi_1, xLo_1);  // xHi[4:7] - xLo[4:7]
 
-                gradY_ch_0[channel] =  _mm_sub_epi16(yHi_0, yLo_0);
-                gradY_ch_1[channel] =  _mm_sub_epi16(yHi_1, yLo_1); 
-                gradY_ch[channel] = _mm_packs_epi16(gradY_ch_0[channel], gradY_ch_1[channel]); //temporary ... typically, we'd pack up the results later in the pipeline.
+                gradY_0_ch[channel] =  _mm_sub_epi16(yHi_0, yLo_0);
+                gradY_1_ch[channel] =  _mm_sub_epi16(yHi_1, yLo_1); 
+
+                #if 1 
+                //mag = abs(gradX) + abs(gradY)
+                // this is using the non-sqrt approach that has proved equally accurate to mag=sqrt(gradX^2 + gradY^2)
+                mag_0_ch[channel] = _mm_add_epi16( abs_epi16(gradX_0_ch[channel]), abs_epi16(gradY_0_ch[channel]) ); // abs(gradX[0:3]) + abs(gradY[0:3])
+                mag_1_ch[channel] = _mm_add_epi16( abs_epi16(gradX_1_ch[channel]), abs_epi16(gradY_1_ch[channel]) ); // abs(gradX[4:7]) + abs(gradY[4:7])
+                mag_ch[channel]   = _mm_packs_epi16(mag_0_ch[channel], mag_1_ch[channel]);
+                #endif
+
+                gradX_ch[channel] = _mm_packs_epi16(gradX_0_ch[channel], gradX_1_ch[channel]); //16-bit -> 8bit (temporary ... typically, we'd pack up the results later in the pipeline)
+                gradY_ch[channel] = _mm_packs_epi16(gradY_0_ch[channel], gradY_1_ch[channel]); //temporary ... typically, we'd pack up the results later in the pipeline.
 
                 //argh, _mm_mul_epi16 doesn't exist. we only seem to have _mm_mullo_epi16 and _mm_mulhi_epi16
-                //mag_ch_0[channel] = _mm_add_epi16( _mm_mul_epi16(gradX_ch_0[channel], gradX_ch_0[channel]), 
-                //                                   _mm_mul_epi16(gradX_ch_0[channel], gradX_ch_0[channel]) ); //gradX^2 + gradY^2
+                //mag_0_ch[channel] = _mm_add_epi16( _mm_mul_epi16(gradX_0_ch[channel], gradX_0_ch[channel]), 
+                //                                   _mm_mul_epi16(gradX_0_ch[channel], gradX_0_ch[channel]) ); //gradX^2 + gradY^2
 
                 _mm_store_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+7] = gradX_ch[channel] -- just a test, doesnt make much sense
-                _mm_store_si128( (__m128i*)(&outMag[y*stride + x]), gradY_ch[channel] ); //aligned stores are easy here...it's all divisible by loadSize.
+                //_mm_store_si128( (__m128i*)(&outMag[y*stride + x]), gradY_ch[channel] ); //aligned stores are easy here...it's all divisible by loadSize.
+                _mm_store_si128( (__m128i*)(&outMag[y*stride + x]), mag_ch[channel] );
             }
         }
     }
