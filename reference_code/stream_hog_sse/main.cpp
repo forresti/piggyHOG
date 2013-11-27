@@ -18,7 +18,6 @@ __m128i max_channel_ori(__m128i ori_ch[3], __m128i mag_ch[3]){
 }
 
 //enables us to load 8-bit values, but work in 16-bit. 
-//      TODO: struct for the inputs / outputs?
 void upcast_8bit_to_16bit(__m128i in_xLo,     __m128i in_xHi,     __m128i in_yLo,     __m128i in_yHi,
                           __m128i &out_xLo_0, __m128i &out_xHi_0, __m128i &out_yLo_0, __m128i &out_yHi_0, //bottom bits, in 16-bit
                           __m128i &out_xLo_1, __m128i &out_xHi_1, __m128i &out_yLo_1, __m128i &out_yHi_1) //top bits,    in 16-bit
@@ -34,12 +33,6 @@ void upcast_8bit_to_16bit(__m128i in_xLo,     __m128i in_xHi,     __m128i in_yLo
     out_yHi_0 = _mm_unpacklo_epi8(in_yHi, _mm_setzero_si128()); 
     out_yLo_1 = _mm_unpackhi_epi8(in_yLo, _mm_setzero_si128()); //unsigned cast to 16-bit ints -- top bits
     out_yHi_1 = _mm_unpackhi_epi8(in_yHi, _mm_setzero_si128());
-
-    //not sure if this is useful or not: -- something to do with sign extension
-    //out_yLo_0 = _mm_cvtepu8_epi16(out_yLo_0); //'officially' convert the '8-bit with room for 16-bit' to 16-bit?
-    //out_yLo_1 = _mm_cvtepu8_epi16(out_yLo_1);
-    //out_yHi_0 = _mm_cvtepu8_epi16(out_yHi_0);
-    //out_yHi_1 = _mm_cvtepu8_epi16(out_yHi_1);
 }
 
 //@param magChannel = current channel's magnitude
