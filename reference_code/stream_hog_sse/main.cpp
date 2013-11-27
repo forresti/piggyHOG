@@ -126,6 +126,9 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
                 select_epi16(mag_0_ch[channel], magMax_0, gradX_0_ch[channel], gradY_0_ch[channel], gradX_max_0, gradY_max_0); //output gradX_max_0, gradY_max_0
                 select_epi16(mag_1_ch[channel], magMax_1, gradX_1_ch[channel], gradY_1_ch[channel], gradX_max_1, gradY_max_1); //output gradX_max_1, gradY_max_1 
 
+                //TODO: compute approx atan2 of (gradY_max_0, gradX_max_0) in fixed pt
+                //      use _mm_mullo_epi16() to calculate tangents
+
                 //magMax = max(mag_ch[0,1,2])
                 magMax_0 = _mm_max_epi16(magMax_0, mag_0_ch[channel]);
                 magMax_1 = _mm_max_epi16(magMax_1, mag_1_ch[channel]); 
@@ -138,22 +141,6 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
                 //_mm_store_si128( (__m128i*)(&outMag[y*stride + x]), gradY_ch[channel] ); //aligned stores are easy here...it's all divisible by loadSize.
                 //_mm_store_si128( (__m128i*)(&outMag[y*stride + x]), mag_ch[channel] );
             }
-
-            //gradMax uses the channel with the maximum magnitude.
-            for(int channel=0; channel<3; channel++){
-                //magArgmax = bitmask of max magnitude channel 
-                // not factoring in this channel's contributions to magMax. 
-                //magIsArgmax_0_ch[channel] = _mm_cmpgt_epi16(mag_0_ch[channel], magMax_0);
-                //magIsArgmax_1_ch[channel] = _mm_cmpgt_epi16(mag_1_ch[channel], magMax_1);
-
-                //TODO: tiebreaker. (ideally, we'd just have 1 channel that corresponds to magMax for each pixel)
-
-                //TODO: perhaps use bitmasked 'blend' instruction to help out:
-                // http://msdn.microsoft.com/en-us/library/bb531454(v=vs.90).aspx
-            }
-
-            //TODO: fixed-pt version of "snap to one of 18 orientations"
-            //      use _mm_mullo_epi16() to calculate tangents 
 
             magMax = _mm_packs_epi16(magMax_0, magMax_1);
             _mm_store_si128( (__m128i*)(&outMag[y*stride + x]), magMax );
