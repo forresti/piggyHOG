@@ -25,15 +25,9 @@ void init_atan2_constants(){
         uu_fixedpt[i] = round(uu[i] * 100);
         vv_fixedpt[i] = round(vv[i] * 100);
 
-        //int16_t tmp_uu_vec[8] = _mm_set_epi16(uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i]); //int16 SSE vectors are 8 wide
-        //int16_t tmp_vv_vec[8];
-        //for(int t=0; t<8; t++){
-        //    tmp_uu_vec[t] = uu_fixedpt[i]; //repmat across the vector
-        //    tmp_vv_vec[t] = vv_fixedpt[i];
-        //}
-
-        uu_fixedpt_epi16[i] = _mm_loadu_si128( (__m128i*)(&tmp_uu_vec[0]) ); 
-        vv_fixedpt_epi16[i] = _mm_loadu_si128( (__m128i*)(&tmp_vv_vec[0]) ); 
+        //vector of copies of uu and vv for SSE vectorization
+        uu_fixedpt_epi16[i] = _mm_set_epi16(uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i]); 
+        vv_fixedpt_epi16[i] = _mm_set_epi16(vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i]); 
     }
 }
 
@@ -89,12 +83,22 @@ __m128i approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
     for(int ori=0; ori<9; ori++){
         //TODO
 #if 0
+        __m128i ori_vec = _mm_set_epi16(ori, ori, ori, ori, ori, ori, ori, ori); //copy of index for if/else in sse 
         __m128i dot = _mm_add_epi16( _mm_mullo_epi16(uu_fixedpt_epi16[ori], gradX_max),
                                      _mm_mullo_epi16(vv_fixedpt_epi16[ori], gradY_max) );
 
-        
- 
+       
+        //if(dot > best_dot){ best_dot = dot; best_ori = ori;} 
+        __m128i isMax    = _mm_cmpgt_epi16(dot, best_dot);
+        __m128i best_dot = _mm_max_epi16(dot, best_dot);
 
+        __m128i t0 = _mm_and_si128(ori_vec, isMax); //zero out nonmaxes in ori_vec
+        __m128i t1 = _mm_andnot_si128(isMax, best_ori); //in ori argmaxes, zero out newly-beaten maxes 
+
+        best_dot = _mm_or_si128(t0, t1);
+
+        //if(-dot > best_dot){ best_dot = -dot; best_ori = ori+9; }
+        //TODO: implement -best_dot
 #endif
     }
 
