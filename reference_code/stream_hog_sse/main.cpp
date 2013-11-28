@@ -11,10 +11,30 @@
 using namespace std;
 char ATAN2_TABLE[512][512]; //signed char (values are -18 to 18)
 
-__m128i max_channel_ori(__m128i ori_ch[3], __m128i mag_ch[3]){
-    __m128i ori_max;
-    //stub
-    return ori_max;
+// unit vectors used to compute gradient orientation
+double  uu[9] = {1.0000, 0.9397, 0.7660, 0.500, 0.1736, -0.1736, -0.5000, -0.7660, -0.9397};
+double  vv[9] = {0.0000, 0.3420, 0.6428, 0.8660, 0.9848, 0.9848, 0.8660, 0.6428, 0.3420};
+int16_t uu_fixedpt[9]; //scalar fixed-pt (scaled up by 100)
+int16_t vv_fixedpt[9];
+__m128i uu_fixedpt_epi16[9]; //each of these vectors is bunch of copies of uu_fixedpt[i]
+__m128i vv_fixedpt_epi16[9];
+
+//stuff for approximate vectorized atan2
+void init_atan2_constants(){
+    for(int i=0; i<9; i++){
+        uu_fixedpt[i] = round(uu[i] * 100);
+        vv_fixedpt[i] = round(vv[i] * 100);
+
+        //int16_t tmp_uu_vec[8] = _mm_set_epi16(uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i]); //int16 SSE vectors are 8 wide
+        //int16_t tmp_vv_vec[8];
+        //for(int t=0; t<8; t++){
+        //    tmp_uu_vec[t] = uu_fixedpt[i]; //repmat across the vector
+        //    tmp_vv_vec[t] = vv_fixedpt[i];
+        //}
+
+        uu_fixedpt_epi16[i] = _mm_loadu_si128( (__m128i*)(&tmp_uu_vec[0]) ); 
+        vv_fixedpt_epi16[i] = _mm_loadu_si128( (__m128i*)(&tmp_vv_vec[0]) ); 
+    }
 }
 
 //enables us to load 8-bit values, but work in 16-bit. 
@@ -56,6 +76,30 @@ void select_epi16(__m128i magChannel, __m128i old_magMax,
    
     gradX_channel = _mm_or_si128(gradX_channel_tmp, gradX_max_tmp); //for each element, ONE of these 2 args is nonzero
     gradY_channel = _mm_or_si128(gradY_channel_tmp, gradY_max_tmp); 
+}
+
+//@param  gradX_max, gradY_max = output gradient of max channel (of the channels checked so far)
+//@return histogramBin( atan2(gradY, gradX) ) -- using approx atan2
+__m128i approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
+
+    __m128i best_dot = _mm_setzero_si128(); //max 
+    __m128i best_ori = _mm_setzero_si128(); //argmax orientation
+
+    // snap to one of 18 orientations
+    for(int ori=0; ori<9; ori++){
+        //TODO
+#if 0
+        __m128i dot = _mm_add_epi16( _mm_mullo_epi16(uu_fixedpt_epi16[ori], gradX_max),
+                                     _mm_mullo_epi16(vv_fixedpt_epi16[ori], gradY_max) );
+
+        
+ 
+
+#endif
+    }
+
+    return best_ori;
+
 }
 
 void gradient_sse(int height, int width, int stride, int n_channels_input, int n_channels_output,
@@ -245,7 +289,9 @@ void init_lookup_table(){
 
 int main (int argc, char **argv)
 {
-    init_lookup_table();
+    init_lookup_table(); //similar to FFLD hog
+    init_atan2_constants(); //easier to vectorize alternative to lookup table. (similar to VOC5 hog)
+
     int ALIGN_IN_BYTES = 256;
     int n_iter = 1000; //not really "iterating" -- just number of times to run the experiment
     //int stride = width + (ALIGN_IN_BYTES - width%ALIGN_IN_BYTES); //thanks: http://stackoverflow.com/questions/2403631
