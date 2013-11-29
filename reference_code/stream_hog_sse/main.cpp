@@ -76,12 +76,15 @@ void select_epi16(__m128i magChannel, __m128i old_magMax,
 //@return histogramBin( atan2(gradY, gradX) ) -- using approx atan2
 __m128i approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
 
+    __m128i isMax; //reset for each iteration
     __m128i best_dot = _mm_setzero_si128(); //max 
     __m128i best_ori = _mm_setzero_si128(); //argmax orientation
 
+    __m128i negative_one_vec = _mm_set_epi16(-1, -1, -1, -1, -1, -1, -1, -1); //to calculate "-dot"
+    __m128i nine_vec = _mm_set_epi16(9, 9, 9, 9, 9, 9, 9, 9);  //calculate "best_ori = ori+9;" when our best ori is negative
+
     // snap to one of 18 orientations
     for(int ori=0; ori<9; ori++){
-        //TODO
 #if 0
         __m128i ori_vec = _mm_set_epi16(ori, ori, ori, ori, ori, ori, ori, ori); //copy of index for if/else in sse 
         __m128i dot = _mm_add_epi16( _mm_mullo_epi16(uu_fixedpt_epi16[ori], gradX_max),
@@ -89,16 +92,28 @@ __m128i approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
 
        
         //if(dot > best_dot){ best_dot = dot; best_ori = ori;} 
-        __m128i isMax    = _mm_cmpgt_epi16(dot, best_dot);
-        __m128i best_dot = _mm_max_epi16(dot, best_dot);
+            isMax    = _mm_cmpgt_epi16(dot, best_dot); //comparing to OLD max from prev iteration
+            best_dot = _mm_max_epi16(dot, best_dot);
 
-        __m128i t0 = _mm_and_si128(ori_vec, isMax); //zero out nonmaxes in ori_vec
-        __m128i t1 = _mm_andnot_si128(isMax, best_ori); //in ori argmaxes, zero out newly-beaten maxes 
+            __m128i t0 = _mm_and_si128(ori_vec, isMax); //zero out nonmaxes in ori_vec
+            __m128i t1 = _mm_andnot_si128(isMax, best_ori); //in ori argmaxes, zero out newly-beaten maxes 
 
-        best_dot = _mm_or_si128(t0, t1);
+            best_dot = _mm_or_si128(t0, t1);
 
         //if(-dot > best_dot){ best_dot = -dot; best_ori = ori+9; }
         //TODO: implement -best_dot
+            __m128i minus_ori_vec = _mm_add_epi16(ori_vec, nine_vec); //ori+9
+            __m128i minus_dot = _mm_mul_epi16(dot, negative_one_vec); //-dot
+
+            isMax = _mm_cmpgt_epi16(minus_dot, best_dot);  //if(-dot > best_dot)
+            best_dot = _mm_max_epi16(minus_dot, best_dot); //    best_dot = -dot
+
+            __m128i t0 = _mm_and_si128(minus_ori_vec, isMax); //zero out nonmaxes in ori_vec
+            __m128i t1 = _mm_andnot_si128(isMax, best_ori); //in ori argmaxes, zero out newly-beaten maxes 
+
+            best_dot = _mm_or_si128(t0, t1); 
+
+        //TODO: in voc5 code, check whether the 'negative ori' case NEEDS to be an "else if." (try running with just "if.") 
 #endif
     }
 
