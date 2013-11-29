@@ -37,13 +37,13 @@ void test_pyramid(){
     double time_one_scale = read_timer() - start_timer;
 
     printf("time for hog pyramid: %f ms \n", time_one_scale);
-    writeHogCellsToFile(hogPyramid);
+    //writeHogCellsToFile(hogPyramid);
 }
 
 int main (int argc, char **argv)
 {
-    test_oneLevel();
-//    test_pyramid();
+//    test_oneLevel();
+    test_pyramid();
 
     return 0;
 }
