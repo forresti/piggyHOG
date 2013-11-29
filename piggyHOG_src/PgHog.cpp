@@ -314,7 +314,7 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
             for(int y=0; y<spatialBinSize; y++){ //TODO: move these loops into PgHog::gradient()?
                 for(int x=0; x<spatialBinSize; x++){
                     //update oriImg and magImg at this x,y location
-                    //PgHog::gradient(hogX*sbin + x, hogY*sbin + y, img, oriImg, magImg); 
+                    PgHog::gradient(hogX*sbin + x, hogY*sbin + y, img, oriImg, magImg); 
                 }
             }
 
@@ -322,14 +322,14 @@ PgHogContainer* PgHog::extract_HOG_oneScale(Mat img, int spatialBinSize){
             //HOG cell binning
             if(hogX>0 && hogY>0){
                 hogCell(hogX-1, hogY-1, oriImg, magImg, hogResult); //hog[0:17] = constrast sensitive features
-    //            hogCell_gradientEnergy(hogX-1, hogY-1, hogResult, normImg); //normImg = sum of each hog cell's contrast sensitive (0-360) bins
-    //            hogCell_unsigned(hogX-1, hogY-1, hogResult); //hog[18:27] = contrast-insensitive features
+                hogCell_gradientEnergy(hogX-1, hogY-1, hogResult, normImg); //normImg = sum of each hog cell's contrast sensitive (0-360) bins
+                hogCell_unsigned(hogX-1, hogY-1, hogResult); //hog[18:27] = contrast-insensitive features
             }
 
             //HOG block normalization
             //note: there are no 'if hogX>0' guards, because the hogResult->hog and normImg are padded.
             //      also, hogBlock_normalize() has a forward dependency to its right and bottom neighbors, so we do hogX-2, hogY-2
-     //       hogBlock_normalize(hogX-2, hogY-2, hogResult, normImg); //TODO: think about edge cases
+            hogBlock_normalize(hogX-2, hogY-2, hogResult, normImg); //TODO: think about edge cases
 #endif
           }
         }
