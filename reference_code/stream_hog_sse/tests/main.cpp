@@ -16,6 +16,7 @@ int16_t vv_fixedpt[9];
 __m128i uu_fixedpt_epi16[9]; //each of these vectors is bunch of copies of uu_fixedpt[i]
 __m128i vv_fixedpt_epi16[9];
 
+#if 0
 //stuff for approximate vectorized atan2
 void init_atan2_constants(){
     for(int i=0; i<9; i++){
@@ -27,6 +28,34 @@ void init_atan2_constants(){
         vv_fixedpt_epi16[i] = _mm_set_epi16(vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i]);
     }
 }
+#endif
+
+//@in-out ori_best_bin[dx][dy] = atan2 ori bin that best matches the gradient (dx,dy) 
+//@in-out ori_dot[dx][dy][bin] = how well we match with each orientation bin
+//uses floating-point calculations. (this is the reference implementation from voc-release5)
+void atan2_snap_to_float(int ori_best_bin[512][512], float ori_dot[512][512][18]){
+
+    for(int dy=-255; dy <= 255; dy++){
+        for(int dx=-255; dx <= 255; dx++){
+
+            float best_dot = 0;
+            int best_o = 0;
+
+            for (int o = 0; o < 9; o++) {
+                double dot = uu[o]*dx + vv[o]*dy; //float
+
+                if (dot > best_dot) {
+                    best_dot = dot;
+                    best_o = o;
+                } else if (-dot > best_dot) {
+                    best_dot = -dot;
+                    best_o = o+9;
+                }
+            }
+        }
+    }
+}
+
 
 
 int main (int argc, char **argv)
