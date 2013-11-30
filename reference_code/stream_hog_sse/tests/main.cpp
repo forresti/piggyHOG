@@ -1,5 +1,3 @@
-
-//#include <cuda.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -33,7 +31,7 @@ void init_atan2_constants(){
 //@in-out ori_best_bin[dx][dy] = atan2 ori bin that best matches the gradient (dx,dy) 
 //@in-out ori_dot[dx][dy][bin] = how well we match with each orientation bin
 //uses floating-point calculations. (this is the reference implementation from voc-release5)
-void atan2_snap_to_float(int ori_best_bin[512][512], float ori_dot[512][512][18]){
+void atan2_snap_to_float(int* ori_best_bin, float* ori_dot){
 
     for(int dy=-255; dy <= 255; dy++){
         for(int dx=-255; dx <= 255; dx++){
@@ -44,6 +42,12 @@ void atan2_snap_to_float(int ori_best_bin[512][512], float ori_dot[512][512][18]
             for (int o = 0; o < 9; o++) {
                 double dot = uu[o]*dx + vv[o]*dy; //float
 
+                //ori_dot[dx+255][dy+255][o] = dot; //save for later analysis
+                //ori_dot[dx+255][dy+255][o+9] = -dot;
+
+                ori_dot[ (dx+255)*512*18 + (dy+255)*18 + o] = dot;
+                ori_dot[ (dx+255)*512*18 + (dy+255)*18 + (o+9)] = dot;
+
                 if (dot > best_dot) {
                     best_dot = dot;
                     best_o = o;
@@ -51,6 +55,9 @@ void atan2_snap_to_float(int ori_best_bin[512][512], float ori_dot[512][512][18]
                     best_dot = -dot;
                     best_o = o+9;
                 }
+
+                ori_best_bin[ (dx+255)*512 + (dy*255) ] = best_o;
+                //ori_best_bin[dx+255][dy+255] = best_o;
             }
         }
     }
@@ -60,6 +67,14 @@ void atan2_snap_to_float(int ori_best_bin[512][512], float ori_dot[512][512][18]
 
 int main (int argc, char **argv)
 {
+
+    //floating-pt "best ori bin" experiment
+    //int ori_best_bin_float[512][512];
+    //float ori_dot_float[512][512][18];
+    int* ori_best_bin_float = (int*)malloc(512*512 * sizeof(int));
+    float* ori_dot_float = (float*)malloc(512*512*18 * sizeof(float));
+    atan2_snap_to_float(ori_best_bin_float, ori_dot_float);
+
 
     return 0;
 }
