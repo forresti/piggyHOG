@@ -306,6 +306,7 @@ void init_lookup_table(){
     }
 }
 
+
 int main (int argc, char **argv)
 {
     init_lookup_table(); //similar to FFLD hog
