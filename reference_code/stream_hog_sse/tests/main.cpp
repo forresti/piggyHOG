@@ -17,8 +17,11 @@ __m128i vv_fixedpt_epi16[9];
 //stuff for approximate vectorized atan2
 void init_atan2_constants(){
     for(int i=0; i<9; i++){
-        uu_fixedpt[i] = round(uu[i] * 100);
-        vv_fixedpt[i] = round(vv[i] * 100);
+        uu_fixedpt[i] = round(uu[i] * 100.0f);
+        vv_fixedpt[i] = round(vv[i] * 100.0f);
+
+//        printf("uu[%d]=%f, uu_fixedpt[%d]=%d \n", i, uu[i], i, uu_fixedpt[i]);
+//        printf("vv[%d]=%f, vv_fixedpt[%d]=%d \n", i, vv[i], i, vv_fixedpt[i]);
 
         //vector of copies of uu and vv for SSE vectorization
         uu_fixedpt_epi16[i] = _mm_set_epi16(uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i]);
@@ -75,7 +78,8 @@ void atan2_snap_to_floatpt(int* ori_best_bin, float* ori_dot){
 
             for (int o = 0; o < 9; o++) {
                 //double dot = uu[o]*dx + vv[o]*dy; //float
-                double dot = uu[o]*dx; //simplify (TODO: remove)
+                //double dot = uu[o]*dx; //simplify (TODO: remove)
+                double dot = uu_fixedpt[o]*dx;
 
                 ori_dot[ (dx+255)*512*18 + (dy+255)*18 + o] = dot;
                 ori_dot[ (dx+255)*512*18 + (dy+255)*18 + (o+9)] = -dot;
