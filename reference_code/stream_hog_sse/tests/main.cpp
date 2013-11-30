@@ -39,7 +39,9 @@ void atan2_snap_to_fixedpt(int* ori_best_bin, int16_t* ori_dot){
 
             for (int o = 0; o < 9; o++) {
                 //double dot = uu[o]*dx + vv[o]*dy; //float
-                uint16_t dot = uu_fixedpt[o]*dx + vv_fixedpt[o]*dy;
+
+                //int16_t dot = uu_fixedpt[o]*dx + vv_fixedpt[o]*dy;
+                int16_t dot = uu_fixedpt[o]*dx; //simplify (TODO: remove)
 
                 ori_dot[ (dx+255)*512*18 + (dy+255)*18 + o] = dot;
                 ori_dot[ (dx+255)*512*18 + (dy+255)*18 + (o+9)] = -dot;
@@ -72,7 +74,9 @@ void atan2_snap_to_floatpt(int* ori_best_bin, float* ori_dot){
             int best_o = 0;
 
             for (int o = 0; o < 9; o++) {
-                double dot = uu[o]*dx + vv[o]*dy; //float
+                //double dot = uu[o]*dx + vv[o]*dy; //float
+                double dot = uu[o]*dx; //simplify (TODO: remove)
+
                 ori_dot[ (dx+255)*512*18 + (dy+255)*18 + o] = dot;
                 ori_dot[ (dx+255)*512*18 + (dy+255)*18 + (o+9)] = -dot;
 
@@ -92,6 +96,8 @@ void atan2_snap_to_floatpt(int* ori_best_bin, float* ori_dot){
 
 int main (int argc, char **argv)
 {
+
+    init_atan2_constants(); //stuff for fixedpt
 
   //floating-pt "best ori bin" experiment
     int* ori_best_bin_floatpt = (int*)malloc(512*512 * sizeof(int));
