@@ -1,0 +1,14 @@
+
+
+using dot = uu[o] * dx and ignoring vv[o]*dy, uint16_t fixedpt and floatpt give same best_ori.
+it seems like the differences between fixedpt and floatpt happen mostly near +255 and -255. (even with int32 instead of int16)
+
+using dot=uu[o]*dx + vv[o]*dy, and multiplying uu,vv by 100...
+ int16: there are ~11000 mismatches out of 512*512=262144 entries.
+ int32: there are ~7000 mismatches
+
+multiplying uu,vv by 1000...
+ int32: there are ~650 mismatches
+
+multiplying uu,vv by 10000...
+ int32: there are ~250 mismatches, and all of them are where dx=0

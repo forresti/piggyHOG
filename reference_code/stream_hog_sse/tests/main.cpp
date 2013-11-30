@@ -17,8 +17,8 @@ __m128i vv_fixedpt_epi16[9];
 //stuff for approximate vectorized atan2
 void init_atan2_constants(){
     for(int i=0; i<9; i++){
-        uu_fixedpt[i] = round(uu[i] * 100.0f);
-        vv_fixedpt[i] = round(vv[i] * 100.0f);
+        uu_fixedpt[i] = round(uu[i] * 10000.0f);
+        vv_fixedpt[i] = round(vv[i] * 10000.0f);
 
 //        printf("uu[%d]=%f, uu_fixedpt[%d]=%d \n", i, uu[i], i, uu_fixedpt[i]);
 //        printf("vv[%d]=%f, vv_fixedpt[%d]=%d \n", i, vv[i], i, vv_fixedpt[i]);
@@ -37,14 +37,16 @@ void atan2_snap_to_fixedpt(int* ori_best_bin, int16_t* ori_dot){
     for(int16_t dx=-255; dx <= 255; dx++){
         for(int16_t dy=-255; dy <= 255; dy++){
 
-            int16_t best_dot = 0;
+            //int16_t best_dot = 0;
+            int best_dot = 0; //TEST -- use int32 instead of int16
             int best_o = 0;
 
             for (int o = 0; o < 9; o++) {
                 //double dot = uu[o]*dx + vv[o]*dy; //float
 
                 //int16_t dot = uu_fixedpt[o]*dx + vv_fixedpt[o]*dy;
-                int16_t dot = uu_fixedpt[o]*dx; //simplify (TODO: remove)
+                //int16_t dot = uu_fixedpt[o]*dx; //simplify (TODO: remove)
+                int dot = (int)uu_fixedpt[o]*(int)dx + (int)vv_fixedpt[o]*(int)dy;  //TEST -- use int32 instead of int16
 
                 ori_dot[ (dx+255)*512*18 + (dy+255)*18 + o] = dot;
                 ori_dot[ (dx+255)*512*18 + (dy+255)*18 + (o+9)] = -dot;
@@ -62,8 +64,6 @@ void atan2_snap_to_fixedpt(int* ori_best_bin, int16_t* ori_dot){
         }
     }
 }
-
-
 
 //@in-out ori_best_bin[dx][dy] = atan2 ori bin that best matches the gradient (dx,dy) 
 //@in-out ori_dot[dx][dy][bin] = how well we match with each orientation bin
@@ -77,9 +77,8 @@ void atan2_snap_to_floatpt(int* ori_best_bin, float* ori_dot){
             int best_o = 0;
 
             for (int o = 0; o < 9; o++) {
-                //double dot = uu[o]*dx + vv[o]*dy; //float
-                //double dot = uu[o]*dx; //simplify (TODO: remove)
-                double dot = uu_fixedpt[o]*dx;
+                double dot = uu[o]*(double)dx + vv[o]*(double)dy; //float
+                //double dot = uu[o] * (double)dx; //simplify (TODO: remove)
 
                 ori_dot[ (dx+255)*512*18 + (dy+255)*18 + o] = dot;
                 ori_dot[ (dx+255)*512*18 + (dy+255)*18 + (o+9)] = -dot;
@@ -98,9 +97,21 @@ void atan2_snap_to_floatpt(int* ori_best_bin, float* ori_dot){
     }
 }
 
+void test_int16_range(){
+
+    for(int ex=2; ex<20; ex++){
+        int tmp_32 = 2 << ex;
+        int16_t tmp_16 = 2 << ex;
+
+        printf("2<<%d. int16: %d, int32: %d \n", ex, tmp_16, tmp_32);
+    }
+
+}
+
 int main (int argc, char **argv)
 {
 
+    test_int16_range();
     init_atan2_constants(); //stuff for fixedpt
 
   //floating-pt "best ori bin" experiment
@@ -114,13 +125,22 @@ int main (int argc, char **argv)
     atan2_snap_to_fixedpt(ori_best_bin_fixedpt, ori_dot_fixedpt);
 
     for(int dx=-255; dx <= 255; dx++){
-        for(int dy=-255; dy <= 255; dy++){
-            for (int o = 0; o < 18; o++) {
+        for(int dy=-255; dy <= 255; dy++)
+        //int dy = 0;
+        {
 
-                
-                printf(    "ori_dot_FLOATpt[%d][%d][%d] = %f \n", dx, dy, o, ori_dot_floatpt[(dx+255)*512*18 + (dy+255)*18 + o]); 
-                printf(    "ori_dot_FIXEDpt[%d][%d][%d] = %d \n", dx, dy, o, ori_dot_fixedpt[(dx+255)*512*18 + (dy+255)*18 + o]); 
+//            if(ori_best_bin_floatpt[ (dx+255)*512 + (dy*255) ] != ori_best_bin_fixedpt[ (dx+255)*512 + (dy*255) ])
+            {
 
+//                printf("mismatch: ori_best_bin_floatpt[dx=%d][dy=%d]=%d, ori_best_bin_fixedpt[dx=%d][dy=%d]=%d \n", dx, dy, ori_best_bin_floatpt[ (dx+255)*512 + (dy*255) ], dx, dy, ori_best_bin_fixedpt[ (dx+255)*512 + (dy*255) ]);
+ 
+                for (int o = 0; o < 18; o++) {
+
+                    
+//                    printf("    ori_dot_FLOATpt[dx=%d][dy=%d][%d] = %f \n", dx, dy, o, ori_dot_floatpt[(dx+255)*512*18 + (dy+255)*18 + o]); 
+//                    printf("    ori_dot_FIXEDpt[dx=%d][dy=%d][%d] = %d \n", dx, dy, o, ori_dot_fixedpt[(dx+255)*512*18 + (dy+255)*18 + o]); 
+
+                }
             }
         }
     }
