@@ -106,6 +106,9 @@ void test_int16_range(){
         printf("2<<%d. int16: %d, int32: %d \n", ex, tmp_16, tmp_32);
     }
 
+    int tmp_32 = -32767;
+    int16_t tmp_16 = tmp_32;
+    printf("%d. int16: %d, int32: %d \n", tmp_32, tmp_16, tmp_32);
 }
 
 int main (int argc, char **argv)
