@@ -49,7 +49,7 @@ printf("stride = %d \n", stride);
 
     double start_timer = read_timer();
     for(int i=0; i<n_iter; i++){
-      stream_simple(img.height, img.width, img.stride, img.data, outImg.data);
+        stream_simple(img.height, img.width, img.stride, img.data, outImg.data);
         //memcpy(outImg.data, img.data, height * stride * sizeof(pixel_t));
     }
     double stream_time = (read_timer() - start_timer) / n_iter;

@@ -3,8 +3,8 @@
 #include "helpers.h"
 //using namespace cv;
 
-#define pixel_t char //you modify this 
-//#define pixel_t float //you modify this 
+//#define pixel_t unsigned char //you modify this 
+#define pixel_t float //you modify this 
 //#define pixel_t __m128
 
 //no notion of RGB ... just a series of values (pixelType = char, short int, int, etc)

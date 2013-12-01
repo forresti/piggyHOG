@@ -17,8 +17,8 @@ __m128i vv_fixedpt_epi16[9];
 //stuff for approximate vectorized atan2
 void init_atan2_constants(){
     for(int i=0; i<9; i++){
-        uu_fixedpt[i] = round(uu[i] * 10000.0f);
-        vv_fixedpt[i] = round(vv[i] * 10000.0f);
+        uu_fixedpt[i] = round(uu[i] * 100.0f);
+        vv_fixedpt[i] = round(vv[i] * 100.0f);
 
 //        printf("uu[%d]=%f, uu_fixedpt[%d]=%d \n", i, uu[i], i, uu_fixedpt[i]);
 //        printf("vv[%d]=%f, vv_fixedpt[%d]=%d \n", i, vv[i], i, vv_fixedpt[i]);
@@ -32,21 +32,23 @@ void init_atan2_constants(){
 //@in-out ori_best_bin[dx][dy] = atan2 ori bin that best matches the gradient (dx,dy) 
 //@in-out ori_dot[dx][dy][bin] = how well we match with each orientation bin
 //uses FIXED-point calculations. (this is the reference implementation from voc-release5)
-void atan2_snap_to_fixedpt(int* ori_best_bin, int16_t* ori_dot){
+//void atan2_snap_to_fixedpt(int* ori_best_bin, int16_t* ori_dot)
+void atan2_snap_to_fixedpt(int* ori_best_bin, int* ori_dot)
+{
 
     for(int16_t dx=-255; dx <= 255; dx++){
         for(int16_t dy=-255; dy <= 255; dy++){
 
-            //int16_t best_dot = 0;
-            int best_dot = 0; //TEST -- use int32 instead of int16
+            int16_t best_dot = 0;
+            //int best_dot = 0; //TEST -- use int32 instead of int16
             int best_o = 0;
 
             for (int o = 0; o < 9; o++) {
                 //double dot = uu[o]*dx + vv[o]*dy; //float
 
-                //int16_t dot = uu_fixedpt[o]*dx + vv_fixedpt[o]*dy;
+                int16_t dot = uu_fixedpt[o]*dx + vv_fixedpt[o]*dy;
                 //int16_t dot = uu_fixedpt[o]*dx; //simplify (TODO: remove)
-                int dot = (int)uu_fixedpt[o]*(int)dx + (int)vv_fixedpt[o]*(int)dy;  //TEST -- use int32 instead of int16
+                //int dot = (int)uu_fixedpt[o]*(int)dx + (int)vv_fixedpt[o]*(int)dy;  //TEST -- use int32 instead of int16
 
                 ori_dot[ (dx+255)*512*18 + (dy+255)*18 + o] = dot;
                 ori_dot[ (dx+255)*512*18 + (dy+255)*18 + (o+9)] = -dot;
@@ -77,8 +79,8 @@ void atan2_snap_to_floatpt(int* ori_best_bin, float* ori_dot){
             int best_o = 0;
 
             for (int o = 0; o < 9; o++) {
-                double dot = uu[o]*(double)dx + vv[o]*(double)dy; //float
-                //double dot = uu[o] * (double)dx; //simplify (TODO: remove)
+                float dot = uu[o]*(float)dx + vv[o]*(float)dy; //float
+                //float dot = uu[o] * (double)dx; //simplify (TODO: remove)
 
                 ori_dot[ (dx+255)*512*18 + (dy+255)*18 + o] = dot;
                 ori_dot[ (dx+255)*512*18 + (dy+255)*18 + (o+9)] = -dot;
@@ -114,7 +116,7 @@ void test_int16_range(){
 int main (int argc, char **argv)
 {
 
-    test_int16_range();
+    //test_int16_range();
     init_atan2_constants(); //stuff for fixedpt
 
   //floating-pt "best ori bin" experiment
@@ -124,7 +126,8 @@ int main (int argc, char **argv)
 
   //fixed-pt "best ori bin" experiment
     int* ori_best_bin_fixedpt = (int*)malloc(512*512 * sizeof(int));
-    int16_t* ori_dot_fixedpt = (int16_t*)malloc(512*512*18 * sizeof(int16_t));
+    int* ori_dot_fixedpt = (int*)malloc(512*512*18 * sizeof(int));
+    //int16_t* ori_dot_fixedpt = (int16_t*)malloc(512*512*18 * sizeof(int16_t));
     atan2_snap_to_fixedpt(ori_best_bin_fixedpt, ori_dot_fixedpt);
 
     for(int dx=-255; dx <= 255; dx++){
@@ -132,10 +135,10 @@ int main (int argc, char **argv)
         //int dy = 0;
         {
 
-//            if(ori_best_bin_floatpt[ (dx+255)*512 + (dy*255) ] != ori_best_bin_fixedpt[ (dx+255)*512 + (dy*255) ])
+            if(ori_best_bin_floatpt[ (dx+255)*512 + (dy*255) ] != ori_best_bin_fixedpt[ (dx+255)*512 + (dy*255) ])
             {
 
-//                printf("mismatch: ori_best_bin_floatpt[dx=%d][dy=%d]=%d, ori_best_bin_fixedpt[dx=%d][dy=%d]=%d \n", dx, dy, ori_best_bin_floatpt[ (dx+255)*512 + (dy*255) ], dx, dy, ori_best_bin_fixedpt[ (dx+255)*512 + (dy*255) ]);
+                printf("mismatch: ori_best_bin_floatpt[dx=%d][dy=%d]=%d, ori_best_bin_fixedpt[dx=%d][dy=%d]=%d \n", dx, dy, ori_best_bin_floatpt[ (dx+255)*512 + (dy*255) ], dx, dy, ori_best_bin_fixedpt[ (dx+255)*512 + (dy*255) ]);
  
                 for (int o = 0; o < 18; o++) {
 
