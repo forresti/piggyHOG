@@ -85,7 +85,7 @@ __m128i approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
 
     // snap to one of 18 orientations
     for(int ori=0; ori<9; ori++){
-#if 0
+#if 1
         __m128i ori_vec = _mm_set_epi16(ori, ori, ori, ori, ori, ori, ori, ori); //copy of index for if/else in sse 
         __m128i dot = _mm_add_epi16( _mm_mullo_epi16(uu_fixedpt_epi16[ori], gradX_max),
                                      _mm_mullo_epi16(vv_fixedpt_epi16[ori], gradY_max) );
@@ -103,13 +103,13 @@ __m128i approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
         //if(-dot > best_dot){ best_dot = -dot; best_ori = ori+9; }
         //TODO: implement -best_dot
             __m128i minus_ori_vec = _mm_add_epi16(ori_vec, nine_vec); //ori+9
-            __m128i minus_dot = _mm_mul_epi16(dot, negative_one_vec); //-dot
+            __m128i minus_dot = _mm_mullo_epi16(dot, negative_one_vec); //-dot
 
             isMax = _mm_cmpgt_epi16(minus_dot, best_dot);  //if(-dot > best_dot)
             best_dot = _mm_max_epi16(minus_dot, best_dot); //    best_dot = -dot
 
-            __m128i t0 = _mm_and_si128(minus_ori_vec, isMax); //zero out nonmaxes in ori_vec
-            __m128i t1 = _mm_andnot_si128(isMax, best_ori); //in ori argmaxes, zero out newly-beaten maxes 
+            t0 = _mm_and_si128(minus_ori_vec, isMax); //zero out nonmaxes in ori_vec
+            t1 = _mm_andnot_si128(isMax, best_ori); //in ori argmaxes, zero out newly-beaten maxes 
 
             best_dot = _mm_or_si128(t0, t1); 
 
