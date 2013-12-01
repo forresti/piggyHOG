@@ -24,7 +24,7 @@ bool test_ori_argmax(int16_t magChannel[8],    int16_t old_magMax[8],
 
     streamHog shog;
 
-printf("test_ori_argmax. gradX_channel[0] = %d \n", gradX_channel[0]);
+//printf("test_ori_argmax. gradX_channel[0] = %d \n", gradX_channel[0]);
 
     //copy to SSE registers
     __m128i magChannel_sse = _mm_load_si128((__m128i*)magChannel); //current channel's mag
@@ -176,7 +176,7 @@ void test_streamHog_oneScale(){
 
 int main (int argc, char **argv)
 {
-    test_streamHog_oneScale();
+    //test_streamHog_oneScale();
 
     run_tests_ori_argmax();
 

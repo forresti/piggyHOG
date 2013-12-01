@@ -83,6 +83,16 @@ void streamHog::select_epi16(__m128i magChannel, __m128i old_magMax,
                              __m128i &gradX_max, __m128i &gradY_max){
 
     __m128i isMax = _mm_cmpgt_epi16(magChannel, old_magMax); // = 1 when magChannel is max that we have seen so far
+#if 1 //debug
+    int16_t isMax_scalar[8];
+    _mm_store_si128((__m128i*)isMax_scalar, isMax);
+    printf("    isMax:");
+    for(int i=0; i<8; i++){
+        printf("%d, ", isMax_scalar[i]);
+    }
+    printf("\n");
+#endif
+
 
     //if magChannel is max, gradX_channel_tmp=gradX_channel; 
     //else                  gradX_channel_tmp = 0
