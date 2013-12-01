@@ -145,8 +145,8 @@ void test_streamHog_oneScale(){
     SimpleImg ori(img.height, img.width, img.stride, 1); //out img has just 1 channel
     double start_timer = read_timer();
     for(int i=0; i<n_iter; i++){
-        //gradient_wideload_unvectorized(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
-        sHog.gradient_sse(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
+        sHog.gradient_wideload_unvectorized(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
+        //sHog.gradient_sse(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
         //sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data);
     }
     mag.simple_csvwrite("mag.csv");

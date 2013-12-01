@@ -268,8 +268,8 @@ void streamHog::gradient_wideload_unvectorized(int height, int width, int stride
             for(int x_inner=0; x_inner < loadSize; x_inner++){
                 int x = (x_tile-1)*loadSize + x_inner + 1; //(x_tile-1)...+1 -> because we're starting from x_tile=2 instead of x_tile=0
  
-                //gradX_ch[0] = (int16_t)img[y*stride + x +                 + 1] - (int16_t)img[y*stride + x                   - 1];
-                gradX_ch[0] = reinterpret_cast<unsigned char*>(xHi)[x_inner] - reinterpret_cast<unsigned char*>(xLo)[x_inner]; //test loading larger words
+                gradX_ch[0] = (int16_t)img[y*stride + x +                 + 1] - (int16_t)img[y*stride + x                   - 1];
+                //gradX_ch[0] = reinterpret_cast<unsigned char*>(xHi)[x_inner] - reinterpret_cast<unsigned char*>(xLo)[x_inner]; //test loading larger words
                 gradX_ch[1] = (int16_t)img[y*stride + x + 1*height*stride + 1] - (int16_t)img[y*stride + x + 1*height*stride - 1];
                 gradX_ch[2] = (int16_t)img[y*stride + x + 2*height*stride + 1] - (int16_t)img[y*stride + x + 2*height*stride - 1];
 
@@ -277,9 +277,12 @@ void streamHog::gradient_wideload_unvectorized(int height, int width, int stride
                 gradY_ch[1] = (int16_t)img[y*stride + x + 1*height*stride + stride] - (int16_t)img[y*stride + x + 1*height*stride - stride];
                 gradY_ch[2] = (int16_t)img[y*stride + x + 2*height*stride + stride] - (int16_t)img[y*stride + x + 2*height*stride - stride];
 
-                mag_ch[0] = gradX_ch[0]*gradX_ch[0] + gradY_ch[0]*gradY_ch[0];
-                mag_ch[1] = gradX_ch[1]*gradX_ch[1] + gradY_ch[1]*gradY_ch[1];
-                mag_ch[2] = gradX_ch[2]*gradX_ch[2] + gradY_ch[2]*gradY_ch[2];
+                //mag_ch[0] = gradX_ch[0]*gradX_ch[0] + gradY_ch[0]*gradY_ch[0];
+                //mag_ch[1] = gradX_ch[1]*gradX_ch[1] + gradY_ch[1]*gradY_ch[1];
+                //mag_ch[2] = gradX_ch[2]*gradX_ch[2] + gradY_ch[2]*gradY_ch[2];
+                mag_ch[0] = abs(gradX_ch[0]) + abs(gradY_ch[0]); //Forrest's version
+                mag_ch[1] = abs(gradX_ch[1]) + abs(gradY_ch[1]);
+                mag_ch[2] = abs(gradX_ch[2]) + abs(gradY_ch[2]);
 
                 int16_t gradX, gradY;
                 int mag_max = 0;
