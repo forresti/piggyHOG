@@ -94,11 +94,12 @@ bool run_tests_ori_argmax(){
     int16_t gradX_max[8] = {0,0,0,0,0,0,0,0};
     int16_t gradY_max[8] = {0,0,0,0,0,0,0,0};
 
-    //initialize gradX, gradY with 1,2,3,4,...,24
+    //initialize gradX, gradY with some arbitrary values...
+    // gradX[ch=0][:] = 1,...,8. gradX[ch=1][:] = 11...18, gradX[ch=2][:] = 21...28 
     for(int ch=0; ch<3; ch++){
         for(int i=0; i<8; i++){
-            gradX_channel[ch][i] = ch*8 + i;
-            gradY_channel[ch][i] = ch*8 + i;
+            gradX_channel[ch][i] = ch*10 + i + 1;
+            gradY_channel[ch][i] = ch*10 + i + 1;
         }
     }
     
@@ -107,6 +108,7 @@ bool run_tests_ori_argmax(){
 
     //test grad{X,Y}_max calculation. (this is the gradX, gradY of the argmax magnitude channel)
     for(int ch=0; ch<3; ch++){
+        printf("channel %d \n", ch);
 
         //calculate 'gold' for this channel's iteration
         reference_ori_argmax(magChannel[ch], old_magMax, 
