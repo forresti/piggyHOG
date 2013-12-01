@@ -76,7 +76,7 @@ void streamHog::upcast_8bit_to_16bit(__m128i in_xLo,  __m128i in_xHi, __m128i in
 }
 
 //@param magChannel = current channel's magnitude
-//@param old_magMax = maximum gradient *seen by previous iteration*
+//@param old_magMax = maximum gradient *seen by previous iteration* (note: this code *doesn't* update old_magMax)
 //@in-out gradX_max, gradY_max = output gradient of max channel (of the channels checked so far)
 void streamHog::select_epi16(__m128i magChannel, __m128i old_magMax, 
                              __m128i gradX_channel, __m128i gradY_channel,
