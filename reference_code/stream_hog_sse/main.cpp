@@ -11,13 +11,8 @@
 #include "helpers.h"
 using namespace std;
 
-
-int main (int argc, char **argv)
-{
-    //init_lookup_table(); //similar to FFLD hog
-    //init_atan2_constants(); //easier to vectorize alternative to lookup table. (similar to VOC5 hog)
-
-    streamHog sHog;
+void test_streamHog_oneScale(){
+    streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
 
     int ALIGN_IN_BYTES = 256;
     int n_iter = 1000; //not really "iterating" -- just number of times to run the experiment
@@ -46,6 +41,13 @@ int main (int argc, char **argv)
     if(n_iter < 100){
         printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=100 or greater. \n", n_iter);
     }
+
+}
+
+
+int main (int argc, char **argv)
+{
+    test_streamHog_oneScale();
 
     return 0;
 }
