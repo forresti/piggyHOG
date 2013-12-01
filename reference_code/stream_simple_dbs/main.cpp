@@ -34,16 +34,16 @@ void stream_sse(int height,
     //loadSize example: (128 bits = 16 bytes) / (4 bytes per float) = 4 bytes
     int loadSize = sizeof(__m128) / sizeof(pixel_t);
 
-     for(int y=0; y<height; y++){
+    for(int y=0; y<height; y++){
         //for(int x=0; x<width; x++){
         for(int x=0; x<width; x+=loadSize){
 
             __m128 in_vec = _mm_load_ps(&img[y*stride + x]); //floating-pt version doesn't like cast to __m128i. shrug.
-            //__m128 in_vec = _mm_load_ps( (__m128*)(&img[y*stride + x]) );
-            //outImg[y *stride + x] = img[y*stride + x];
 
+            __m128 in_vec_sqrt = _mm_sqrt_ps(in_vec); //test
+            _mm_store_ps(&outImg[y*stride + x], in_vec_sqrt);
 
-            _mm_store_ps(&outImg[y*stride + x], in_vec);
+            //_mm_store_ps(&outImg[y*stride + x], in_vec);
         }
     }
 
