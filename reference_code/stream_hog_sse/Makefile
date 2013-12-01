@@ -2,7 +2,7 @@
 #Created: 1/24/10
 #Modified: 9/6/12
 
-OBJS = main.o  helpers.o SimpleImg.o
+OBJS = main.o  helpers.o SimpleImg.o streamHog.o
 EXENAME = main
 
 #on sandy bridge, -march=native gives me -mavx -msse2avx
@@ -16,7 +16,7 @@ all : $(EXENAME)
 $(EXENAME) : $(OBJS)
 	$(LINK) -o $(EXENAME) $(OBJS) $(LINKOPTS)
 
-main.o : main.cpp helpers.h SimpleImg.h
+main.o : main.cpp helpers.h SimpleImg.h streamHog.o
 	$(CC) $(CCOPTS) main.cpp
 
 helpers.o : helpers.cpp helpers.h 
@@ -25,8 +25,8 @@ helpers.o : helpers.cpp helpers.h
 SimpleImg.o : SimpleImg.cpp SimpleImg.h helpers.h
 	$(CC) $(CCOPTS) SimpleImg.cpp
 
-#streamHog.o : streamHog.cpp streamHog.h helpers.h
-#	$(CC) $(CCOPTS) streamHog.cpp
+streamHog.o : streamHog.cpp streamHog.h helpers.h
+	$(CC) $(CCOPTS) streamHog.cpp
 
 clean : 
 	rm -f *.o $(EXENAME) 2>/dev/null

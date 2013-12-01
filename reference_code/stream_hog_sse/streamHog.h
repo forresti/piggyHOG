@@ -34,18 +34,22 @@ class streamHog{
                       pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag);
 
 
+    void gradient_wideload_unvectorized(int height, int width, int stride, int n_channels_input, int n_channels_output,
+                            pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag);
   private:
     char ATAN2_TABLE[512][512]; //signed char (values are -18 to 18)
 
-    // unit vectors used to compute gradient orientation
-    double  uu[9] = {1.0000, 0.9397, 0.7660, 0.500, 0.1736, -0.1736, -0.5000, -0.7660, -0.9397};
-    double  vv[9] = {0.0000, 0.3420, 0.6428, 0.8660, 0.9848, 0.9848, 0.8660, 0.6428, 0.3420};
+    // unit vectors used to compute gradient orientation (initialized in init_atan2_constants(), which is called in the constructor)
+    //double  uu[9] = {1.0000, 0.9397, 0.7660, 0.500, 0.1736, -0.1736, -0.5000, -0.7660, -0.9397};
+    //double  vv[9] = {0.0000, 0.3420, 0.6428, 0.8660, 0.9848, 0.9848, 0.8660, 0.6428, 0.3420};
+    double  uu[9];
+    double  vv[9];
     int16_t uu_fixedpt[9]; //scalar fixed-pt (scaled up by 100)
     int16_t vv_fixedpt[9];
     __m128i uu_fixedpt_epi16[9]; //each of these vectors is bunch of copies of uu_fixedpt[i]
     __m128i vv_fixedpt_epi16[9];
 
 
-}
+};
 #endif
 

@@ -7,6 +7,7 @@
 #include <pmmintrin.h> //for _mm_hadd_pd()
 
 #include "SimpleImg.h"
+#include "streamHog.h"
 #include "helpers.h"
 using namespace std;
 
@@ -16,9 +17,18 @@ streamHog::streamHog(){
     init_atan2_constants(); //easier to vectorize alternative to lookup table. (similar to VOC5 hog)
 }
 
+//destructor
+streamHog::~streamHog(){ }
+
 //stuff for approximate vectorized atan2
 void streamHog::init_atan2_constants(){
+    double  uu_local[9] = {1.0000, 0.9397, 0.7660, 0.500, 0.1736, -0.1736, -0.5000, -0.7660, -0.9397}; //from voc-release5 features.cc
+    double  vv_local[9] = {0.0000, 0.3420, 0.6428, 0.8660, 0.9848, 0.9848, 0.8660, 0.6428, 0.3420}; 
+
     for(int i=0; i<9; i++){
+        uu[i] = uu_local[i]; //can't do array[9]={data, data, ...} initialization in a class. 
+        vv[i] = vv_local[i];
+
         uu_fixedpt[i] = round(uu[i] * 100);
         vv_fixedpt[i] = round(vv[i] * 100);
 
