@@ -15,16 +15,16 @@ using namespace std;
 //test template for: 
 //  bestChannel = argmax(mag[0,1,2]); 
 //  [gradX, gradY] = gradX[bestChannel], gradY[bestChannel]
+//@in-out gradX_max, gradY_max = result from this channel's iteration
 //@return bool = "pass/fail"
 bool test_ori_argmax(int16_t magChannel[8],    int16_t old_magMax[8],
                     int16_t gradX_channel[8], int16_t gradY_channel[8],
-                    int16_t gradX_max[8],     int16_t gradY_max[8],
+                    //int16_t gradX_max[8],     int16_t gradY_max[8],
+                    int16_t* gradX_max,     int16_t* gradY_max,
                     int16_t gold_gradX_max[8], int16_t gold_gradY_max[8]) //gold_* = expected output
 {
 
     streamHog shog;
-
-//printf("test_ori_argmax. gradX_channel[0] = %d \n", gradX_channel[0]);
 
     //copy to SSE registers
     __m128i magChannel_sse = _mm_load_si128((__m128i*)magChannel); //current channel's mag
@@ -40,21 +40,19 @@ bool test_ori_argmax(int16_t magChannel[8],    int16_t old_magMax[8],
 
     
     //copy back passed-by-ref grad{X,Y}_max_sse
-    int16_t gradX_max_result[8];
-    int16_t gradY_max_result[8];
-    _mm_store_si128((__m128i*)gradX_max_result, gradX_max_sse);
-    _mm_store_si128((__m128i*)gradY_max_result, gradY_max_sse);
+    _mm_store_si128((__m128i*)gradX_max, gradX_max_sse); //write SSE result back to scalar grad{X,Y}_max
+    _mm_store_si128((__m128i*)gradY_max, gradY_max_sse);
 
     //check correctness
     bool isGood = true;
     for(int i=0; i<8; i++){
-        if(gradY_max_result[i] != gold_gradX_max[i]){
+        if(gradY_max[i] != gold_gradX_max[i]){
             isGood = false;
-            printf("    gradX_max[%d]. expected:%d, got:%d \n", i, gold_gradX_max[i], gradX_max_result[i]);
+            printf("    gradX_max[%d]. expected:%d, got:%d \n", i, gold_gradX_max[i], gradX_max[i]);
         }
-        if(gradY_max_result[i] != gold_gradY_max[i]){
+        if(gradY_max[i] != gold_gradY_max[i]){
             isGood = false;
-            printf("    gradY_max[%d]. expected:%d, got:%d \n\n", i, gold_gradY_max[i], gradY_max_result[i]);
+            printf("    gradY_max[%d]. expected:%d, got:%d \n\n", i, gold_gradY_max[i], gradY_max[i]);
         }
     }
     return isGood;
@@ -130,15 +128,6 @@ bool run_tests_ori_argmax(){
     }
  
 }
-
-//bool test_ori_argmax(int16_t magChannel[8],    int16_t old_magMax[8],
-//                    int16_t gradX_channel[8], int16_t gradY_channel[8],
-//                    int16_t gradX_max[8],     int16_t gradY_max[8],
-//                    int16_t gold_gradX_max[8], int16_t gold_gradY_max[8]) 
-
-//void streamHog::select_epi16(__m128i magChannel, __m128i old_magMax,
-//                             __m128i gradX_channel, __m128i gradY_channel,
-//                             __m128i &gradX_max, __m128i &gradY_max){
 
 // MAIN TEST OF FUNCTIONALITY
 void test_streamHog_oneScale(){
