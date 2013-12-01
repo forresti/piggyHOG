@@ -36,9 +36,8 @@ bool test_ori_argmax(int16_t magChannel[8],    int16_t old_magMax[8],
     shog.select_epi16(magChannel_sse, old_magMax_sse, 
                       gradX_channel_sse, gradY_channel_sse,
                       gradX_max_sse, gradY_max_sse); //grad{X,Y}_max_sse are passed by ref, so they get updated.
-
    
-    //print_epi16(gradY_max_sse, "gradX_max"); //TODO: get this to work w/o segfault
+    //print_epi16(gradY_max_sse, "gradY_max"); //TODO: get this to work w/o segfault
     //print_epi16(gradY_max_sse, "gradY_max");
  
     //copy back passed-by-ref grad{X,Y}_max_sse
@@ -57,6 +56,7 @@ bool test_ori_argmax(int16_t magChannel[8],    int16_t old_magMax[8],
             printf("    gradY_max[%d]. expected:%d, got:%d \n\n", i, gold_gradY_max[i], gradY_max[i]);
         }
     }
+//exit(0);
     return isGood;
 }
 
@@ -125,8 +125,9 @@ bool run_tests_ori_argmax(){
             old_magMax[i] = max(magChannel[ch][i], old_magMax[i]); 
         }
         if(!isGood){ numFailed++; }
-    }
+   }
 
+    exit(0);
     printf("number of select_epi16 tests failed: %d \n", numFailed); 
 }
 
@@ -163,12 +164,11 @@ void test_streamHog_oneScale(){
     }
 }
 
-
 int main (int argc, char **argv)
 {
-    //test_streamHog_oneScale();
+    test_streamHog_oneScale();
 
-    run_tests_ori_argmax();
+//    run_tests_ori_argmax();
 
     return 0;
 }
