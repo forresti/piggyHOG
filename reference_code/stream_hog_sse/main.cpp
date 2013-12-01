@@ -56,7 +56,6 @@ bool test_ori_argmax(int16_t magChannel[8],    int16_t old_magMax[8],
             printf("    gradY_max[%d]. expected:%d, got:%d \n\n", i, gold_gradY_max[i], gradY_max[i]);
         }
     }
-//exit(0);
     return isGood;
 }
 
@@ -127,7 +126,6 @@ bool run_tests_ori_argmax(){
         if(!isGood){ numFailed++; }
    }
 
-    exit(0);
     printf("number of select_epi16 tests failed: %d \n", numFailed); 
 }
 

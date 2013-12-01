@@ -14,6 +14,9 @@ int16_t vv_fixedpt[9];
 __m128i uu_fixedpt_epi16[9]; //each of these vectors is bunch of copies of uu_fixedpt[i]
 __m128i vv_fixedpt_epi16[9];
 
+//alternatuve to unit vectors -- FFLD-style lookup table
+char ATAN2_TABLE[512][512]; //signed char (values are -18 to 18)
+
 //stuff for approximate vectorized atan2
 void init_atan2_constants(){
     for(int i=0; i<9; i++){
@@ -26,6 +29,25 @@ void init_atan2_constants(){
         //vector of copies of uu and vv for SSE vectorization
         uu_fixedpt_epi16[i] = _mm_set_epi16(uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i],uu_fixedpt[i]);
         vv_fixedpt_epi16[i] = _mm_set_epi16(vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i],vv_fixedpt[i]);
+    }
+}
+
+//FFLD-style lookup table
+void init_lookup_table(){
+    for (int dy = -255; dy <= 255; ++dy) { //pixels are 0 to 255, so gradient values are -255 to 255
+        for (int dx = -255; dx <= 255; ++dx) {
+            // Angle in the range [-pi, pi]
+            double angle = atan2(static_cast<double>(dy), static_cast<double>(dx));
+
+            // Convert it to the range [9.0, 27.0]
+            angle = angle * (9.0 / M_PI) + 18.0;
+
+            // Convert it to the range [0, 18)
+            if (angle >= 18.0)
+                angle -= 18.0;
+            ATAN2_TABLE[dy + 255][dx + 255] = round( max(angle, 0.0) );
+            //printf("ATAN2_TABLE[%d][%d] = %d \n", dx+255, dy+255, ATAN2_TABLE[dy + 255][dx + 255]);
+        }
     }
 }
 
@@ -118,6 +140,7 @@ int main (int argc, char **argv)
 
     //test_int16_range();
     init_atan2_constants(); //stuff for fixedpt
+    init_lookup_table();    
 
   //floating-pt "best ori bin" experiment
     int* ori_best_bin_floatpt = (int*)malloc(512*512 * sizeof(int));
@@ -134,20 +157,25 @@ int main (int argc, char **argv)
         for(int dy=-255; dy <= 255; dy++)
         //int dy = 0;
         {
-
+#if 0 //fixed-pt vs floating-pt
             if(ori_best_bin_floatpt[ (dx+255)*512 + (dy*255) ] != ori_best_bin_fixedpt[ (dx+255)*512 + (dy*255) ])
             {
-
                 printf("mismatch: ori_best_bin_floatpt[dx=%d][dy=%d]=%d, ori_best_bin_fixedpt[dx=%d][dy=%d]=%d \n", dx, dy, ori_best_bin_floatpt[ (dx+255)*512 + (dy*255) ], dx, dy, ori_best_bin_fixedpt[ (dx+255)*512 + (dy*255) ]);
  
                 for (int o = 0; o < 18; o++) {
-
-                    
 //                    printf("    ori_dot_FLOATpt[dx=%d][dy=%d][%d] = %f \n", dx, dy, o, ori_dot_floatpt[(dx+255)*512*18 + (dy+255)*18 + o]); 
 //                    printf("    ori_dot_FIXEDpt[dx=%d][dy=%d][%d] = %d \n", dx, dy, o, ori_dot_fixedpt[(dx+255)*512*18 + (dy+255)*18 + o]); 
 
                 }
             }
+#endif
+#if 1 //floating-pt vs FFLD LUT
+            if(ori_best_bin_floatpt[ (dx+255)*512 + (dy*255) ] != (ATAN2_TABLE[dy+255][dx+255]))
+            {
+                printf("    ori_best_bin_FLOATpt[dx=%d][dy=%d] = %d, ATAN2_TABLE[dy=%d][dx=%d] = %d \n", dx, dy, ori_best_bin_floatpt[ (dx+255)*512 + (dy*255) ], dy, dx, (ATAN2_TABLE[dy+255][dx+255])); 
+            }
+
+#endif
         }
     }
 
