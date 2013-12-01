@@ -7,22 +7,17 @@
 #include <pmmintrin.h> //for _mm_hadd_pd()
 
 #include "SimpleImg.h"
-#include "streamHog.h"
 #include "helpers.h"
 using namespace std;
-#if 0
-char ATAN2_TABLE[512][512]; //signed char (values are -18 to 18)
 
-// unit vectors used to compute gradient orientation
-double  uu[9] = {1.0000, 0.9397, 0.7660, 0.500, 0.1736, -0.1736, -0.5000, -0.7660, -0.9397};
-double  vv[9] = {0.0000, 0.3420, 0.6428, 0.8660, 0.9848, 0.9848, 0.8660, 0.6428, 0.3420};
-int16_t uu_fixedpt[9]; //scalar fixed-pt (scaled up by 100)
-int16_t vv_fixedpt[9];
-__m128i uu_fixedpt_epi16[9]; //each of these vectors is bunch of copies of uu_fixedpt[i]
-__m128i vv_fixedpt_epi16[9];
+//constructor
+streamHog::streamHog(){
+    init_lookup_table(); //similar to FFLD hog
+    init_atan2_constants(); //easier to vectorize alternative to lookup table. (similar to VOC5 hog)
+}
 
 //stuff for approximate vectorized atan2
-void init_atan2_constants(){
+void streamHog::init_atan2_constants(){
     for(int i=0; i<9; i++){
         uu_fixedpt[i] = round(uu[i] * 100);
         vv_fixedpt[i] = round(vv[i] * 100);
@@ -33,8 +28,27 @@ void init_atan2_constants(){
     }
 }
 
+//TODO: make this much smaller than 512x512.
+void streamHog::init_lookup_table(){
+    for (int dy = -255; dy <= 255; ++dy) { //pixels are 0 to 255, so gradient values are -255 to 255
+        for (int dx = -255; dx <= 255; ++dx) {
+            // Angle in the range [-pi, pi]
+            double angle = atan2(static_cast<double>(dy), static_cast<double>(dx));
+
+            // Convert it to the range [9.0, 27.0]
+            angle = angle * (9.0 / M_PI) + 18.0;
+
+            // Convert it to the range [0, 18)
+            if (angle >= 18.0)
+                angle -= 18.0;
+            ATAN2_TABLE[dy + 255][dx + 255] = round( max(angle, 0.0) );
+            //printf("ATAN2_TABLE[%d][%d] = %d \n", dx+255, dy+255, ATAN2_TABLE[dy + 255][dx + 255]);
+        }
+    }
+}
+
 //enables us to load 8-bit values, but work in 16-bit. 
-void upcast_8bit_to_16bit(__m128i in_xLo,     __m128i in_xHi,     __m128i in_yLo,     __m128i in_yHi,
+void streamHog::upcast_8bit_to_16bit(__m128i in_xLo,  __m128i in_xHi, __m128i in_yLo,     __m128i in_yHi,
                           __m128i &out_xLo_0, __m128i &out_xHi_0, __m128i &out_yLo_0, __m128i &out_yHi_0, //bottom bits, in 16-bit
                           __m128i &out_xLo_1, __m128i &out_xHi_1, __m128i &out_yLo_1, __m128i &out_yHi_1) //top bits,    in 16-bit
 {
@@ -54,9 +68,9 @@ void upcast_8bit_to_16bit(__m128i in_xLo,     __m128i in_xHi,     __m128i in_yLo
 //@param magChannel = current channel's magnitude
 //@param old_magMax = maximum gradient *seen by previous iteration*
 //@in-out gradX_max, gradY_max = output gradient of max channel (of the channels checked so far)
-void select_epi16(__m128i magChannel, __m128i old_magMax, 
-                  __m128i gradX_channel, __m128i gradY_channel,
-                  __m128i &gradX_max, __m128i &gradY_max){
+void streamHog::select_epi16(__m128i magChannel, __m128i old_magMax, 
+                             __m128i gradX_channel, __m128i gradY_channel,
+                             __m128i &gradX_max, __m128i &gradY_max){
 
     __m128i isMax = _mm_cmpgt_epi16(magChannel, old_magMax); // = 1 when magChannel is max that we have seen so far
 
@@ -76,7 +90,7 @@ void select_epi16(__m128i magChannel, __m128i old_magMax,
 
 //@param  gradX_max, gradY_max = output gradient of max channel (of the channels checked so far)
 //@return histogramBin( atan2(gradY, gradX) ) -- using approx atan2
-__m128i approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
+__m128i streamHog::approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
 
     __m128i isMax; //reset for each iteration
     __m128i best_dot = _mm_setzero_si128(); //max 
@@ -105,13 +119,13 @@ __m128i approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
         //if(-dot > best_dot){ best_dot = -dot; best_ori = ori+9; }
         //TODO: implement -best_dot
             __m128i minus_ori_vec = _mm_add_epi16(ori_vec, nine_vec); //ori+9
-            __m128i minus_dot = _mm_mullo_epi16(dot, negative_one_vec); //-dot
+            __m128i minus_dot = _mm_mul_epi16(dot, negative_one_vec); //-dot
 
             isMax = _mm_cmpgt_epi16(minus_dot, best_dot);  //if(-dot > best_dot)
             best_dot = _mm_max_epi16(minus_dot, best_dot); //    best_dot = -dot
 
-            t0 = _mm_and_si128(minus_ori_vec, isMax); //zero out nonmaxes in ori_vec
-            t1 = _mm_andnot_si128(isMax, best_ori); //in ori argmaxes, zero out newly-beaten maxes 
+            __m128i t0 = _mm_and_si128(minus_ori_vec, isMax); //zero out nonmaxes in ori_vec
+            __m128i t1 = _mm_andnot_si128(isMax, best_ori); //in ori argmaxes, zero out newly-beaten maxes 
 
             best_dot = _mm_or_si128(t0, t1); 
 
@@ -123,7 +137,7 @@ __m128i approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
 
 }
 
-void gradient_sse(int height, int width, int stride, int n_channels_input, int n_channels_output,
+void streamHog::gradient_sse(int height, int width, int stride, int n_channels_input, int n_channels_output,
                   pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag){
     assert(n_channels_input == 3);
     assert(n_channels_output == 1);
@@ -206,9 +220,9 @@ void gradient_sse(int height, int width, int stride, int n_channels_input, int n
     }
 }
 
-
+// gives not-quite-right results:
 //no attempt at vectorization...just checking correctness.
-void gradient_wideload_unvectorized(int height, int width, int stride, int n_channels_input, int n_channels_output,
+void streamHog::gradient_wideload_unvectorized(int height, int width, int stride, int n_channels_input, int n_channels_output,
                             pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag){
     assert(n_channels_input == 3);
     assert(n_channels_output == 1);
@@ -287,64 +301,6 @@ void gradient_wideload_unvectorized(int height, int width, int stride, int n_cha
             }
         }
     }
-}
-
-//TODO: make this much smaller than 512x512.
-void init_lookup_table(){
-    for (int dy = -255; dy <= 255; ++dy) { //pixels are 0 to 255, so gradient values are -255 to 255
-        for (int dx = -255; dx <= 255; ++dx) {
-            // Angle in the range [-pi, pi]
-            double angle = atan2(static_cast<double>(dy), static_cast<double>(dx));
-
-            // Convert it to the range [9.0, 27.0]
-            angle = angle * (9.0 / M_PI) + 18.0;
-
-            // Convert it to the range [0, 18)
-            if (angle >= 18.0)
-                angle -= 18.0;
-            ATAN2_TABLE[dy + 255][dx + 255] = round( max(angle, 0.0) );
-            //printf("ATAN2_TABLE[%d][%d] = %d \n", dx+255, dy+255, ATAN2_TABLE[dy + 255][dx + 255]);
-        }
-    }
-}
-#endif
-
-int main (int argc, char **argv)
-{
-    //init_lookup_table(); //similar to FFLD hog
-    //init_atan2_constants(); //easier to vectorize alternative to lookup table. (similar to VOC5 hog)
-
-    streamHog sHog;
-
-    int ALIGN_IN_BYTES = 256;
-    int n_iter = 1000; //not really "iterating" -- just number of times to run the experiment
-    //int stride = width + (ALIGN_IN_BYTES - width%ALIGN_IN_BYTES); //thanks: http://stackoverflow.com/questions/2403631
-    //SimpleImg img(height, width, stride, n_channels);
-
-    SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
-
-    //[mag, ori] = gradient_wideload_unvectorized(img)
-    SimpleImg mag(img.height, img.width, img.stride, 1); //out img has just 1 channel
-    SimpleImg ori(img.height, img.width, img.stride, 1); //out img has just 1 channel
-    double start_timer = read_timer();
-    for(int i=0; i<n_iter; i++){
-        //gradient_wideload_unvectorized(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
-        sHog.gradient_sse(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
-    }
-    mag.simple_csvwrite("mag.csv");
-    mag.simple_imwrite("mag.jpg");
-    ori.simple_imwrite("ori.jpg");
-
-    double stream_time = (read_timer() - start_timer) / n_iter;
-    double gb_to_copy = img.width * img.height * img.n_channels * sizeof(pixel_t) / 1e9;
-    double gb_per_sec = gb_to_copy / (stream_time/1000); //convert stream_time from ms to sec
-    printf("avg stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec);
-
-    if(n_iter < 100){
-        printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=100 or greater. \n", n_iter);
-    }
-
-    return 0;
 }
 
 
