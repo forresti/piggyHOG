@@ -86,7 +86,7 @@ bool run_tests_ori_argmax(){
 
   //test suite with 3 subtests; 1 per channel
     int16_t  magChannel0[8] = {1,2,3,4,5,6,7,8};
-    int16_t  magChannel1[8] = {110,120,130,140,150,160,170,180};
+    int16_t  magChannel1[8] = {110,120,130,140,150,160,1,180};
     int16_t  magChannel2[8] = {0,200,50,0,0,0,0,0};
     int16_t* magChannel[3] = {magChannel0, magChannel1, magChannel2}; magChannel[3][8];
     int16_t  old_magMax[8] = {0,0,0,0,0,0,0,0};   
