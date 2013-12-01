@@ -15,11 +15,10 @@ using namespace std;
 //test template for: 
 //  bestChannel = argmax(mag[0,1,2]); 
 //  [gradX, gradY] = gradX[bestChannel], gradY[bestChannel]
-//@in-out gradX_max, gradY_max = result from this channel's iteration
+//@in-out gradX_max[8], gradY_max[8] = result from this channel's iteration
 //@return bool = "pass/fail"
 bool test_ori_argmax(int16_t magChannel[8],    int16_t old_magMax[8],
                     int16_t gradX_channel[8], int16_t gradY_channel[8],
-                    //int16_t gradX_max[8],     int16_t gradY_max[8],
                     int16_t* gradX_max,     int16_t* gradY_max,
                     int16_t gold_gradX_max[8], int16_t gold_gradY_max[8]) //gold_* = expected output
 {
@@ -38,10 +37,16 @@ bool test_ori_argmax(int16_t magChannel[8],    int16_t old_magMax[8],
                       gradX_channel_sse, gradY_channel_sse,
                       gradX_max_sse, gradY_max_sse); //grad{X,Y}_max_sse are passed by ref, so they get updated.
 
-    
+   
+    print_epi16(gradY_max_sse, "gradX_max");
+    print_epi16(gradY_max_sse, "gradY_max");
+ 
     //copy back passed-by-ref grad{X,Y}_max_sse
     _mm_store_si128((__m128i*)gradX_max, gradX_max_sse); //write SSE result back to scalar grad{X,Y}_max
     _mm_store_si128((__m128i*)gradY_max, gradY_max_sse);
+
+    //print_epi16(gradY_max_sse, "gradX_max");
+    //print_epi16(gradY_max_sse, "gradY_max");
 
     //check correctness
     bool isGood = true;
@@ -65,7 +70,6 @@ bool test_ori_argmax(int16_t magChannel[8],    int16_t old_magMax[8],
 void reference_ori_argmax(int16_t magChannel[8],    int16_t old_magMax[8],
                           int16_t gradX_channel[8], int16_t gradY_channel[8],
                           int16_t* gradX_max,     int16_t* gradY_max)
-                          //int16_t &gradX_max[8],     int16_t &gradY_max[8])
 {
 
     for(int i=0; i<8; i++){ //iterate over sse-style vector
@@ -124,7 +128,6 @@ bool run_tests_ori_argmax(){
             old_magMax[i] = max(magChannel[ch][i], old_magMax[i]); 
         }
         if(!isGood){ numFailed++; }
-
     }
  
 }

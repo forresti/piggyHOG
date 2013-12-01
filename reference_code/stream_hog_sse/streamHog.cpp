@@ -75,17 +75,6 @@ void streamHog::upcast_8bit_to_16bit(__m128i in_xLo,  __m128i in_xHi, __m128i in
     out_yHi_1 = _mm_unpackhi_epi8(in_yHi, _mm_setzero_si128());
 }
 
-void print_epi16(__m128i vec_sse, string vec_name){
-    int16_t vec_scalar[8];
-    _mm_store_si128((__m128i*)vec_scalar, vec_sse);
-
-    printf("    %s: ", vec_name.c_str());
-    for(int i=0; i<8; i++){
-        printf("%d, ", vec_scalar[i]);
-    }
-    printf("\n"); 
-}
-
 //@param magChannel = current channel's magnitude
 //@param old_magMax = maximum gradient *seen by previous iteration* (note: this code *doesn't* update old_magMax)
 //@in-out gradX_max, gradY_max = output gradient of max channel (of the channels checked so far)
@@ -93,7 +82,7 @@ void streamHog::select_epi16(__m128i magChannel, __m128i old_magMax,
                              __m128i gradX_channel, __m128i gradY_channel,
                              __m128i &gradX_max, __m128i &gradY_max){
 
-    print_epi16(gradX_max, "gradX_max prev iteration");
+    //print_epi16(gradX_max, "gradX_max prev iteration");
 
     __m128i isMax = _mm_cmpgt_epi16(magChannel, old_magMax); // = 1 when magChannel is max that we have seen so far
 
@@ -110,9 +99,9 @@ void streamHog::select_epi16(__m128i magChannel, __m128i old_magMax,
     gradX_max = _mm_or_si128(gradX_channel_tmp, gradX_max_tmp); //for each element, ONE of these 2 args is nonzero
     gradY_max = _mm_or_si128(gradY_channel_tmp, gradY_max_tmp); 
 
-    print_epi16(isMax, "isMax");
-    print_epi16(gradX_max_tmp, "gradX_max_tmp");
-    print_epi16(gradX_max, "gradX_max");
+    //print_epi16(isMax, "isMax");
+    //print_epi16(gradX_max_tmp, "gradX_max_tmp");
+    //print_epi16(gradX_max, "gradX_max");
 }
 
 //@param  gradX_max, gradY_max = output gradient of max channel (of the channels checked so far)

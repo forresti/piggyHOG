@@ -20,8 +20,9 @@ using namespace std;
 #define malloc_aligned(a,b) malloc(b)
 #endif
 
+void print_epi16(__m128i vec_sse, string vec_name);
 double read_timer();
-std::string forrestGetImgType(int imgTypeInt);
+//std::string forrestGetImgType(int imgTypeInt);
 
 #endif
 
