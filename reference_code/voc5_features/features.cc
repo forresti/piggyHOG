@@ -50,6 +50,8 @@ mxArray *process(const mxArray *mximage, const mxArray *mxsbin) {
   float *hist = (float *)mxCalloc(blocks[0]*blocks[1]*18, sizeof(float));
   float *norm = (float *)mxCalloc(blocks[0]*blocks[1], sizeof(float));
 
+  float *mag = (float*)mxCalloc(blocks[0]*blocks[1], sizeof(float)); //Forrest added
+    
   // memory for HOG features
   int out[3];
   out[0] = max(blocks[0]-2, 0);
@@ -94,6 +96,8 @@ mxArray *process(const mxArray *mximage, const mxArray *mxsbin) {
         dy = dy3;
       }
 
+      //mag[(x-1)*blocks[0] + (y-1)] = v; //Forrest -- log the magnitude 
+
       // snap to one of 18 orientations
       double best_dot = 0;
       int best_o = 0;
@@ -120,7 +124,7 @@ mxArray *process(const mxArray *mximage, const mxArray *mxsbin) {
       v = sqrt(v);
 
 
-      printf("weightX = %f, weightY = %f \n", vx0, vy0);
+      //printf("weightX = %f, weightY = %f \n", vx0, vy0);
 
       if (ixp >= 0 && iyp >= 0) {
         *(hist + ixp*blocks[0] + iyp + best_o*blocks[0]*blocks[1]) += 
@@ -223,6 +227,7 @@ mxArray *process(const mxArray *mximage, const mxArray *mxsbin) {
 
   mxFree(hist);
   mxFree(norm);
+  mxFree(mag);
   return mxfeat;
 }
 

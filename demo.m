@@ -9,7 +9,7 @@ function demo()
         curr_img = imgs(idx).name
         pyra = time_extract_hog(curr_img, model);
 
-        visHog(pyra)
+        %visHog(pyra)
         %print(gcf, '-dpng', '-r0', [output_dir '/' curr_img]);
     end
 
@@ -18,8 +18,8 @@ function pyra = time_extract_hog(img_name, model)
     %im = color(im);
 
     th = tic();
-    %pyra = featpyramid(double(im), model);
-    pyra = featpyramid_fhog(single(im), model);
+    pyra = featpyramid(double(im), model);
+    %pyra = featpyramid_fhog(single(im), model);
     tF = toc(th);
     fprintf('  --> HOG pyramid extraction took %f seconds\n', tF);
 

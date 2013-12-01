@@ -29,13 +29,16 @@ class streamHog{
 
     __m128i approx_atan2_bin(__m128i gradX_max, __m128i gradY_max);
 
-
     void gradient_sse(int height, int width, int stride, int n_channels_input, int n_channels_output,
                       pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag);
 
 
     void gradient_wideload_unvectorized(int height, int width, int stride, int n_channels_input, int n_channels_output,
                             pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag);
+
+    void gradient_voc5_reference(int height, int width, int stride, int n_channels_input, int n_channels_output,
+                  pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag);
+
   private:
     char ATAN2_TABLE[512][512]; //signed char (values are -18 to 18)
 

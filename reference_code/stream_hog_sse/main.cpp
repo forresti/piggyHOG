@@ -147,6 +147,7 @@ void test_streamHog_oneScale(){
     for(int i=0; i<n_iter; i++){
         //gradient_wideload_unvectorized(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
         sHog.gradient_sse(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
+        //sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data);
     }
     mag.simple_csvwrite("mag.csv");
     mag.simple_imwrite("mag.jpg");

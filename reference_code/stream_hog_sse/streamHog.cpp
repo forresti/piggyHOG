@@ -319,4 +319,67 @@ void streamHog::gradient_wideload_unvectorized(int height, int width, int stride
     }
 }
 
+//gradient code from voc-release5 DPM. (reference impl)
+void streamHog::gradient_voc5_reference(int height, int width, int stride, int n_channels_input, int n_channels_output,
+                  pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag){
+
+    for(int y=2; y<height-2; y++){
+        for(int x=2; x<width-2; x++){
+
+            int channel = 0;
+            double dx = (double)img[y*stride + (x+1) + channel*height*stride] - 
+                            (double)img[y*stride + (x-1) + channel*height*stride];
+            double dy = (double)img[(y+1)*stride + x + channel*height*stride] -
+                            (double)img[(y-1)*stride + x + channel*height*stride];
+            //double v = dx*dx + dy*dy; //max magnitude (gets updated later)
+            double v = fabs(dx) + fabs(dy);
+
+            // second color channel
+            channel=1;
+            double dx2 = (double)img[y*stride + (x+1) + channel*height*stride] -
+                            (double)img[y*stride + (x-1) + channel*height*stride];
+            double dy2 = (double)img[(y+1)*stride + x + channel*height*stride] -
+                            (double)img[(y-1)*stride + x + channel*height*stride];
+            //double v2 = dx2*dx2 + dy2*dy2;
+            double v2 = fabs(dx2) + fabs(dy2);
+
+            // third color channel
+            double dx3 = (double)img[y*stride + (x+1) + channel*height*stride] -
+                            (double)img[y*stride + (x-1) + channel*height*stride];
+            double dy3 = (double)img[(y+1)*stride + x + channel*height*stride] -
+                            (double)img[(y-1)*stride + x + channel*height*stride];
+            //double v3 = dx3*dx3 + dy3*dy3;
+            double v3 = fabs(dx3) + fabs(dy3); //Forrest's version
+
+            // pick channel with strongest gradient
+            if (v2 > v) {
+                v = v2; 
+                dx = dx2;
+                dy = dy2;
+            }     
+            if (v3 > v) {
+                v = v3; 
+                dx = dx3;
+                dy = dy3;
+            }     
+
+            // snap to one of 18 orientations
+            double best_dot = 0;
+            int best_o = 0;
+            for (int o = 0; o < 9; o++) {
+                double dot = uu[o]*dx + vv[o]*dy;
+                if (dot > best_dot) {
+                    best_dot = dot;
+                    best_o = o;
+                } else if (-dot > best_dot) {
+                    best_dot = -dot;
+                    best_o = o+9;
+                }   
+            }
+
+            outMag[y*stride + x] = v;
+            outOri[y*stride + x] = best_o; 
+        }
+    }
+}
 
