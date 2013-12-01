@@ -38,15 +38,12 @@ bool test_ori_argmax(int16_t magChannel[8],    int16_t old_magMax[8],
                       gradX_max_sse, gradY_max_sse); //grad{X,Y}_max_sse are passed by ref, so they get updated.
 
    
-    print_epi16(gradY_max_sse, "gradX_max");
-    print_epi16(gradY_max_sse, "gradY_max");
+    //print_epi16(gradY_max_sse, "gradX_max"); //TODO: get this to work w/o segfault
+    //print_epi16(gradY_max_sse, "gradY_max");
  
     //copy back passed-by-ref grad{X,Y}_max_sse
     _mm_store_si128((__m128i*)gradX_max, gradX_max_sse); //write SSE result back to scalar grad{X,Y}_max
     _mm_store_si128((__m128i*)gradY_max, gradY_max_sse);
-
-    //print_epi16(gradY_max_sse, "gradX_max");
-    //print_epi16(gradY_max_sse, "gradY_max");
 
     //check correctness
     bool isGood = true;
@@ -84,7 +81,7 @@ void reference_ori_argmax(int16_t magChannel[8],    int16_t old_magMax[8],
 //test streamHog::select_epi16(), which gets the argmax mag channel, 
 //     and stores the gradX,gradY of that argmax channel.
 bool run_tests_ori_argmax(){
-    int numFailed;
+    int numFailed=0;
 
   //test suite with 3 subtests; 1 per channel
     int16_t  magChannel0[8] = {1,2,3,4,5,6,7,8};
@@ -129,7 +126,8 @@ bool run_tests_ori_argmax(){
         }
         if(!isGood){ numFailed++; }
     }
- 
+
+    printf("number of select_epi16 tests failed: %d \n", numFailed); 
 }
 
 // MAIN TEST OF FUNCTIONALITY
