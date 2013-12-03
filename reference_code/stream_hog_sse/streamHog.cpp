@@ -174,12 +174,11 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
     _mm_store_si128( (__m128i*)(&gradY_max_unpacked[8]), gradY_max_1 ); //8:15
 
 #if 1 //real code
-
     // non-vectorized atan2 table lookup.
     for(int i=0; i<16; i++){ 
         int16_t dx = gradX_max_unpacked[i];
         int16_t dy = gradY_max_unpacked[i];
-        pixel_t ori = ATAN2_TABLE[dy+255][dx+255]; //TODO: make ATAN2_TABLE an unsigned char. verify that ATAN2_TABLE is 0-18.
+        pixel_t ori = ATAN2_TABLE[dy+255][dx+255]; //ATAN2_TABLE is 0-18. (char)
         #ifdef SCALE_ORI
             ori = ori*9; //to be more visible in output images for debugging
         #endif
@@ -265,7 +264,6 @@ void streamHog::gradient_sse(int height, int width, int stride, int n_channels_i
                 // this is using the non-sqrt approach that has proved equally accurate to mag=sqrt(gradX^2 + gradY^2)
                 mag_0_ch[channel] = _mm_add_epi16( _mm_abs_epi16(gradX_0_ch[channel]), _mm_abs_epi16(gradY_0_ch[channel]) ); // abs(gradX[0:7]) + abs(gradY[0:7])
                 mag_1_ch[channel] = _mm_add_epi16( _mm_abs_epi16(gradX_1_ch[channel]), _mm_abs_epi16(gradY_1_ch[channel]) ); // abs(gradX[8:15]) + abs(gradY[8:15])
-                mag_ch[channel]   = _mm_packs_epi16(mag_0_ch[channel], mag_1_ch[channel]);
 
                 //gradX, gradY of the argmax(magnitude) channel
                 select_epi16(mag_0_ch[channel], magMax_0, gradX_0_ch[channel], gradY_0_ch[channel], gradX_max_0, gradY_max_0); //output gradX_max_0, gradY_max_0

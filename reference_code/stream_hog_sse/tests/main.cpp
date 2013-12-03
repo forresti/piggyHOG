@@ -135,8 +135,7 @@ void test_int16_range(){
     printf("%d. int16: %d, int32: %d \n", tmp_32, tmp_16, tmp_32);
 }
 
-int main (int argc, char **argv)
-{
+void fixedpt_vs_floatpt(){
 
     //test_int16_range();
     init_atan2_constants(); //stuff for fixedpt
@@ -178,6 +177,39 @@ int main (int argc, char **argv)
 #endif
         }
     }
+}
+
+//print the lookup table, with stuff grouped by bin (look for patterns...)
+void analyze_LUT(){
+
+    int num_per_bin[19];
+
+    for(int ori=0; ori<=18; ori++){
+        num_per_bin[ori] = 0;
+
+        printf("ori bin %d \n", ori);
+        for(int dx=-255; dx <= 255; dx++){
+            for(int dy=-255; dy <= 255; dy++){
+
+                if(ATAN2_TABLE[dy+255][dx+255] == ori){
+                    printf("    ATAN2_TABLE[dy=%d][dx=%d] = %d \n", dy, dx, ATAN2_TABLE[dy+255][dx+255]);
+                    num_per_bin[ori]++;
+                } 
+            }
+        }
+    }
+
+    //TODO: print num_per_bin[0:18]
+    for(int ori=0; ori<=18; ori++){
+        printf("%d LUT entries in bin %d \n", num_per_bin[ori], ori);
+    }
+}
+
+
+int main (int argc, char **argv)
+{
+    fixedpt_vs_floatpt(); //compare voc5 floatpt, voc5 fixedpt, FFLD floatpt
+    analyze_LUT(); //look for patterns/clusters in LUT
 
     return 0;
 }
