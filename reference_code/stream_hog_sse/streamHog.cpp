@@ -11,6 +11,8 @@
 #include "helpers.h"
 using namespace std;
 
+#define SCALE_ORI //if defined, scale up the orientation (1 to 18) to make it more visible in output images for debugging
+
 //constructor
 streamHog::streamHog(){
     init_lookup_table(); //similar to FFLD hog
@@ -105,7 +107,8 @@ void streamHog::select_epi16(__m128i magChannel, __m128i old_magMax,
 }
 
 //@param  gradX_max, gradY_max = output gradient of max channel (of the channels checked so far)
-//@return histogramBin( atan2(gradY, gradX) ) -- using approx atan2
+//@return histogramBin( atan2(gradY, gradX) ) -- using approx atan2. 
+//        input and output are packed int16_t
 __m128i streamHog::approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
 
     __m128i isMax; //reset for each iteration
@@ -117,7 +120,7 @@ __m128i streamHog::approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
 
     // snap to one of 18 orientations
     for(int ori=0; ori<9; ori++){
-#if 0
+#if 1
         __m128i ori_vec = _mm_set_epi16(ori, ori, ori, ori, ori, ori, ori, ori); //copy of index for if/else in sse 
         __m128i dot = _mm_add_epi16( _mm_mullo_epi16(uu_fixedpt_epi16[ori], gradX_max),
                                      _mm_mullo_epi16(vv_fixedpt_epi16[ori], gradY_max) );
@@ -130,24 +133,28 @@ __m128i streamHog::approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
             __m128i t0 = _mm_and_si128(ori_vec, isMax); //zero out nonmaxes in ori_vec
             __m128i t1 = _mm_andnot_si128(isMax, best_ori); //in ori argmaxes, zero out newly-beaten maxes 
 
-            best_dot = _mm_or_si128(t0, t1);
+            best_ori = _mm_or_si128(t0, t1);
 
         //if(-dot > best_dot){ best_dot = -dot; best_ori = ori+9; }
         //TODO: implement -best_dot
             __m128i minus_ori_vec = _mm_add_epi16(ori_vec, nine_vec); //ori+9
-            __m128i minus_dot = _mm_mul_epi16(dot, negative_one_vec); //-dot
+            __m128i minus_dot = _mm_mullo_epi16(dot, negative_one_vec); //-dot
 
             isMax = _mm_cmpgt_epi16(minus_dot, best_dot);  //if(-dot > best_dot)
             best_dot = _mm_max_epi16(minus_dot, best_dot); //    best_dot = -dot
 
-            __m128i t0 = _mm_and_si128(minus_ori_vec, isMax); //zero out nonmaxes in ori_vec
-            __m128i t1 = _mm_andnot_si128(isMax, best_ori); //in ori argmaxes, zero out newly-beaten maxes 
+            t0 = _mm_and_si128(minus_ori_vec, isMax); //zero out nonmaxes in ori_vec
+            t1 = _mm_andnot_si128(isMax, best_ori); //in ori argmaxes, zero out newly-beaten maxes 
 
-            best_dot = _mm_or_si128(t0, t1); 
+            best_ori = _mm_or_si128(t0, t1); 
 
         //TODO: in voc5 code, check whether the 'negative ori' case NEEDS to be an "else if." (try running with just "if.") 
 #endif
     }
+
+    #ifdef SCALE_ORI
+    best_ori = _mm_mullo_epi16(best_ori, nine_vec); //TEST. scale up the ori vector...maybe it'll actually show up in pictures
+    #endif 
 
     return best_ori;
 
@@ -158,7 +165,6 @@ __m128i streamHog::approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
 //  implemented as non-vectorized atan2 table lookup. 
 // @param grad{X,Y}_max{0,1} = packed 16-bit gradients of max-mag channel
 // @param outOri_currPtr = &outOri[y*stride + x]. 
-#if 1 
 void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1, 
                               __m128i gradY_max_0, __m128i gradY_max_1, pixel_t* outOri_currPtr)
 {
@@ -180,21 +186,14 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
         int16_t dx = gradX_max_unpacked[i];
         int16_t dy = gradY_max_unpacked[i];
         pixel_t ori = ATAN2_TABLE[dy+255][dx+255]; //TODO: make ATAN2_TABLE an unsigned char. verify that ATAN2_TABLE is 0-18.
+        #ifdef SCALE_ORI
+            ori = ori*9; //to be more visible in output images for debugging
+        #endif
         outOri_currPtr[i] = ori; //outOri[y*stride + x + i] = ori;
     }
 #endif 
 
-#if 1 //stripped down benchmark
-    __m128i gradX_max = _mm_packs_epi16(gradX_max_0, gradX_max_1); //16-bit -> 8-bit. (too low precision...just a test)
-    __m128i gradY_max = _mm_packs_epi16(gradY_max_0, gradY_max_1);
-
-    __m128i gradX_plus_gradY = _mm_add_epi8(gradX_max, gradY_max); //dummy work so that grad{X,Y}_max are computed
-    //_mm_store_si128( (__m128i*)(outOri_currPtr), gradX_plus_gradY );
-
-    _mm_store_si128( (__m128i*)(outOri_currPtr), gradX_max );
-#endif
-
-#if 0 //very stripped down benchmark. (ignores the +/- overflow of 16-bit->8-bit for gradX,gradY)
+#if 1 //very stripped down benchmark. (ignores the +/- overflow of 16-bit->8-bit for gradX,gradY)
     _mm_store_si128( (__m128i*)(&gradX_max_unpacked[0]), gradX_max_0 ); //0:7
     _mm_store_si128( (__m128i*)(&gradX_max_unpacked[8]), gradX_max_1 ); //8:15
 
@@ -208,8 +207,18 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
     }
 #endif
 
-}
+#if 0 //stripped down benchmark (just enough to force the compiler to compute gradX_max and gradY_max)
+
+    __m128i gradX_max = _mm_packs_epi16(gradX_max_0, gradX_max_1); //16-bit -> 8-bit. (too low precision...just a test)
+    __m128i gradY_max = _mm_packs_epi16(gradY_max_0, gradY_max_1);
+
+    __m128i gradX_plus_gradY = _mm_add_epi8(gradX_max, gradY_max); //dummy work so that grad{X,Y}_max are computed
+    //_mm_store_si128( (__m128i*)(outOri_currPtr), gradX_plus_gradY );
+
+    _mm_store_si128( (__m128i*)(outOri_currPtr), gradX_max );
 #endif
+
+}
 
 //TODO: replace outOri with outGradX_max and outGradY_max. (after calling gradient_sse, you do a lookup table)
 //  or, just do the lookup in here...
@@ -290,9 +299,17 @@ void streamHog::gradient_sse(int height, int width, int stride, int n_channels_i
 
             magMax = _mm_packs_epi16(magMax_0, magMax_1);
             _mm_store_si128( (__m128i*)(&outMag[y*stride + x]), magMax );
-            
+           
+#if 0 //atan2 nonvectorized LUT. (not tested for correctness)
             //outOri[y*stride + x + 0:15] = atan2(gradX_max[0:15], gradY_max[0:15])
             ori_atan2_LUT(gradX_max_0, gradX_max_1, gradY_max_0, gradY_max_1, &outOri[y*stride + x]);
+#endif
+#if 1 //atan2 "snap-to ori" based on dot products, like VOC5. (not tested for correctness)
+            __m128i oriMax_0 = approx_atan2_bin(gradX_max_0, gradY_max_0); //input and output packed int16_t
+            __m128i oriMax_1 = approx_atan2_bin(gradX_max_1, gradY_max_1); 
+            __m128i oriMax = _mm_packs_epi16(oriMax_0, oriMax_1); //16-bit -> 8-bit (values are 1 to 18)
+            _mm_store_si128( (__m128i*)(&outOri[y*stride + x]), oriMax );
+#endif
         }
     }
 }
