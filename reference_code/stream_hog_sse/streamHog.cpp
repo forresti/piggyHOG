@@ -153,15 +153,15 @@ __m128i streamHog::approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
 
 }
 
-//compute orientation from {gradX_max, gradY_max}. 
-//  implemented as non-vectorized atan2 table lookup. 
-//@param grad{X,Y}_max{0,1} = packed 16-bit gradients of max-mag channel
-//@param outOri_currPtr = &outOri[y*stride + x]. 
 //outOri_currPtr[0:15] = atan2(gradX_max[0:15], gradY_max[0:15])
-#if 0
-void ori_atan2_LUT(gradX_max_0, gradX_max_, 
-                   gradY_max_0, gradY_max_1, pixel_t* outOri_currPtr); //outOri[y*stride + x + 0:15] = atan2(gradX_max[0:15], gradY_max[0:15])
-
+// compute orientation from {gradX_max, gradY_max}. 
+//  implemented as non-vectorized atan2 table lookup. 
+// @param grad{X,Y}_max{0,1} = packed 16-bit gradients of max-mag channel
+// @param outOri_currPtr = &outOri[y*stride + x]. 
+#if 1 
+void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1, 
+                              __m128i gradY_max_0, __m128i gradY_max_1, pixel_t* outOri_currPtr)
+{
     //compute orientation from {gradX_max, gradY_max}. 
     //  implemented as non-vectorized atan2 table lookup. 
     int16_t gradX_max_unpacked[16]; //unpacked 8-bit numbers
@@ -176,11 +176,11 @@ void ori_atan2_LUT(gradX_max_0, gradX_max_,
     for(int i=0; i<16; i++){ //TODO: do we need to loop over gradX and gradY independently? 
         int16_t dx = gradX_max_unpacked[i];
         int16_t dy = gradY_max_unpacked[i];
-        outOri[y*stride + x + i] = ATAN2_TABLE[dy+255][dx+255]; 
+        pixel_t ori = ATAN2_TABLE[dy+255][dx+255]; //TODO: make ATAN2_TABLE an unsigned char. verify that ATAN2_TABLE is 0-18.
+        outOri_currPtr[i] = ori; //outOri[y*stride + x + i] = ori 
     }
 }
 #endif
-
 
 //TODO: replace outOri with outGradX_max and outGradY_max. (after calling gradient_sse, you do a lookup table)
 //  or, just do the lookup in here...

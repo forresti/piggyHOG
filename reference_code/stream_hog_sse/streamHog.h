@@ -29,6 +29,9 @@ class streamHog{
 
     __m128i approx_atan2_bin(__m128i gradX_max, __m128i gradY_max);
 
+    void ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
+                       __m128i gradY_max_0, __m128i gradY_max_1, pixel_t* outOri_currPtr);
+
     void gradient_sse(int height, int width, int stride, int n_channels_input, int n_channels_output,
                       pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag);
 
