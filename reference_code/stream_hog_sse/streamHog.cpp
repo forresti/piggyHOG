@@ -167,6 +167,7 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
     int16_t gradX_max_unpacked[16]; //unpacked 8-bit numbers
     int16_t gradY_max_unpacked[16];
 
+#if 0 //real code
     _mm_store_si128( (__m128i*)(&gradX_max_unpacked[0]), gradX_max_0 ); //0:7
     _mm_store_si128( (__m128i*)(&gradX_max_unpacked[8]), gradX_max_1 ); //8:15
     _mm_store_si128( (__m128i*)(&gradY_max_unpacked[0]), gradY_max_0 ); //0:7
@@ -175,13 +176,38 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
     //pixel_t local_outOri[16];
 
     // non-vectorized atan2 table lookup.
-    for(int i=0; i<16; i++){ //TODO: do we need to loop over gradX and gradY independently? 
+    for(int i=0; i<16; i++){ 
         int16_t dx = gradX_max_unpacked[i];
         int16_t dy = gradY_max_unpacked[i];
+        pixel_t ori = ATAN2_TABLE[dy+255][dx+255]; //TODO: make ATAN2_TABLE an unsigned char. verify that ATAN2_TABLE is 0-18.
+        outOri_currPtr[i] = ori; //outOri[y*stride + x + i] = ori;
+    }
+#endif 
+
+#if 1 //stripped down benchmark
+    __m128i gradX_max = _mm_packs_epi16(gradX_max_0, gradX_max_1); //16-bit -> 8-bit. (too low precision...just a test)
+    __m128i gradY_max = _mm_packs_epi16(gradY_max_0, gradY_max_1);
+
+    __m128i gradX_plus_gradY = _mm_add_epi8(gradX_max, gradY_max); //dummy work so that grad{X,Y}_max are computed
+    //_mm_store_si128( (__m128i*)(outOri_currPtr), gradX_plus_gradY );
+
+    _mm_store_si128( (__m128i*)(outOri_currPtr), gradX_max );
+#endif
+
+#if 0 //very stripped down benchmark. (ignores the +/- overflow of 16-bit->8-bit for gradX,gradY)
+    _mm_store_si128( (__m128i*)(&gradX_max_unpacked[0]), gradX_max_0 ); //0:7
+    _mm_store_si128( (__m128i*)(&gradX_max_unpacked[8]), gradX_max_1 ); //8:15
+
+    // non-vectorized atan2 table lookup.
+    for(int i=0; i<16; i++){ 
+        int16_t dx = gradX_max_unpacked[i];
+        //int16_t dy = gradY_max_unpacked[i];
         //pixel_t ori = ATAN2_TABLE[dy+255][dx+255]; //TODO: make ATAN2_TABLE an unsigned char. verify that ATAN2_TABLE is 0-18.
         //outOri_currPtr[i] = ori; //outOri[y*stride + x + i] = ori;
-        outOri_currPtr[i] = dx+dy; //test
+        outOri_currPtr[i] = dx;
     }
+#endif
+
 }
 #endif
 
