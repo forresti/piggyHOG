@@ -178,8 +178,9 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
     for(int i=0; i<16; i++){ //TODO: do we need to loop over gradX and gradY independently? 
         int16_t dx = gradX_max_unpacked[i];
         int16_t dy = gradY_max_unpacked[i];
-        pixel_t ori = ATAN2_TABLE[dy+255][dx+255]; //TODO: make ATAN2_TABLE an unsigned char. verify that ATAN2_TABLE is 0-18.
-        outOri_currPtr[i] = ori; //outOri[y*stride + x + i] = ori 
+        //pixel_t ori = ATAN2_TABLE[dy+255][dx+255]; //TODO: make ATAN2_TABLE an unsigned char. verify that ATAN2_TABLE is 0-18.
+        //outOri_currPtr[i] = ori; //outOri[y*stride + x + i] = ori;
+        outOri_currPtr[i] = dx+dy; //test
     }
 }
 #endif
@@ -263,7 +264,7 @@ void streamHog::gradient_sse(int height, int width, int stride, int n_channels_i
 
             magMax = _mm_packs_epi16(magMax_0, magMax_1);
             _mm_store_si128( (__m128i*)(&outMag[y*stride + x]), magMax );
-
+            
             //outOri[y*stride + x + 0:15] = atan2(gradX_max[0:15], gradY_max[0:15])
             ori_atan2_LUT(gradX_max_0, gradX_max_1, gradY_max_0, gradY_max_1, &outOri[y*stride + x]);
         }
