@@ -137,10 +137,6 @@ void test_int16_range(){
 
 void fixedpt_vs_floatpt(){
 
-    //test_int16_range();
-    init_atan2_constants(); //stuff for fixedpt
-    init_lookup_table();    
-
   //floating-pt "best ori bin" experiment
     int* ori_best_bin_floatpt = (int*)malloc(512*512 * sizeof(int));
     float* ori_dot_floatpt = (float*)malloc(512*512*18 * sizeof(float));
@@ -205,10 +201,29 @@ void analyze_LUT(){
     }
 }
 
+//for printing LUT
+void writeCsv_LUT(char LUT[512][512], int nRows, int nCols, string fname)
+{
+    ofstream myfile;
+    myfile.open(fname.c_str());
+    for(int row=0; row<nRows; row++){
+        for(int col=0; col<(nCols-1); col++){
+            myfile << (int)LUT[row][col] << ","; //row=dy, col=dx
+        }
+        myfile << (int)LUT[row][nCols-1] << "\n"; //don't put a ',' after final element on a CSV line
+    }
+    myfile.close();
+}
 
 int main (int argc, char **argv)
 {
-    fixedpt_vs_floatpt(); //compare voc5 floatpt, voc5 fixedpt, FFLD floatpt
+    //test_int16_range();
+    init_atan2_constants(); //stuff for fixedpt
+    init_lookup_table();
+    
+    writeCsv_LUT(ATAN2_TABLE, 512, 512,  "LUT_FFLD.csv"); //save the FFLD ATAN2 LUT (for visualization in matlab/python)
+
+    //fixedpt_vs_floatpt(); //compare voc5 floatpt, voc5 fixedpt, FFLD floatpt
     analyze_LUT(); //look for patterns/clusters in LUT
 
     return 0;

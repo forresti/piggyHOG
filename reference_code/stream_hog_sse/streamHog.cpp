@@ -179,6 +179,7 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
         int16_t dx = gradX_max_unpacked[i];
         int16_t dy = gradY_max_unpacked[i];
         pixel_t ori = ATAN2_TABLE[dy+255][dx+255]; //ATAN2_TABLE is 0-18. (char)
+        //pixel_t ori = ATAN2_TABLE[ (dy>>1) + 255 ][ (dx>>1) + 255 ]; //test LUT quantization -- looks fine.
         #ifdef SCALE_ORI
             ori = ori*9; //to be more visible in output images for debugging
         #endif
