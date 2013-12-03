@@ -174,7 +174,7 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
     _mm_store_si128( (__m128i*)(&gradY_max_unpacked[8]), gradY_max_1 ); //8:15
 
 
-#if 0 //real code
+#if 1 //real code
 
     // non-vectorized atan2 table lookup.
     for(int i=0; i<16; i++){ 
@@ -188,7 +188,7 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
     }
 #endif 
 
-#if 1 //very stripped down benchmark. (ignores the +/- overflow of 16-bit->8-bit for gradX,gradY)
+#if 0 //very stripped down benchmark. (ignores the +/- overflow of 16-bit->8-bit for gradX,gradY)
 
     for(int i=0; i<16; i++){ 
         int16_t dx = gradX_max_unpacked[i];
