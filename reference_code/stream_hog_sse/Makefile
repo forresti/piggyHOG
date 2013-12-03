@@ -7,7 +7,7 @@ EXENAME = main
 
 #on sandy bridge, -march=native gives me -mavx -msse2avx
 CC = g++
-CCOPTS = -c  -g -O3 `pkg-config opencv --cflags` -msse -ffast-math -fopenmp -mssse3 
+CCOPTS = -c  -g -O3 `pkg-config opencv --cflags` -msse -ffast-math -fopenmp -mssse3 -mavx -msse2avx 
 LINK = g++
 LINKOPTS = `pkg-config opencv --libs` -lgomp
 
