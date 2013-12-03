@@ -173,7 +173,7 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
     int16_t gradX_max_unpacked[16]; //unpacked 8-bit numbers
     int16_t gradY_max_unpacked[16];
 
-#if 0 //real code
+#if 1 //real code
     _mm_store_si128( (__m128i*)(&gradX_max_unpacked[0]), gradX_max_0 ); //0:7
     _mm_store_si128( (__m128i*)(&gradX_max_unpacked[8]), gradX_max_1 ); //8:15
     _mm_store_si128( (__m128i*)(&gradY_max_unpacked[0]), gradY_max_0 ); //0:7
@@ -193,7 +193,7 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
     }
 #endif 
 
-#if 1 //very stripped down benchmark. (ignores the +/- overflow of 16-bit->8-bit for gradX,gradY)
+#if 0 //very stripped down benchmark. (ignores the +/- overflow of 16-bit->8-bit for gradX,gradY)
     _mm_store_si128( (__m128i*)(&gradX_max_unpacked[0]), gradX_max_0 ); //0:7
     _mm_store_si128( (__m128i*)(&gradX_max_unpacked[8]), gradX_max_1 ); //8:15
 
@@ -249,7 +249,7 @@ void streamHog::gradient_sse(int height, int width, int stride, int n_channels_i
     __m128i magMax, magMax_0, magMax_1; //packed 8-bit, bottom bits, top bits
     //__m128i magIsArgmax_0_ch[3], magIsArgmax_1_ch[3]; //bottom bits, top bits. boolean bitmask for "is this channel the mag argmax?"
 
-    for(int y=2; y<height-2; y++){
+    for(int y=0; y<height-2; y++){
         for(int x=0; x < stride-2; x+=loadSize){ //(stride-2) to avoid falling off the end when doing (location+2) to get xHi
 
             magMax = magMax_0 = magMax_1 = _mm_setzero_si128();
