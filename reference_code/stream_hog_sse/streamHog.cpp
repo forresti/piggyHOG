@@ -11,7 +11,7 @@
 #include "helpers.h"
 using namespace std;
 
-//#define SCALE_ORI //if defined, scale up the orientation (1 to 18) to make it more visible in output images for debugging
+#define SCALE_ORI //if defined, scale up the orientation (1 to 18) to make it more visible in output images for debugging
 
 //constructor
 streamHog::streamHog(){
@@ -168,7 +168,7 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
     int16_t gradX_max_unpacked[16]; //unpacked 8-bit numbers
     int16_t gradY_max_unpacked[16];
 
-#if 1 //real code
+#if 0 //real code
     _mm_store_si128( (__m128i*)(&gradX_max_unpacked[0]), gradX_max_0 ); //0:7
     _mm_store_si128( (__m128i*)(&gradX_max_unpacked[8]), gradX_max_1 ); //8:15
     _mm_store_si128( (__m128i*)(&gradY_max_unpacked[0]), gradY_max_0 ); //0:7
@@ -194,12 +194,13 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
 
     for(int i=0; i<16; i++){ 
         int16_t dx = gradX_max_unpacked[i];
-        //int16_t dy = gradY_max_unpacked[i];
-        outOri_currPtr[i] = dx;
+        int16_t dy = gradY_max_unpacked[i];
+        //outOri_currPtr[i] = dx;
+        outOri_currPtr[i] = dx + dy;
     }
 #endif
 
-#if 0 //stripped down benchmark (just enough to force the compiler to compute gradX_max and gradY_max)
+#if 1 //stripped down benchmark (just enough to force the compiler to compute gradX_max and gradY_max)
 
     __m128i gradX_max = _mm_packs_epi16(gradX_max_0, gradX_max_1); //16-bit -> 8-bit. (too low precision...just a test)
     __m128i gradY_max = _mm_packs_epi16(gradY_max_0, gradY_max_1);
