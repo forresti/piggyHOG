@@ -43,7 +43,7 @@ class streamHog{
                   pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag);
 
   private:
-    unsigned char ATAN2_TABLE[512][512]; //signed char (values are 0 to 18)
+    char ATAN2_TABLE[512][512]; // values are 0 to 18
 
     // unit vectors used to compute gradient orientation (initialized in init_atan2_constants(), which is called in the constructor)
     //double  uu[9] = {1.0000, 0.9397, 0.7660, 0.500, 0.1736, -0.1736, -0.5000, -0.7660, -0.9397};
