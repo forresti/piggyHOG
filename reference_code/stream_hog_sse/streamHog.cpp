@@ -172,6 +172,8 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
     _mm_store_si128( (__m128i*)(&gradY_max_unpacked[0]), gradY_max_0 ); //0:7
     _mm_store_si128( (__m128i*)(&gradY_max_unpacked[8]), gradY_max_1 ); //8:15
 
+    //pixel_t local_outOri[16];
+
     // non-vectorized atan2 table lookup.
     for(int i=0; i<16; i++){ //TODO: do we need to loop over gradX and gradY independently? 
         int16_t dx = gradX_max_unpacked[i];
@@ -255,16 +257,15 @@ void streamHog::gradient_sse(int height, int width, int stride, int n_channels_i
                 gradX_ch[channel] = _mm_packs_epi16(gradX_0_ch[channel], gradX_1_ch[channel]); //16-bit -> 8bit (temporary ... typically, we'd pack up the results later in the pipeline)
                 gradY_ch[channel] = _mm_packs_epi16(gradY_0_ch[channel], gradY_1_ch[channel]); //temporary ... typically, we'd pack up the results later in the pipeline.
 
-                _mm_store_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+15] = gradX_ch[channel] -- just a test, doesnt make much sense
-                //_mm_store_si128( (__m128i*)(&outMag[y*stride + x]), gradY_ch[channel] ); //aligned stores are easy here...it's all divisible by loadSize.
+                //_mm_store_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+15] = gradX_ch[channel] -- just a test, doesnt make much sense
                 //_mm_store_si128( (__m128i*)(&outMag[y*stride + x]), mag_ch[channel] );
             }
 
             magMax = _mm_packs_epi16(magMax_0, magMax_1);
             _mm_store_si128( (__m128i*)(&outMag[y*stride + x]), magMax );
 
-            //TODO: call ori_atan2_LUT() here
-            //ori_atan2_LUT(TODO); //outOri[y*stride + x + 0:15] = atan2(gradX_max[0:15], gradY_max[0:15])
+            //outOri[y*stride + x + 0:15] = atan2(gradX_max[0:15], gradY_max[0:15])
+            ori_atan2_LUT(gradX_max_0, gradX_max_1, gradY_max_0, gradY_max_1, &outOri[y*stride + x]);
         }
     }
 }
