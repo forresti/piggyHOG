@@ -405,10 +405,11 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
                 //*(hist + ixp*imgHeight + iyp + best_o*imgHeight*imgWidth) +=
                 //    vx1*vy1*v;
 
-                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + best_o] += vx1*vy1*v;
-
+                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + best_o] += vx1*vy1*v;
+                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + best_o] += v; //test
             } 
 
+#if 0
             if (ixp+1 < imgWidth && iyp >= 0) { 
                 //*(hist + (ixp+1)*imgHeight + iyp + best_o*imgHeight*imgWidth) +=
                 //    vx0*vy1*v;
@@ -429,6 +430,7 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
 
                 outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + best_o] += vx0*vy0*v;
             } 
+#endif
         }
     }
 }
