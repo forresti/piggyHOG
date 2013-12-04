@@ -146,10 +146,10 @@ float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin,
 void test_streamHog_oneScale(){
     streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
 
-    int sbin = 8;
+    int sbin = 4;
 
     int ALIGN_IN_BYTES = 256;
-    int n_iter = 1000; //not really "iterating" -- just number of times to run the experiment
+    int n_iter = 200; //not really "iterating" -- just number of times to run the experiment
     if(n_iter < 100){
         printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=100 or greater. \n", n_iter);
     }
@@ -182,7 +182,7 @@ void test_streamHog_oneScale(){
   //hist = computeCells(mag, ori, sbin)
     start_timer = read_timer();
 
-    //TODO: figure out how to test voc5 vs streamHog computeCells().
+    //TODO: figure out how to test correctness: voc5 vs streamHog computeCells().
     for(int i=0; i<n_iter; i++){
         //ori and mag both have size {img.height, img.width} 
         sHog.computeCells_voc5_reference(img.height, img.width, img.stride, sbin,
@@ -191,7 +191,8 @@ void test_streamHog_oneScale(){
     }
 
     stream_time = (read_timer() - start_timer) / n_iter;
-    gb_to_copy = img.width * img.height * img.n_channels * sizeof(pixel_t) / 1e9;
+    int hogDepth = 32;
+    gb_to_copy = hogWidth * hogHeight * hogDepth * sizeof(float) / 1e9; //TODO: change 'float' to new data type if necessary
     gb_per_sec = gb_to_copy / (stream_time/1000); //convert stream_time from ms to sec
     printf("avg hogCell stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec);
 
