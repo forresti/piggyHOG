@@ -11,7 +11,7 @@
 #include "helpers.h"
 using namespace std;
 
-#define SCALE_ORI //if defined, scale up the orientation (1 to 18) to make it more visible in output images for debugging
+//#define SCALE_ORI //if defined, scale up the orientation (1 to 18) to make it more visible in output images for debugging
 
 //constructor
 streamHog::streamHog(){
@@ -438,9 +438,9 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
             float vx1 = 1.0-vx0;
             float vy1 = 1.0-vy0;
 
-            if(ixp < 0 || iyp < 0){
-                printf("x=%d, y=%d, ixp=%d, iyp=%d \n", x, y, ixp, iyp);
-            }
+            //if(ixp < 0 || iyp < 0){
+            //    printf("x=%d, y=%d, ixp=%d, iyp=%d \n", x, y, ixp, iyp);
+            //}
 
             if (ixp >= 0 && iyp >= 0) 
             { 
@@ -516,16 +516,13 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             float vx1 = 1.0-vx0;
             float vy1 = 1.0-vy0;
 #endif
-            //TODO: avoid multiple computations of x%sbin?
-            int x_mod_sbin = x%sbin;
-            int y_mod_sbin = y%sbin;
-
-            int ixp = ipos_LUT[x_mod_sbin] + x*sbin_inverse;
-            int iyp = ipos_LUT[y_mod_sbin] + y*sbin_inverse;
-            float vx0 = v0_LUT[x_mod_sbin];
-            float vy0 = v0_LUT[y_mod_sbin];
-            float vx1 = v1_LUT[x_mod_sbin];
-            float vy1 = v1_LUT[y_mod_sbin];
+            //TODO: test my LUT ixp vs. VOC5 ixp. (should be correct, but should make sure 
+            int ixp = ipos_LUT[x%sbin] + x*sbin_inverse;
+            int iyp = ipos_LUT[y%sbin] + y*sbin_inverse;
+            float vx0 = v0_LUT[x%sbin];
+            float vy0 = v0_LUT[y%sbin];
+            float vx1 = v1_LUT[x%sbin];
+            float vy1 = v1_LUT[y%sbin];
 
             int x_hist = x*0.25f; //test
             int y_hist = y*0.25f;
@@ -535,11 +532,23 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
                 //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + 0] = curr_mag; //simple benchmark [2.6 GB/s = .91ms on laptop]
                 //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + curr_ori] = curr_mag; //[2.1 GB/s = 1.15ms on laptop]
                 //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + 0] = curr_mag*vx1*vy1;
-                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] = vx1*vy1*curr_mag;
+                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += curr_mag;
+                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx1*vy1*curr_mag;
             }
             //outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
             //outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
             //outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
+
+            //DEBUG printfs.
+            float my_outHist_element = outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori];
+            if(my_outHist_element > 100000){
+                printf("outHist[ixp=%d][iyp=%d][curr_ori=%d] = %f \n", ixp, iyp, curr_ori, my_outHist_element);
+            }
+    
+            if(curr_mag > 512){
+                printf("mag[x=%d][y=%d] = %d \n", x, y, curr_mag);
+            }
+
         }
     } 
 }
