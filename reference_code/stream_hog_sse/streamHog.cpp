@@ -527,29 +527,33 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             int x_hist = x*0.25f; //test
             int y_hist = y*0.25f;
 
-            ixp = max(0, ixp); //temporary
+            //temporary: (will do something more clever later) -- this is SLOW and not quite right at edges
+            ixp = max(0, ixp);
             iyp = max(0, iyp);
+            ixp = min(ixp, outHistWidth-2);
+            iyp = min(iyp, outHistHeight-2);
 
+          //the actual computation:
             //if (ixp >= 0 && iyp >= 0) //this is expensive. 
             {
                 //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + 0] = curr_mag; //simple benchmark [2.6 GB/s = .91ms on laptop]
                 //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + curr_ori] = curr_mag; //[2.1 GB/s = 1.15ms on laptop]
                 //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + 0] = curr_mag*vx1*vy1;
                 //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += curr_mag;
-                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx1*vy1*curr_mag;
+                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx1*vy1*curr_mag;
             }
-            //outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
-            //outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
-            //outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
+//            outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
+//            outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
+//            outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
 
             //DEBUG printfs.
             float my_outHist_element = outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori];
-            if(my_outHist_element > 100000){
-                printf("outHist[ixp=%d][iyp=%d][curr_ori=%d] = %f \n", ixp, iyp, curr_ori, my_outHist_element);
+            if(my_outHist_element > 512){
+//                printf("outHist[ixp=%d][iyp=%d][curr_ori=%d] = %f \n", ixp, iyp, curr_ori, my_outHist_element);
             }
     
             if(curr_mag > 512){
-                printf("mag[x=%d][y=%d] = %d \n", x, y, curr_mag);
+//                printf("mag[x=%d][y=%d] = %d \n", x, y, curr_mag);
             }
         }
     } 
