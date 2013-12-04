@@ -305,8 +305,8 @@ void streamHog::gradient_sse(int height, int width, int stride, int n_channels_i
 void streamHog::gradient_voc5_reference(int height, int width, int stride, int n_channels_input, int n_channels_output,
                   pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag){
 
-    for(int y=2; y<height-2; y++){
-        for(int x=2; x<width-2; x++){
+    for(int y=1; y<height-1; y++){
+        for(int x=1; x<width-1; x++){
 
             int channel = 0;
             double dx = (double)img[y*stride + (x+1) + channel*height*stride] - 
@@ -359,9 +359,57 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
                 }   
             }
 
+            #ifdef SCALE_ORI
+            best_o = best_o * 9;
+            #endif
+
             outMag[y*stride + x] = v;
             outOri[y*stride + x] = best_o; 
         }
     }
+}
+
+//gradient code from voc-release5 DPM. (reference impl)
+//  TODO: rearrange for the following out dims:
+//assumed output dimensions: outHist[imgHeight/sbin][imgWidth/sbin][hogDepth=32]. row major (like piggyHOG).
+//  output stride = output width. (because we already have 32-dimensional features as the inner dimension)
+void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int imgStride, 
+                                            pixel_t *__restrict__ ori, pixel_t *__restrict__ mag,
+                                            pixel_t *__restrict__ outHist){
+
+#if 0
+        {   
+            // add to 4 histograms around pixel using linear interpolation
+            double xp = ((double)x+0.5)/(double)sbin - 0.5;
+            double yp = ((double)y+0.5)/(double)sbin - 0.5;
+            int ixp = (int)floor(xp);
+            int iyp = (int)floor(yp);
+            double vx0 = xp-ixp;
+            double vy0 = yp-iyp;
+            double vx1 = 1.0-vx0;
+            double vy1 = 1.0-vy0;
+            //v = sqrt(v); //Forrest -- no longer need to sqrt the magnitude
+
+            if (ixp >= 0 && iyp >= 0) { 
+                *(hist + ixp*blocks[0] + iyp + best_o*blocks[0]*blocks[1]) +=
+                    vx1*vy1*v;
+            } 
+
+            if (ixp+1 < blocks[1] && iyp >= 0) { 
+                *(hist + (ixp+1)*blocks[0] + iyp + best_o*blocks[0]*blocks[1]) +=
+                    vx0*vy1*v;
+            } 
+
+            if (ixp >= 0 && iyp+1 < blocks[0]) { 
+                *(hist + ixp*blocks[0] + (iyp+1) + best_o*blocks[0]*blocks[1]) +=
+                    vx1*vy0*v;
+            } 
+
+            if (ixp+1 < blocks[1] && iyp+1 < blocks[0]) { 
+                *(hist + (ixp+1)*blocks[0] + (iyp+1) + best_o*blocks[0]*blocks[1]) +=
+                    vx0*vy0*v;
+            } 
+        }
+#endif
 }
 
