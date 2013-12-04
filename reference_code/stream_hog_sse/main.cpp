@@ -135,6 +135,9 @@ void test_streamHog_oneScale(){
 
     int ALIGN_IN_BYTES = 256;
     int n_iter = 1000; //not really "iterating" -- just number of times to run the experiment
+    if(n_iter < 100){
+        printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=100 or greater. \n", n_iter);
+    }
     //int stride = width + (ALIGN_IN_BYTES - width%ALIGN_IN_BYTES); //thanks: http://stackoverflow.com/questions/2403631
     //SimpleImg img(height, width, stride, n_channels);
 
@@ -149,18 +152,15 @@ void test_streamHog_oneScale(){
         sHog.gradient_sse(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
         //sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data);
     }
-    mag.simple_csvwrite("mag.csv");
-    mag.simple_imwrite("mag.jpg");
-    ori.simple_imwrite("ori.jpg");
 
     double stream_time = (read_timer() - start_timer) / n_iter;
     double gb_to_copy = img.width * img.height * img.n_channels * sizeof(pixel_t) / 1e9;
     double gb_per_sec = gb_to_copy / (stream_time/1000); //convert stream_time from ms to sec
     printf("avg stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec);
 
-    if(n_iter < 100){
-        printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=100 or greater. \n", n_iter);
-    }
+    //mag.simple_csvwrite("mag.csv");
+    mag.simple_imwrite("mag.jpg");
+    ori.simple_imwrite("ori.jpg");
 }
 
 int main (int argc, char **argv)
