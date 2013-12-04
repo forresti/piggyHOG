@@ -36,8 +36,8 @@ class streamHog{
                       pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag);
 
 
-    void gradient_wideload_unvectorized(int height, int width, int stride, int n_channels_input, int n_channels_output,
-                            pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag);
+    //void gradient_wideload_unvectorized(int height, int width, int stride, int n_channels_input, int n_channels_output,
+    //                        pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag);
 
     void gradient_voc5_reference(int height, int width, int stride, int n_channels_input, int n_channels_output,
                   pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag);
