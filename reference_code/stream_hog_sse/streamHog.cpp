@@ -533,7 +533,7 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
                 //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + curr_ori] = curr_mag; //[2.1 GB/s = 1.15ms on laptop]
                 //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + 0] = curr_mag*vx1*vy1;
                 //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += curr_mag;
-                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx1*vy1*curr_mag;
+                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx1*vy1*curr_mag;
             }
             //outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
             //outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;

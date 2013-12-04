@@ -150,7 +150,7 @@ void test_streamHog_oneScale(){
     int sbin = 4;
 
     int ALIGN_IN_BYTES = 256;
-    int n_iter = 200; //not really "iterating" -- just number of times to run the experiment
+    int n_iter = 1; //not really "iterating" -- just number of times to run the experiment
     if(n_iter < 100){
         printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=100 or greater. \n", n_iter);
     }
