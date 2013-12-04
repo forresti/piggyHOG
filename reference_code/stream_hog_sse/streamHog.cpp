@@ -15,12 +15,44 @@ using namespace std;
 
 //constructor
 streamHog::streamHog(){
-    init_lookup_table(); //similar to FFLD hog
+    init_atan2_LUT(); //similar to FFLD hog
     init_atan2_constants(); //easier to vectorize alternative to lookup table. (similar to VOC5 hog)
+    init_lerp_LUT();
 }
 
 //destructor
 streamHog::~streamHog(){ }
+
+//linear interpolation multipliers
+void streamHog::init_lerp_LUT(){
+
+    int sbin=4;
+
+    //for(int i=0; i<sbin; i++)
+    for(int i=0; i<50; i++)
+    {
+        float lerpMult_voc5 = ((float)i+0.5)/(float)sbin - 0.5;
+        float lerpMult_ours_base = ((float)(i%sbin)+0.5)/(float)sbin - 0.5;
+        float lerpMult_ours = lerpMult_ours_base + i/sbin;
+
+        //LERP_TABLE[i] = lerpMult;
+        //printf("    LERP_TABLE[%d] = %f \n", i, lerpMult);
+        printf("    lerp_voc5[%d] = %f, lerp_base[%d] = %f, lerp_ours[%d] = %f \n", i, lerpMult_voc5, i, lerpMult_ours_base, i, lerpMult_ours);
+    } 
+
+
+#if 0
+    float xp = ((float)x+0.5)/(float)sbin - 0.5; //this is expensive (replacing it with 'x/4' gives a 1.5x speedup in hogCell)
+    float yp = ((float)y+0.5)/(float)sbin - 0.5;
+    int ixp = (int)floor(xp);
+    int iyp = (int)floor(yp);
+    float vx0 = xp-ixp;
+    float vy0 = yp-iyp;
+    float vx1 = 1.0-vx0;
+    float vy1 = 1.0-vy0;
+#endif    
+
+}
 
 //stuff for approximate vectorized atan2
 void streamHog::init_atan2_constants(){
@@ -41,7 +73,7 @@ void streamHog::init_atan2_constants(){
 }
 
 //TODO: make this much smaller than 512x512.
-void streamHog::init_lookup_table(){
+void streamHog::init_atan2_LUT(){
     for (int dy = -255; dy <= 255; ++dy) { //pixels are 0 to 255, so gradient values are -255 to 255
         for (int dx = -255; dx <= 255; ++dx) {
             // Angle in the range [-pi, pi]

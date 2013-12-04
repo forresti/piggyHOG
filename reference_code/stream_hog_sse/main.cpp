@@ -186,13 +186,13 @@ void test_streamHog_oneScale(){
     for(int i=0; i<n_iter; i++){
         //ori and mag both have size {img.height, img.width}
  
-        sHog.computeCells_voc5_reference(img.height, img.width, img.stride, sbin,
-                                         ori.data, mag.data, 
-                                         hogHeight, hogWidth, hogBuffer); 
+//        sHog.computeCells_voc5_reference(img.height, img.width, img.stride, sbin,
+//                                         ori.data, mag.data, 
+//                                         hogHeight, hogWidth, hogBuffer); 
 
-//        sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
-//                                 ori.data, mag.data,
-//                                 hogHeight, hogWidth, hogBuffer);
+        sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
+                                 ori.data, mag.data,
+                                 hogHeight, hogWidth, hogBuffer);
     }
 
     stream_time = (read_timer() - start_timer) / n_iter;

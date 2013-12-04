@@ -16,7 +16,8 @@ class streamHog{
     ~streamHog();
 
     void init_atan2_constants();
-    void init_lookup_table();
+    void init_atan2_LUT();
+    void init_lerp_LUT();
 
     //enables us to load 8-bit values, but work in 16-bit. 
     void upcast_8bit_to_16bit(__m128i in_xLo,     __m128i in_xHi,     __m128i in_yLo,     __m128i in_yHi,
