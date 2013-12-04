@@ -392,8 +392,10 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
             int v = mag[y*imgStride + x]; //upcast to int
 
             // add to 4 histograms around pixel using linear interpolation
-            float xp = ((float)x+0.5)/(float)sbin - 0.5;
+            float xp = ((float)x+0.5)/(float)sbin - 0.5; //this is expensive (replacing it with 'x/4' gives a 1.5x speedup in hogCell)
             float yp = ((float)y+0.5)/(float)sbin - 0.5;
+            //float xp = x/4; //TEST
+            //float yp = y/4;
             int ixp = (int)floor(xp);
             int iyp = (int)floor(yp);
             float vx0 = xp-ixp;
@@ -401,34 +403,30 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
             float vx1 = 1.0-vx0;
             float vy1 = 1.0-vy0;
 
-            //if (ixp >= 0 && iyp >= 0) 
+            if (ixp >= 0 && iyp >= 0) 
             { 
-                //*(hist + ixp*imgHeight + iyp + best_o*imgHeight*imgWidth) +=
-                //    vx1*vy1*v;
+                //*(hist + ixp*imgHeight + iyp + best_o*imgHeight*imgWidth) += vx1*vy1*v; //from VOC5
 
-                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + best_o] += vx1*vy1*v;
-                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + best_o] += v; //test -- avoid multiplying by weights
-                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth] += v; //test -- always use bin 0
+                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + best_o] += vx1*vy1*v; //[5.6ms on laptop, 640x480, 1 level, sbin=4, only accumulate to 1 cell]
+                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + best_o] += v; //test -- avoid multiplying by weights [5.5ms on laptop]
+                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth] += v; //test -- always use bin 0. [3.2ms on laptop]
             } 
 
-#if 0
+#if 1
             if (ixp+1 < imgWidth && iyp >= 0) { 
-                //*(hist + (ixp+1)*imgHeight + iyp + best_o*imgHeight*imgWidth) +=
-                //    vx0*vy1*v;
+                //*(hist + (ixp+1)*imgHeight + iyp + best_o*imgHeight*imgWidth) += vx0*vy1*v;
 
                 outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + best_o] += vx0*vy1*v;
             } 
 
             if (ixp >= 0 && iyp+1 < imgHeight) { 
-                //*(hist + ixp*imgHeight + (iyp+1) + best_o*imgHeight*imgWidth) +=
-                //    vx1*vy0*v;
+                //*(hist + ixp*imgHeight + (iyp+1) + best_o*imgHeight*imgWidth) += vx1*vy0*v;
 
                 outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + best_o] += vx1*vy0*v;
             } 
 
             if (ixp+1 < imgWidth && iyp+1 < imgHeight) { 
-                //*(hist + (ixp+1)*imgHeight + (iyp+1) + best_o*imgHeight*imgWidth) +=
-                //    vx0*vy0*v;
+                //*(hist + (ixp+1)*imgHeight + (iyp+1) + best_o*imgHeight*imgWidth) += vx0*vy0*v;
 
                 outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + best_o] += vx0*vy0*v;
             } 
@@ -442,12 +440,16 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
                                     pixel_t *__restrict__ ori, pixel_t *__restrict__ mag,
                                     int outHistHeight, int outHistWidth,
                                     float *__restrict__ outHist){
+
+    const int hogDepth = 32;
+
     for(int y=0; y<imgHeight-2; y++){
         for(int x=0; x < imgWidth-2; x++){
             int curr_ori = ori[y*imgStride + x]; //orientation bin -- upcast to int
             int curr_mag = mag[y*imgStride + x]; //upcast to int
 
-            //outHist[x*hogDepth = y*outHistWidth
+
+            outHist[x*hogDepth + y*outHistWidth*hogDepth + 0] = curr_mag; //simple benchmark [2.4 GB/s = 0.98ms on laptop]
         }
     } 
 }
