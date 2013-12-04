@@ -17,7 +17,7 @@ using namespace std;
 streamHog::streamHog(){
     init_atan2_LUT(); //similar to FFLD hog
     init_atan2_constants(); //easier to vectorize alternative to lookup table. (similar to VOC5 hog)
-    init_lerp_LUT();
+    //init_lerp_LUT();
 }
 
 //destructor
@@ -417,6 +417,7 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
     //TODO: have mag as an int16_t instead of a uchar. 
 
     const int hogDepth = 32;
+    float sbin_inverse = 1.0f / (float)sbin;
 
     for(int y=1; y<imgHeight-1; y++){
         for(int x=1; x<imgWidth-1; x++){
@@ -424,10 +425,12 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
             int v = mag[y*imgStride + x]; //upcast to int
 
             // add to 4 histograms around pixel using linear interpolation
-            float xp = ((float)x+0.5)/(float)sbin - 0.5; //this is expensive (replacing it with 'x/4' gives a 1.5x speedup in hogCell)
-            float yp = ((float)y+0.5)/(float)sbin - 0.5;
+            //float xp = ((float)x+0.5)/(float)sbin - 0.5; //this is expensive (replacing it with 'x/4' gives a 1.5x speedup in hogCell)
+            //float yp = ((float)y+0.5)/(float)sbin - 0.5;
             //float xp = x/4; //TEST
             //float yp = y/4;
+            float xp = ((float)x+0.5)*sbin_inverse - 0.5;
+            float yp = ((float)y+0.5)*sbin_inverse - 0.5;
             int ixp = (int)floor(xp);
             int iyp = (int)floor(yp);
             float vx0 = xp-ixp;
