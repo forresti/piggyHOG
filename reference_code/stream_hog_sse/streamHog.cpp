@@ -401,12 +401,14 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
             float vx1 = 1.0-vx0;
             float vy1 = 1.0-vy0;
 
-            if (ixp >= 0 && iyp >= 0) { 
+            //if (ixp >= 0 && iyp >= 0) 
+            { 
                 //*(hist + ixp*imgHeight + iyp + best_o*imgHeight*imgWidth) +=
                 //    vx1*vy1*v;
 
                 //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + best_o] += vx1*vy1*v;
-                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + best_o] += v; //test
+                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + best_o] += v; //test -- avoid multiplying by weights
+                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth] += v; //test -- always use bin 0
             } 
 
 #if 0
