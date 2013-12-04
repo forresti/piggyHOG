@@ -43,6 +43,10 @@ class streamHog{
                                      int outHistHeight, int outHistWidth,
                                      float *__restrict__ outHist);
 
+    void computeCells_stream(int imgHeight, int imgWidth, int imgStride, int sbin,
+                             pixel_t *__restrict__ ori, pixel_t *__restrict__ mag,
+                             int outHistHeight, int outHistWidth,
+                             float *__restrict__ outHist);
   private:
     char ATAN2_TABLE[512][512]; // values are 0 to 18
 
