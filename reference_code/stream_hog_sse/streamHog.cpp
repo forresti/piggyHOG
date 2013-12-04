@@ -376,7 +376,7 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
 //  output stride = output width. (because we already have 32-dimensional features as the inner dimension)
 void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int imgStride, int sbin, 
                                             pixel_t *__restrict__ ori, pixel_t *__restrict__ mag,
-                                            int outHistHeight, int outHeightWidth,
+                                            int outHistHeight, int outHistWidth,
                                             float *__restrict__ outHist){
 
     assert(outHistHeight == round(imgHeight/sbin));
@@ -391,7 +391,7 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
             int best_o = ori[y*imgStride + x]; //orientation bin -- upcast to int
             int v = mag[y*imgStride + x]; //upcast to int
 
-#if 0
+#if 1
             // add to 4 histograms around pixel using linear interpolation
             double xp = ((double)x+0.5)/(double)sbin - 0.5;
             double yp = ((double)y+0.5)/(double)sbin - 0.5;
@@ -413,16 +413,19 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
             if (ixp+1 < imgWidth && iyp >= 0) { 
 //                *(hist + (ixp+1)*imgHeight + iyp + best_o*imgHeight*imgWidth) +=
 //                    vx0*vy1*v;
+                outHist[(ixp+1)*hogDepth + iyp*outHistHeight + best_o] += vx0*vy1*v;
             } 
 
             if (ixp >= 0 && iyp+1 < imgHeight) { 
 //                *(hist + ixp*imgHeight + (iyp+1) + best_o*imgHeight*imgWidth) +=
 //                    vx1*vy0*v;
+                outHist[ixp*hogDepth + (iyp+1)*outHistHeight + best_o] += vx1*vy0*v;
             } 
 
             if (ixp+1 < imgWidth && iyp+1 < imgHeight) { 
 //                *(hist + (ixp+1)*imgHeight + (iyp+1) + best_o*imgHeight*imgWidth) +=
 //                    vx0*vy0*v;
+                outHist[(ixp+1)*hogDepth + (iyp+1)*outHistHeight + best_o] += vx0*vy0*v;
             } 
 #endif
         }

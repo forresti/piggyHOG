@@ -38,9 +38,10 @@ class streamHog{
     void gradient_voc5_reference(int height, int width, int stride, int n_channels_input, int n_channels_output,
                   pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag);
 
-    void computeCells_voc5_reference(int height, int width, int stride, 
+    void computeCells_voc5_reference(int imgHeight, int imgWidth, int imgStride, int sbin,
                                      pixel_t *__restrict__ ori, pixel_t *__restrict__ mag,
-                                     pixel_t *__restrict__ outHist);
+                                     int outHistHeight, int outHistWidth,
+                                     float *__restrict__ outHist);
 
   private:
     char ATAN2_TABLE[512][512]; // values are 0 to 18

@@ -129,9 +129,24 @@ bool run_tests_ori_argmax(){
     printf("number of select_epi16 tests failed: %d \n", numFailed); 
 }
 
+//TODO: put this into a class (like PgHogContainer or streamHog), once I decide what data types to use
+//@output-by-ref out_hogWidth out_hogHeight
+//@return hogWidth = memory aligned vector for storing HOG histogram 
+float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin,
+                   int &out_hogHeight, int &out_hogWidth){
+
+    out_hogHeight = round(in_imgHeight/sbin);
+    out_hogWidth = round(in_imgWidth/sbin);
+    const int hogDepth = 32;
+
+    float* hogBuffer = (float*)malloc_aligned(32, in_imgWidth * in_imgHeight * hogDepth * sizeof(float));
+} 
+
 // MAIN TEST OF FUNCTIONALITY
 void test_streamHog_oneScale(){
     streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
+
+    int sbin = 8;
 
     int ALIGN_IN_BYTES = 256;
     int n_iter = 1000; //not really "iterating" -- just number of times to run the experiment
@@ -142,25 +157,44 @@ void test_streamHog_oneScale(){
     //SimpleImg img(height, width, stride, n_channels);
 
     SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
-
-    //[mag, ori] = gradient_wideload_unvectorized(img)
-    SimpleImg mag(img.height, img.width, img.stride, 1); //out img has just 1 channel
     SimpleImg ori(img.height, img.width, img.stride, 1); //out img has just 1 channel
+    SimpleImg mag(img.height, img.width, img.stride, 1); //out img has just 1 channel
+    int hogWidth, hogHeight;
+    float* hogBuffer = allocate_hist(img.height, img.width, sbin,
+                                     hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
+
+  //[mag, ori] = gradient_sse(img)
     double start_timer = read_timer();
     for(int i=0; i<n_iter; i++){
-        //sHog.gradient_wideload_unvectorized(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
-        //sHog.gradient_sse(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
-        sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data);
+        sHog.gradient_sse(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
+        //sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data);
     }
 
     double stream_time = (read_timer() - start_timer) / n_iter;
     double gb_to_copy = img.width * img.height * img.n_channels * sizeof(pixel_t) / 1e9;
     double gb_per_sec = gb_to_copy / (stream_time/1000); //convert stream_time from ms to sec
-    printf("avg stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec);
+    printf("avg (mag, ori) stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec);
 
     //mag.simple_csvwrite("mag.csv");
     mag.simple_imwrite("mag.jpg");
     ori.simple_imwrite("ori.jpg");
+
+  //hist = computeCells(mag, ori, sbin)
+    start_timer = read_timer();
+
+    //TODO: figure out how to test voc5 vs streamHog computeCells().
+    for(int i=0; i<n_iter; i++){
+        //ori and mag both have size {img.height, img.width} 
+        sHog.computeCells_voc5_reference(img.height, img.width, img.stride, sbin,
+                                         ori.data, mag.data, 
+                                         hogHeight, hogWidth, hogBuffer); 
+    }
+
+    stream_time = (read_timer() - start_timer) / n_iter;
+    gb_to_copy = img.width * img.height * img.n_channels * sizeof(pixel_t) / 1e9;
+    gb_per_sec = gb_to_copy / (stream_time/1000); //convert stream_time from ms to sec
+    printf("avg hogCell stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec);
+
 }
 
 int main (int argc, char **argv)
