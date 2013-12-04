@@ -477,14 +477,52 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
                                     float *__restrict__ outHist){
 
     const int hogDepth = 32;
+    float sbin_inverse = 1.0f / (float)sbin;
+
+    float pos_LUT[sbin]; //xp,yp ... access as pos_LUT[x%sbin]
+    int ipos_LUT[sbin]; //ixp, iyp
+    float v0_LUT[sbin]; //vx0, vy0
+    float v1_LUT[sbin]; //vx1, vy1
+
+    //main idea: xp, yp are cyclic. so, just cache the cycle, and later on add the x,y offset.
+    for(int i=0; i<sbin; i++){
+        pos_LUT[i] = ((float)(i%sbin)+0.5)/(float)sbin - 0.5;
+        ipos_LUT[i] = (int)pos_LUT[i];
+        v0_LUT[i] = pos_LUT[i] - ipos_LUT[i]; //xp-ixp
+        v1_LUT[i] = 1.0f - v0_LUT[i]; //1.0-vx0
+    }
 
     for(int y=0; y<imgHeight-2; y++){
         for(int x=0; x < imgWidth-2; x++){
             int curr_ori = ori[y*imgStride + x]; //orientation bin -- upcast to int
             int curr_mag = mag[y*imgStride + x]; //upcast to int
+#if 0
+            //float xp = ((float)x+0.5)*sbin_inverse - 0.5;
+            //float yp = ((float)y+0.5)*sbin_inverse - 0.5;
+            float xp = x*0.25f;
+            float yp = y*0.25f;
+            int ixp = (int)floor(xp);
+            int iyp = (int)floor(yp);
+            float vx0 = xp-ixp;
+            float vy0 = yp-iyp;
+            float vx1 = 1.0-vx0;
+            float vy1 = 1.0-vy0;
+#endif
+            //TODO: avoid multiple computations of x%sbin?
+            int ixp = ipos_LUT[x%sbin] + x*sbin_inverse;
+            int iyp = ipos_LUT[y%sbin] + y*sbin_inverse;
+            float vx0 = v0_LUT[x%sbin];
+            float vy0 = v0_LUT[y%sbin];
+            float vx1 = v1_LUT[x%sbin];
+            float vy1 = v1_LUT[y%sbin];
 
+            int x_hist = x*0.25f; //test
+            int y_hist = y*0.25f;
 
-            outHist[x*hogDepth + y*outHistWidth*hogDepth + 0] = curr_mag; //simple benchmark [2.4 GB/s = 0.98ms on laptop]
+            //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + 0] = curr_mag; //simple benchmark [2.6 GB/s = .91ms on laptop]
+            //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + curr_ori] = curr_mag; //[2.1 GB/s = 1.15ms on laptop]
+            //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + 0] = curr_mag*vx1*vy1;
+            outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] = curr_mag*vx1*vy1;
         }
     } 
 }
