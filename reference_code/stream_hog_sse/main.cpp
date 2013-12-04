@@ -141,6 +141,7 @@ float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin,
 
     float* hogBuffer = (float*)malloc_aligned(32, out_hogWidth * out_hogHeight * hogDepth * sizeof(float));
     memset(hogBuffer, 0, out_hogWidth * out_hogHeight * hogDepth * sizeof(float));
+    return hogBuffer;
 } 
 
 // MAIN TEST OF FUNCTIONALITY
