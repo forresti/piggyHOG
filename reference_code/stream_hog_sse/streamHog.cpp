@@ -403,25 +403,25 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
             double vy1 = 1.0-vy0;
 
             if (ixp >= 0 && iyp >= 0) { 
-//                *(hist + ixp*blocks[0] + iyp + best_o*blocks[0]*blocks[1]) +=
+//                *(hist + ixp*imgHeight + iyp + best_o*imgHeight*imgWidth) +=
 //                    vx1*vy1*v;
 
                 outHist[ixp*hogDepth + iyp*outHistHeight + best_o] += vx1*vy1*v;
 
             } 
 
-            if (ixp+1 < blocks[1] && iyp >= 0) { 
-//                *(hist + (ixp+1)*blocks[0] + iyp + best_o*blocks[0]*blocks[1]) +=
+            if (ixp+1 < imgWidth && iyp >= 0) { 
+//                *(hist + (ixp+1)*imgHeight + iyp + best_o*imgHeight*imgWidth) +=
 //                    vx0*vy1*v;
             } 
 
-            if (ixp >= 0 && iyp+1 < blocks[0]) { 
-//                *(hist + ixp*blocks[0] + (iyp+1) + best_o*blocks[0]*blocks[1]) +=
+            if (ixp >= 0 && iyp+1 < imgHeight) { 
+//                *(hist + ixp*imgHeight + (iyp+1) + best_o*imgHeight*imgWidth) +=
 //                    vx1*vy0*v;
             } 
 
-            if (ixp+1 < blocks[1] && iyp+1 < blocks[0]) { 
-//                *(hist + (ixp+1)*blocks[0] + (iyp+1) + best_o*blocks[0]*blocks[1]) +=
+            if (ixp+1 < imgWidth && iyp+1 < imgHeight) { 
+//                *(hist + (ixp+1)*imgHeight + (iyp+1) + best_o*imgHeight*imgWidth) +=
 //                    vx0*vy0*v;
             } 
 #endif
