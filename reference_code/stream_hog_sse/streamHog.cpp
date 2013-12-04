@@ -438,9 +438,9 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
             float vx1 = 1.0-vx0;
             float vy1 = 1.0-vy0;
 
-            //if(ixp < 0 || iyp < 0){
-            //    printf("ixp=%d, iyp=%d \n", ixp, iyp);
-            //}
+            if(ixp < 0 || iyp < 0){
+                printf("x=%d, y=%d, ixp=%d, iyp=%d \n", x, y, ixp, iyp);
+            }
 
             if (ixp >= 0 && iyp >= 0) 
             { 
@@ -496,6 +496,10 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
         v1_LUT[i] = 1.0f - v0_LUT[i]; //1.0-vx0
     }
 
+    //TODO: x=2:imgHeight-2. no checking for 'if ixp>=0,...' 
+    //      then, have a final 'cleanup' loop for the x=0:2, x=imgHeight-2:imgHeight, etc.
+    //      same deal for y. 
+
     for(int y=0; y<imgHeight-2; y++){
         for(int x=0; x < imgWidth-2; x++){
             int curr_ori = ori[y*imgStride + x]; //orientation bin -- upcast to int
@@ -523,13 +527,16 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             int x_hist = x*0.25f; //test
             int y_hist = y*0.25f;
 
-            if (ixp >= 0 && iyp >= 0) 
+            //if (ixp >= 0 && iyp >= 0) //this is expensive. 
             {
                 //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + 0] = curr_mag; //simple benchmark [2.6 GB/s = .91ms on laptop]
                 //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + curr_ori] = curr_mag; //[2.1 GB/s = 1.15ms on laptop]
                 //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + 0] = curr_mag*vx1*vy1;
-                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] = curr_mag*vx1*vy1;
+                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] = vx1*vy1*curr_mag;
             }
+            outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
+            //outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
+            //outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
         }
     } 
 }
