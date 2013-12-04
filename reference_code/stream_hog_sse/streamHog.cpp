@@ -362,6 +362,7 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
             #ifdef SCALE_ORI
             best_o = best_o * 9;
             #endif
+            //v = sqrt(v); //Forrest -- no longer need to sqrt the magnitude
 
             outMag[y*stride + x] = v;
             outOri[y*stride + x] = best_o; 
@@ -373,12 +374,24 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
 //  TODO: rearrange for the following out dims:
 //assumed output dimensions: outHist[imgHeight/sbin][imgWidth/sbin][hogDepth=32]. row major (like piggyHOG).
 //  output stride = output width. (because we already have 32-dimensional features as the inner dimension)
-void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int imgStride, 
+void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int imgStride, int sbin, 
                                             pixel_t *__restrict__ ori, pixel_t *__restrict__ mag,
-                                            pixel_t *__restrict__ outHist){
+                                            int outHistHeight, int outHeightWidth,
+                                            float *__restrict__ outHist){
+
+    assert(outHistHeight == round(imgHeight/sbin));
+    assert(outHistWidth == round(imgWidth/sbin));
+
+    //TODO: have mag as an int16_t instead of a uchar. 
+
+    const int hogDepth = 32;
+
+    for(int y=1; y<imgHeight-1; y++){
+        for(int x=1; x<imgWidth-1; x++){
+            int best_o = ori[y*imgStride + x]; //orientation bin -- upcast to int
+            int v = mag[y*imgStride + x]; //upcast to int
 
 #if 0
-        {   
             // add to 4 histograms around pixel using linear interpolation
             double xp = ((double)x+0.5)/(double)sbin - 0.5;
             double yp = ((double)y+0.5)/(double)sbin - 0.5;
@@ -388,28 +401,31 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
             double vy0 = yp-iyp;
             double vx1 = 1.0-vx0;
             double vy1 = 1.0-vy0;
-            //v = sqrt(v); //Forrest -- no longer need to sqrt the magnitude
 
             if (ixp >= 0 && iyp >= 0) { 
-                *(hist + ixp*blocks[0] + iyp + best_o*blocks[0]*blocks[1]) +=
-                    vx1*vy1*v;
+//                *(hist + ixp*blocks[0] + iyp + best_o*blocks[0]*blocks[1]) +=
+//                    vx1*vy1*v;
+
+                outHist[ixp*hogDepth + iyp*outHistHeight + best_o] += vx1*vy1*v;
+
             } 
 
             if (ixp+1 < blocks[1] && iyp >= 0) { 
-                *(hist + (ixp+1)*blocks[0] + iyp + best_o*blocks[0]*blocks[1]) +=
-                    vx0*vy1*v;
+//                *(hist + (ixp+1)*blocks[0] + iyp + best_o*blocks[0]*blocks[1]) +=
+//                    vx0*vy1*v;
             } 
 
             if (ixp >= 0 && iyp+1 < blocks[0]) { 
-                *(hist + ixp*blocks[0] + (iyp+1) + best_o*blocks[0]*blocks[1]) +=
-                    vx1*vy0*v;
+//                *(hist + ixp*blocks[0] + (iyp+1) + best_o*blocks[0]*blocks[1]) +=
+//                    vx1*vy0*v;
             } 
 
             if (ixp+1 < blocks[1] && iyp+1 < blocks[0]) { 
-                *(hist + (ixp+1)*blocks[0] + (iyp+1) + best_o*blocks[0]*blocks[1]) +=
-                    vx0*vy0*v;
+//                *(hist + (ixp+1)*blocks[0] + (iyp+1) + best_o*blocks[0]*blocks[1]) +=
+//                    vx0*vy0*v;
             } 
-        }
 #endif
+        }
+    }
 }
 
