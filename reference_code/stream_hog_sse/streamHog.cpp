@@ -517,12 +517,15 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             float vy1 = 1.0-vy0;
 #endif
             //TODO: avoid multiple computations of x%sbin?
-            int ixp = ipos_LUT[x%sbin] + x*sbin_inverse;
-            int iyp = ipos_LUT[y%sbin] + y*sbin_inverse;
-            float vx0 = v0_LUT[x%sbin];
-            float vy0 = v0_LUT[y%sbin];
-            float vx1 = v1_LUT[x%sbin];
-            float vy1 = v1_LUT[y%sbin];
+            int x_mod_sbin = x%sbin;
+            int y_mod_sbin = y%sbin;
+
+            int ixp = ipos_LUT[x_mod_sbin] + x*sbin_inverse;
+            int iyp = ipos_LUT[y_mod_sbin] + y*sbin_inverse;
+            float vx0 = v0_LUT[x_mod_sbin];
+            float vy0 = v0_LUT[y_mod_sbin];
+            float vx1 = v1_LUT[x_mod_sbin];
+            float vy1 = v1_LUT[y_mod_sbin];
 
             int x_hist = x*0.25f; //test
             int y_hist = y*0.25f;
@@ -534,7 +537,7 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
                 //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + 0] = curr_mag*vx1*vy1;
                 outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] = vx1*vy1*curr_mag;
             }
-            outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
+            //outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
             //outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
             //outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
         }
