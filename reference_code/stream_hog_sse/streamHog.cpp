@@ -438,6 +438,10 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
             float vx1 = 1.0-vx0;
             float vy1 = 1.0-vy0;
 
+            //if(ixp < 0 || iyp < 0){
+            //    printf("ixp=%d, iyp=%d \n", ixp, iyp);
+            //}
+
             if (ixp >= 0 && iyp >= 0) 
             { 
                 //*(hist + ixp*imgHeight + iyp + best_o*imgHeight*imgWidth) += vx1*vy1*v; //from VOC5
@@ -519,10 +523,13 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             int x_hist = x*0.25f; //test
             int y_hist = y*0.25f;
 
-            //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + 0] = curr_mag; //simple benchmark [2.6 GB/s = .91ms on laptop]
-            //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + curr_ori] = curr_mag; //[2.1 GB/s = 1.15ms on laptop]
-            //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + 0] = curr_mag*vx1*vy1;
-            outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] = curr_mag*vx1*vy1;
+            if (ixp >= 0 && iyp >= 0) 
+            {
+                //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + 0] = curr_mag; //simple benchmark [2.6 GB/s = .91ms on laptop]
+                //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + curr_ori] = curr_mag; //[2.1 GB/s = 1.15ms on laptop]
+                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + 0] = curr_mag*vx1*vy1;
+                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] = curr_mag*vx1*vy1;
+            }
         }
     } 
 }
