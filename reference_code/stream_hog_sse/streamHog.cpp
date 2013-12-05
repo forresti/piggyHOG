@@ -490,7 +490,7 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
     //main idea: xp, yp are cyclic. so, just cache the cycle, and later on add the x,y offset.
     for(int i=0; i<sbin; i++){
         pos_LUT[i] = ((float)(i%sbin)+0.5)/(float)sbin - 0.5;
-        ipos_LUT[i] = (int)pos_LUT[i];
+        ipos_LUT[i] = floor(pos_LUT[i]);
         v0_LUT[i] = pos_LUT[i] - ipos_LUT[i]; //xp-ixp
         v1_LUT[i] = 1.0f - v0_LUT[i]; //1.0-vx0
     }
