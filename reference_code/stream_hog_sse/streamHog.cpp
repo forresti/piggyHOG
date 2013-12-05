@@ -503,29 +503,14 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
         for(int x=0; x < imgWidth-2; x++){
             int curr_ori = ori[y*imgStride + x]; //orientation bin -- upcast to int
             int curr_mag = mag[y*imgStride + x]; //upcast to int
-#if 0
-            float xp = ((float)x+0.5)*sbin_inverse - 0.5;
-            float yp = ((float)y+0.5)*sbin_inverse - 0.5;
-            //float xp = x*0.25f;
-            //float yp = y*0.25f;
-            int ixp = (int)floor(xp);
-            int iyp = (int)floor(yp);
-            float vx0 = xp-ixp;
-            float vy0 = yp-iyp;
-            float vx1 = 1.0-vx0;
-            float vy1 = 1.0-vy0;
-#endif
-#if 1
-            //TODO: test my LUT ixp vs. VOC5 ixp. (should be correct, but should make sure 
-            int ixp = ipos_LUT[x%sbin] + floor(x*sbin_inverse);
-            int iyp = ipos_LUT[y%sbin] + floor(y*sbin_inverse);
+
+            //tested: my LUT matches VOC5 
+            int ixp = ipos_LUT[x%sbin] + int(x*sbin_inverse);
+            int iyp = ipos_LUT[y%sbin] + int(y*sbin_inverse);
             float vx0 = v0_LUT[x%sbin];
             float vy0 = v0_LUT[y%sbin];
             float vx1 = v1_LUT[x%sbin];
             float vy1 = v1_LUT[y%sbin];
-#endif
-            int x_hist = x*0.25f; //test
-            int y_hist = y*0.25f;
 
             //temporary: (will do something more clever later) -- this is SLOW and not quite right at edges
             ixp = max(0, ixp);
@@ -547,8 +532,9 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
 
             //DEBUG printfs.
-            float my_outHist_element = outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori];
-            if(my_outHist_element > 512){
+            //float my_outHist_element = outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori];
+            //if(my_outHist_element > 512)
+            {
 //                printf("outHist[ixp=%d][iyp=%d][curr_ori=%d] = %f \n", ixp, iyp, curr_ori, my_outHist_element);
             }
     
