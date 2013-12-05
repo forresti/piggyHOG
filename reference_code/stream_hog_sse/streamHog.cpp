@@ -451,19 +451,19 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
             } 
 
 #if 1
-            if (ixp+1 < imgWidth && iyp >= 0) { 
+            if (ixp+1 < outHistWidth && iyp >= 0) { 
                 //*(hist + (ixp+1)*imgHeight + iyp + best_o*imgHeight*imgWidth) += vx0*vy1*v;
 
                 outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + best_o] += vx0*vy1*v;
             } 
 
-            if (ixp >= 0 && iyp+1 < imgHeight) { 
+            if (ixp >= 0 && iyp+1 < outHistHeight) { 
                 //*(hist + ixp*imgHeight + (iyp+1) + best_o*imgHeight*imgWidth) += vx1*vy0*v;
 
                 outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + best_o] += vx1*vy0*v;
             } 
 
-            if (ixp+1 < imgWidth && iyp+1 < imgHeight) { 
+            if (ixp+1 < outHistWidth && iyp+1 < outHistHeight) { 
                 //*(hist + (ixp+1)*imgHeight + (iyp+1) + best_o*imgHeight*imgWidth) += vx0*vy0*v;
 
                 outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + best_o] += vx0*vy0*v;
