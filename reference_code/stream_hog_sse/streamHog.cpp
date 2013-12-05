@@ -17,41 +17,10 @@ using namespace std;
 streamHog::streamHog(){
     init_atan2_LUT(); //similar to FFLD hog
     init_atan2_constants(); //easier to vectorize alternative to lookup table. (similar to VOC5 hog)
-    //init_lerp_LUT();
 }
 
 //destructor
 streamHog::~streamHog(){ }
-
-//linear interpolation multipliers
-void streamHog::init_lerp_LUT(){
-
-    int sbin=4;
-
-    //for(int i=0; i<sbin; i++)
-    for(int i=0; i<50; i++)
-    {
-        float lerpMult_voc5 = ((float)i+0.5)/(float)sbin - 0.5;
-        float lerpMult_ours_base = ((float)(i%sbin)+0.5)/(float)sbin - 0.5;
-        float lerpMult_ours = lerpMult_ours_base + i/sbin;
-
-        //LERP_TABLE[i] = lerpMult;
-        //printf("    LERP_TABLE[%d] = %f \n", i, lerpMult);
-        printf("    lerp_voc5[%d] = %f, lerp_base[%d] = %f, lerp_ours[%d] = %f \n", i, lerpMult_voc5, i, lerpMult_ours_base, i, lerpMult_ours);
-    } 
-
-#if 0
-    float xp = ((float)x+0.5)/(float)sbin - 0.5; //this is expensive (replacing it with 'x/4' gives a 1.5x speedup in hogCell)
-    float yp = ((float)y+0.5)/(float)sbin - 0.5;
-    int ixp = (int)floor(xp);
-    int iyp = (int)floor(yp);
-    float vx0 = xp-ixp;
-    float vy0 = yp-iyp;
-    float vx1 = 1.0-vx0;
-    float vy1 = 1.0-vy0;
-#endif    
-
-}
 
 //stuff for approximate vectorized atan2
 void streamHog::init_atan2_constants(){
@@ -418,6 +387,7 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
     const int hogDepth = 32;
     float sbin_inverse = 1.0f / (float)sbin;
 
+#pragma omp parallel for
     for(int y=1; y<imgHeight-1; y++){
         for(int x=1; x<imgWidth-1; x++){
             int best_o = ori[y*imgStride + x]; //orientation bin -- upcast to int
@@ -499,7 +469,7 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
     //      then, have a final 'cleanup' loop for the x=0:2, x=imgHeight-2:imgHeight, etc.
     //      same deal for y. 
 
-//#pragma omp parallel for
+#pragma omp parallel for
     for(int y=0; y<imgHeight-2; y++){
         for(int x=0; x < imgWidth-2; x++){
             int curr_ori = ori[y*imgStride + x]; //orientation bin -- upcast to int
@@ -525,13 +495,16 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             float vy1 = v1_LUT[y%sbin];
 #endif
             //temporary: (will do something more clever later) -- this is SLOW and not quite right at edges
-            ixp = max(0, ixp);
-            iyp = max(0, iyp);
-            ixp = min(ixp, outHistWidth-2);
-            iyp = min(iyp, outHistHeight-2);
+            //ixp = max(0, ixp);
+            //iyp = max(0, iyp);
+            //ixp = min(ixp, outHistWidth-2);
+            //iyp = min(iyp, outHistHeight-2);
+
+            //TODO: instead of doing 'if (ixp >= 0 && iyp >= 0)' on every iteration,
+            //      have a separate set of loops for border cases
 
           //the actual computation:
-            //if (ixp >= 0 && iyp >= 0) //this is expensive. 
+            if (ixp >= 0 && iyp >= 0) //this is expensive. 
             {
                 //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + 0] = curr_mag; //simple benchmark [2.6 GB/s = .91ms on laptop]
                 //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + curr_ori] = curr_mag; //[2.1 GB/s = 1.15ms on laptop]
@@ -539,10 +512,15 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
                 //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += curr_mag;
                 outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx1*vy1*curr_mag;
             }
-            outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
-            outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
-            outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
-
+            if (ixp+1 < outHistWidth && iyp >= 0) {
+                outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
+            }
+            if (ixp+1 < outHistWidth && iyp+1 < outHistHeight) {
+                outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
+            }
+            if (ixp+1 < outHistWidth && iyp+1 < outHistHeight) {
+                outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
+            }
             //DEBUG printfs.
             //float my_outHist_element = outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori];
             //if(my_outHist_element > 512)
@@ -552,3 +530,4 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
         }
     } 
 }
+
