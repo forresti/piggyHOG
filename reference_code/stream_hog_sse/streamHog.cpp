@@ -499,6 +499,7 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
     //      then, have a final 'cleanup' loop for the x=0:2, x=imgHeight-2:imgHeight, etc.
     //      same deal for y. 
 
+//#pragma omp parallel for
     for(int y=0; y<imgHeight-2; y++){
         for(int x=0; x < imgWidth-2; x++){
             int curr_ori = ori[y*imgStride + x]; //orientation bin -- upcast to int
@@ -547,10 +548,6 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             //if(my_outHist_element > 512)
             {
 //                printf("outHist[ixp=%d][iyp=%d][curr_ori=%d] = %f \n", ixp, iyp, curr_ori, my_outHist_element);
-            }
-    
-            if(curr_mag > 512){
-//                printf("mag[x=%d][y=%d] = %d \n", x, y, curr_mag);
             }
         }
     } 

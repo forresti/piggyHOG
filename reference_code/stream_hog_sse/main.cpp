@@ -144,7 +144,7 @@ float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin,
     return hogBuffer;
 } 
 
-// MAIN TEST OF FUNCTIONALITY
+//correctness check
 void test_computeCells_voc5_vs_streamHOG(){
     streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
     int sbin = 4;
