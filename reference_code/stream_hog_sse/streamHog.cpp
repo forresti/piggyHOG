@@ -503,7 +503,7 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
         for(int x=0; x < imgWidth-2; x++){
             int curr_ori = ori[y*imgStride + x]; //orientation bin -- upcast to int
             int curr_mag = mag[y*imgStride + x]; //upcast to int
-#if 1
+#if 0
             float xp = ((float)x+0.5)*sbin_inverse - 0.5;
             float yp = ((float)y+0.5)*sbin_inverse - 0.5;
             //float xp = x*0.25f;
@@ -515,10 +515,10 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             float vx1 = 1.0-vx0;
             float vy1 = 1.0-vy0;
 #endif
-#if 0
+#if 1
             //TODO: test my LUT ixp vs. VOC5 ixp. (should be correct, but should make sure 
-            int ixp = ipos_LUT[x%sbin] + x*sbin_inverse;
-            int iyp = ipos_LUT[y%sbin] + y*sbin_inverse;
+            int ixp = ipos_LUT[x%sbin] + floor(x*sbin_inverse);
+            int iyp = ipos_LUT[y%sbin] + floor(y*sbin_inverse);
             float vx0 = v0_LUT[x%sbin];
             float vy0 = v0_LUT[y%sbin];
             float vx1 = v1_LUT[x%sbin];

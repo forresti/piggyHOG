@@ -251,8 +251,8 @@ void test_streamHog_oneScale(){
 int main (int argc, char **argv)
 {
     //run_tests_ori_argmax(); //unit test
-    test_computeCells_voc5_vs_streamHOG(); //unit test
-    //test_streamHog_oneScale(); //timing experiment
+    //test_computeCells_voc5_vs_streamHOG(); //unit test
+    test_streamHog_oneScale(); //timing experiment
 
     return 0;
 }

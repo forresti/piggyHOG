@@ -215,16 +215,58 @@ void writeCsv_LUT(char LUT[512][512], int nRows, int nCols, string fname)
     myfile.close();
 }
 
+void lerp_LUT_vs_voc5(){
+    printf("lerp_LUT_vs_voc5() \n");
+
+    int sbin = 4;
+    float sbin_inverse = 1.0f / (float)sbin;
+    printf("    sbin_inverse = %f \n", sbin_inverse); 
+
+    float pos_LUT[sbin]; //xp,yp ... access as pos_LUT[x%sbin]
+    int ipos_LUT[sbin]; //ixp, iyp
+    float v0_LUT[sbin]; //vx0, vy0
+    float v1_LUT[sbin]; //vx1, vy1
+
+    //main idea: xp, yp are cyclic. so, just cache the cycle, and later on add the x,y offset.
+    for(int i=0; i<sbin; i++){
+        pos_LUT[i] = ((float)(i%sbin)+0.5)/(float)sbin - 0.5;
+        ipos_LUT[i] = (int)floor(pos_LUT[i]);
+        v0_LUT[i] = pos_LUT[i] - ipos_LUT[i]; //xp-ixp
+        v1_LUT[i] = 1.0f - v0_LUT[i]; //1.0-vx0
+    }
+
+    for(int x=0; x<50; x++){
+        //VOC5
+        float xp = ((float)x+0.5)*sbin_inverse - 0.5;
+        int ixp = (int)floor(xp);
+        float vx0 = xp-ixp;
+        float vx1 = 1.0-vx0;
+
+        //LUT
+        float xp_quick = pos_LUT[x%sbin] + x/sbin;
+        int ixp_quick = pos_LUT[x%sbin] + x/sbin;
+        float vx0_quick = v0_LUT[x%sbin];
+        float vx1_quick = v1_LUT[x%sbin];
+
+        printf("  x=%d \n", x);
+        printf("    VOC5: xp=%f, ixp=%d, vx1=%f, vx1=%f\n", xp, ixp, vx0, vx1);
+        printf("    LUT:  xp=%f, ixp=%d, vx0=%f, vx1=%f\n", xp_quick, ixp_quick, vx0_quick, vx1_quick);
+
+    }
+}   
+
 int main (int argc, char **argv)
 {
     //test_int16_range();
     init_atan2_constants(); //stuff for fixedpt
     init_lookup_table();
     
-    writeCsv_LUT(ATAN2_TABLE, 512, 512,  "LUT_FFLD.csv"); //save the FFLD ATAN2 LUT (for visualization in matlab/python)
+    //writeCsv_LUT(ATAN2_TABLE, 512, 512,  "LUT_FFLD.csv"); //save the FFLD ATAN2 LUT (for visualization in matlab/python)
 
     //fixedpt_vs_floatpt(); //compare voc5 floatpt, voc5 fixedpt, FFLD floatpt
-    analyze_LUT(); //look for patterns/clusters in LUT
+    //analyze_LUT(); //look for patterns/clusters in LUT
+
+    lerp_LUT_vs_voc5();
 
     return 0;
 }
