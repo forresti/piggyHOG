@@ -145,6 +145,49 @@ float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin,
 } 
 
 // MAIN TEST OF FUNCTIONALITY
+void test_computeCells_voc5_vs_streamHOG(){
+    streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
+    int sbin = 4;
+
+    SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
+    SimpleImg ori(img.height, img.width, img.stride, 1); //out img has just 1 channel
+    SimpleImg mag(img.height, img.width, img.stride, 1); //out img has just 1 channel
+    int hogWidth, hogHeight;
+    float* hogBuffer_voc5 = allocate_hist(img.height, img.width, sbin,
+                                          hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
+    float* hogBuffer_streamHog = allocate_hist(img.height, img.width, sbin,
+                                               hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
+
+  //[mag, ori] = gradient_sse(img)
+    sHog.gradient_sse(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
+    //sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data);
+
+  //hist = computeCells(mag, ori, sbin)
+    sHog.computeCells_voc5_reference(img.height, img.width, img.stride, sbin,
+                                     ori.data, mag.data, 
+                                     hogHeight, hogWidth, hogBuffer_voc5); 
+    sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
+                             ori.data, mag.data,
+                             hogHeight, hogWidth, hogBuffer_streamHog);
+
+    int hogDepth = 32;
+    float eps_diff = 0.01;
+
+    //check if it matches...
+    for(int y=0; y<hogHeight; y++){
+        for(int x=0; x<hogWidth; x++){
+            for(int d=0; d<hogDepth; d++){
+                float voc5_element = hogBuffer_voc5[x*hogDepth + y*hogWidth*hogDepth + d];
+                float streamHog_element = hogBuffer_streamHog[x*hogDepth + y*hogWidth*hogDepth + d];
+                if( fabs(streamHog_element - voc5_element) > eps_diff){
+                    printf("x=%d, y=%d, d=%d. voc5=%f, streamHog=%f \n", x, y, d, voc5_element, streamHog_element);
+                }
+            }
+        }
+    }
+}
+
+// MAIN TEST OF FUNCTIONALITY
 void test_streamHog_oneScale(){
     streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
 
@@ -207,9 +250,9 @@ void test_streamHog_oneScale(){
 
 int main (int argc, char **argv)
 {
-    test_streamHog_oneScale();
-
-//    run_tests_ori_argmax();
+    //run_tests_ori_argmax(); //unit test
+    test_computeCells_voc5_vs_streamHOG(); //unit test
+    //test_streamHog_oneScale(); //timing experiment
 
     return 0;
 }

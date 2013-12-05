@@ -40,7 +40,6 @@ void streamHog::init_lerp_LUT(){
         printf("    lerp_voc5[%d] = %f, lerp_base[%d] = %f, lerp_ours[%d] = %f \n", i, lerpMult_voc5, i, lerpMult_ours_base, i, lerpMult_ours);
     } 
 
-
 #if 0
     float xp = ((float)x+0.5)/(float)sbin - 0.5; //this is expensive (replacing it with 'x/4' gives a 1.5x speedup in hogCell)
     float yp = ((float)y+0.5)/(float)sbin - 0.5;
@@ -504,11 +503,11 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
         for(int x=0; x < imgWidth-2; x++){
             int curr_ori = ori[y*imgStride + x]; //orientation bin -- upcast to int
             int curr_mag = mag[y*imgStride + x]; //upcast to int
-#if 0
-            //float xp = ((float)x+0.5)*sbin_inverse - 0.5;
-            //float yp = ((float)y+0.5)*sbin_inverse - 0.5;
-            float xp = x*0.25f;
-            float yp = y*0.25f;
+#if 1
+            float xp = ((float)x+0.5)*sbin_inverse - 0.5;
+            float yp = ((float)y+0.5)*sbin_inverse - 0.5;
+            //float xp = x*0.25f;
+            //float yp = y*0.25f;
             int ixp = (int)floor(xp);
             int iyp = (int)floor(yp);
             float vx0 = xp-ixp;
@@ -516,6 +515,7 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             float vx1 = 1.0-vx0;
             float vy1 = 1.0-vy0;
 #endif
+#if 0
             //TODO: test my LUT ixp vs. VOC5 ixp. (should be correct, but should make sure 
             int ixp = ipos_LUT[x%sbin] + x*sbin_inverse;
             int iyp = ipos_LUT[y%sbin] + y*sbin_inverse;
@@ -523,7 +523,7 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             float vy0 = v0_LUT[y%sbin];
             float vx1 = v1_LUT[x%sbin];
             float vy1 = v1_LUT[y%sbin];
-
+#endif
             int x_hist = x*0.25f; //test
             int y_hist = y*0.25f;
 
@@ -542,9 +542,9 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
                 //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += curr_mag;
                 outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx1*vy1*curr_mag;
             }
-//            outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
-//            outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
-//            outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
+            outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
+            outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
+            outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
 
             //DEBUG printfs.
             float my_outHist_element = outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori];
