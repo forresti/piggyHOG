@@ -531,3 +531,79 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
     } 
 }
 
+//TODO: handle hog padding. (for now, just use padded HOG dims as input here)
+//@in-out normImg = 1-channel img of size (histWidth x histHeight). we populate this with hist sums.
+void streamHog::hogCell_gradientEnergy(float *__restrict__ hogHist, int histHeight, int histWidth, 
+                                       float *__restrict__ normImg)
+{
+
+    const int hogDepth = 32;
+
+    //sum up the (0 to 360 degree) hog cells
+    for(int y=0; y < histHeight; y++){
+        for(int x=0; x < histWidth; x++){
+
+            int hogIdx = x*hogDepth + y*histWidth*hogDepth;
+            float norm = 0.0f;
+            for(int ori=0; ori<18; ori++){ //0-360 degree ori bins
+                norm += hogHist[hogIdx+ori] * hogHist[hogIdx+ori]; //squared -- will do sqrt in hogBlock_normalize()
+
+                //TODO: can we do abs() instead of squaring this?
+            }
+            normImg[y*histHeight + x] = norm;
+        }
+    }
+}
+
+//TODO: compute 9 contrast-insensitive features
+
+//hog cells -> hog blocks
+//@in-out hogHist -- gets updated by normalizing neighborhoods
+//@param TODO: possibly add a 'norm' vector as input.
+void streamHog::normalizeCells_voc5(float *__restrict__ hogHist, int histHeight, int histWidth,
+                                    float *__restrict__ normImg)
+{
+
+#if 0
+    // compute features
+    for (int x = 0; x < out[1]; x++) { 
+        for (int y = 0; y < out[0]; y++) {
+            float *dst = feat + x*out[0] + y;
+            float *src, *p, n1, n2, n3, n4;
+
+            p = norm + (x+1)*blocks[0] + y+1;
+            n1 = 1.0 / sqrt(*p + *(p+1) + *(p+blocks[0]) + *(p+blocks[0]+1) + eps);
+            p = norm + (x+1)*blocks[0] + y;
+            n2 = 1.0 / sqrt(*p + *(p+1) + *(p+blocks[0]) + *(p+blocks[0]+1) + eps);
+            p = norm + x*blocks[0] + y+1;
+            n3 = 1.0 / sqrt(*p + *(p+1) + *(p+blocks[0]) + *(p+blocks[0]+1) + eps);
+            p = norm + x*blocks[0] + y;
+            n4 = 1.0 / sqrt(*p + *(p+1) + *(p+blocks[0]) + *(p+blocks[0]+1) + eps);
+
+            float t1 = 0;
+            float t2 = 0;
+            float t3 = 0;
+            float t4 = 0;
+
+            // contrast-sensitive features
+            src = hist + (x+1)*blocks[0] + (y+1);
+            for (int o = 0; o < 18; o++) {
+                float h1 = min(*src * n1, 0.2);
+                float h2 = min(*src * n2, 0.2);
+                float h3 = min(*src * n3, 0.2);
+                float h4 = min(*src * n4, 0.2);
+                *dst = 0.5 * (h1 + h2 + h3 + h4);
+                t1 += h1;
+                t2 += h2;
+                t3 += h3;
+                t4 += h4;
+                dst += out[0]*out[1];
+                src += blocks[0]*blocks[1];
+            }
+
+        }
+    }
+#endif
+}
+
+

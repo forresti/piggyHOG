@@ -177,6 +177,9 @@ void test_computeCells_voc5_vs_streamHOG(){
                                           hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
     float* hogBuffer_streamHog = allocate_hist(img.height, img.width, sbin,
                                                hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
+    int hogStride = hogWidth; //TODO: change this?
+    //SimpleImg normImg(hogHeight, hogWidth, hogStride, 1); //gradient energy of histograms
+    float* normImg = (float*)malloc_aligned(32, hogWidth * hogHeight * sizeof(float));
 
   //[mag, ori] = gradient_sse(img)
     sHog.gradient_sse(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
@@ -191,23 +194,10 @@ void test_computeCells_voc5_vs_streamHOG(){
                              hogHeight, hogWidth, hogBuffer_streamHog);
 
     int hogDepth = 32;
-#if 0
-    float eps_diff = 0.01;
+    diff_hogs(hogBuffer_voc5, hogBuffer_streamHog, hogHeight, hogWidth, hogDepth, "voc5_cells", "streamHog_cells");
 
-    //check if it matches...
-    for(int y=0; y<hogHeight; y++){
-        for(int x=0; x<hogWidth; x++){
-            for(int d=0; d<hogDepth; d++){
-                float voc5_element = hogBuffer_voc5[x*hogDepth + y*hogWidth*hogDepth + d];
-                float streamHog_element = hogBuffer_streamHog[x*hogDepth + y*hogWidth*hogDepth + d];
-                if( fabs(streamHog_element - voc5_element) > eps_diff){
-                    printf("x=%d, y=%d, d=%d. voc5=%f, streamHog=%f \n", x, y, d, voc5_element, streamHog_element);
-                }
-            }
-        }
-    }
-#endif
-    diff_hogs(hogBuffer_voc5, hogBuffer_streamHog, hogHeight, hogWidth, hogDepth, "voc5", "streamHog");
+    sHog.hogCell_gradientEnergy(hogBuffer_voc5, hogHeight, hogWidth, normImg); //populates normImg
+
 }
 
 // MAIN TEST OF FUNCTIONALITY
@@ -230,6 +220,7 @@ void test_streamHog_oneScale(){
     int hogWidth, hogHeight;
     float* hogBuffer = allocate_hist(img.height, img.width, sbin,
                                      hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
+    float* normImg = (float*)malloc_aligned(32, hogWidth * hogHeight * sizeof(float));
 
   //[mag, ori] = gradient_sse(img)
     double start_timer = read_timer();
@@ -250,7 +241,6 @@ void test_streamHog_oneScale(){
   //hist = computeCells(mag, ori, sbin)
     start_timer = read_timer();
 
-    //TODO: figure out how to test correctness: voc5 vs streamHog computeCells().
     for(int i=0; i<n_iter; i++){
         //ori and mag both have size {img.height, img.width}
  
@@ -269,6 +259,17 @@ void test_streamHog_oneScale(){
     gb_per_sec = gb_to_copy / (stream_time/1000); //convert stream_time from ms to sec
     printf("avg hogCell stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec);
 
+  //normImg(x,y) = sum( hist(x,y,0:17) )
+    start_timer = read_timer();
+
+    for(int i=0; i<n_iter; i++){
+        sHog.hogCell_gradientEnergy(hogBuffer, hogHeight, hogWidth, normImg); //populates normImg
+    }
+
+    stream_time = (read_timer() - start_timer) / n_iter;
+    gb_to_copy = hogWidth * hogHeight * 18 * sizeof(float) / 1e9; //for each hog cell: read 18 elements, write 1
+    gb_per_sec = gb_to_copy / (stream_time/1000); //convert stream_time from ms to sec
+    printf("avg hogCell_gradientEnergy stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec); 
 }
 
 int main (int argc, char **argv)

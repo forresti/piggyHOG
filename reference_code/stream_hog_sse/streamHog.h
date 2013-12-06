@@ -46,6 +46,13 @@ class streamHog{
                              pixel_t *__restrict__ ori, pixel_t *__restrict__ mag,
                              int outHistHeight, int outHistWidth,
                              float *__restrict__ outHist);
+
+    void hogCell_gradientEnergy(float *__restrict__ hogHist, int histHeight, int histWidth,     
+                                float *__restrict__ normImg);
+
+
+    void normalizeCells_voc5(float *__restrict__ hogHist, int histHeight, int histWidth,
+                             float *__restrict__ normImg);
   private:
     char ATAN2_TABLE[512][512]; // values are 0 to 18
 

@@ -19,10 +19,14 @@ void test_oneLevel(){
     Mat img = imread("../images_640x480/carsgraz_001.image.jpg"); //OpenCV 8U_C3 image
     PgHog pghog;
 
-    double start_timer = read_timer();
+    int n_iter = 10;
     int spatialBinSize = 4;
-    PgHogContainer* hogResult = pghog.extract_HOG_oneScale(img, spatialBinSize);
-    double time_one_scale = read_timer() - start_timer;
+
+    double start_timer = read_timer();
+    for(int i=0; i<n_iter; i++){
+        PgHogContainer* hogResult = pghog.extract_HOG_oneScale(img, spatialBinSize);
+    }
+    double time_one_scale = (read_timer() - start_timer)/n_iter;
 
     printf("time for 1 scale: %f ms \n", time_one_scale);
 }
@@ -42,8 +46,8 @@ void test_pyramid(){
 
 int main (int argc, char **argv)
 {
-//    test_oneLevel();
-    test_pyramid();
+    test_oneLevel();
+//    test_pyramid();
 
     return 0;
 }
