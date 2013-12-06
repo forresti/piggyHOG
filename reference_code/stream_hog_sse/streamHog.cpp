@@ -680,7 +680,6 @@ void streamHog::normalizeCells_voc5(float *__restrict__ in_hogHist, float *__res
             out_hogBlocks[hogIdx + 29] = 0.2357f * t3;
             out_hogBlocks[hogIdx + 30] = 0.2357f * t4;
             #endif
-
         }
     }
 #endif
