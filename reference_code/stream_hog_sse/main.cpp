@@ -144,6 +144,26 @@ float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin,
     return hogBuffer;
 } 
 
+
+void diff_hogs(float* hog_gold, float* hog_test, int hogHeight, int hogWidth, int hogDepth,
+               string hog_gold_name, string hog_test_name){
+    float eps_diff = 0.01;
+
+    for(int y=0; y<hogHeight; y++){
+        for(int x=0; x<hogWidth; x++){
+            for(int d=0; d<hogDepth; d++){
+                float gold_element = hog_gold[x*hogDepth + y*hogWidth*hogDepth + d];
+                float test_element = hog_test[x*hogDepth + y*hogWidth*hogDepth + d];
+                if( fabs(test_element - gold_element) > eps_diff){
+                    //e.g. x=1, y=1, d=31, voc5=..., streamHog=...
+                    printf("x=%d, y=%d, d=%d. %s=%f, %s=%f \n", x, y, d, 
+                            hog_gold_name.c_str(), gold_element, hog_test_name.c_str(), test_element);
+                }
+            }
+        }
+    }
+}
+
 //correctness check
 void test_computeCells_voc5_vs_streamHOG(){
     streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
@@ -171,6 +191,7 @@ void test_computeCells_voc5_vs_streamHOG(){
                              hogHeight, hogWidth, hogBuffer_streamHog);
 
     int hogDepth = 32;
+#if 0
     float eps_diff = 0.01;
 
     //check if it matches...
@@ -185,6 +206,8 @@ void test_computeCells_voc5_vs_streamHOG(){
             }
         }
     }
+#endif
+    diff_hogs(hogBuffer_voc5, hogBuffer_streamHog, hogHeight, hogWidth, hogDepth, "voc5", "streamHog");
 }
 
 // MAIN TEST OF FUNCTIONALITY
@@ -251,7 +274,7 @@ void test_streamHog_oneScale(){
 int main (int argc, char **argv)
 {
     //run_tests_ori_argmax(); //unit test
-    //test_computeCells_voc5_vs_streamHOG(); //unit test
+    test_computeCells_voc5_vs_streamHOG(); //unit test
     test_streamHog_oneScale(); //timing experiment
 
     return 0;
