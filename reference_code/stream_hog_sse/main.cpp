@@ -196,7 +196,16 @@ void test_computeCells_voc5_vs_streamHOG(){
     int hogDepth = 32;
     diff_hogs(hogBuffer_voc5, hogBuffer_streamHog, hogHeight, hogWidth, hogDepth, "voc5_cells", "streamHog_cells");
 
+  //normImg(x,y) = sum( hist(x,y,0:17) )
     sHog.hogCell_gradientEnergy(hogBuffer_voc5, hogHeight, hogWidth, normImg); //populates normImg
+
+
+    float* hogBuffer_streamHog_blocks = allocate_hist(img.height, img.width, sbin,
+                                                      hogHeight, hogWidth); //will contain final output
+
+  //blocks = normalizeCells(hist, normImg)
+    sHog.normalizeCells_voc5(hogBuffer_streamHog, normImg, hogBuffer_streamHog_blocks,
+                             hogHeight, hogWidth);
 
 }
 
@@ -220,6 +229,8 @@ void test_streamHog_oneScale(){
     int hogWidth, hogHeight;
     float* hogBuffer = allocate_hist(img.height, img.width, sbin,
                                      hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
+    float* hogBuffer_blocks = allocate_hist(img.height, img.width, sbin,
+                                            hogHeight, hogWidth); //for normalized result
     float* normImg = (float*)malloc_aligned(32, hogWidth * hogHeight * sizeof(float));
 
   //[mag, ori] = gradient_sse(img)
@@ -270,6 +281,20 @@ void test_streamHog_oneScale(){
     gb_to_copy = hogWidth * hogHeight * 18 * sizeof(float) / 1e9; //for each hog cell: read 18 elements, write 1
     gb_per_sec = gb_to_copy / (stream_time/1000); //convert stream_time from ms to sec
     printf("avg hogCell_gradientEnergy stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec); 
+
+
+  //blocks = normalizeCells(hist, normImg)
+    start_timer = read_timer();
+
+    for(int i=0; i<n_iter; i++){
+        sHog.normalizeCells_voc5(hogBuffer, normImg, hogBuffer_blocks,
+                                hogHeight, hogWidth);
+    }
+
+    stream_time = (read_timer() - start_timer) / n_iter;
+    gb_to_copy = hogWidth * hogHeight * 18 * sizeof(float) / 1e9; //TODO: think about amt of data to stream
+    gb_per_sec = gb_to_copy / (stream_time/1000); //convert stream_time from ms to sec
+    printf("avg normalizeCells_voc5 stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec);
 }
 
 int main (int argc, char **argv)
