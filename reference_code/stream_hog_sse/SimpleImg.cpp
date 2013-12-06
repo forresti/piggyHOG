@@ -31,6 +31,8 @@ SimpleImg::SimpleImg(string fname){
     assert(sizeof(pixel_t) == 1); //uchar single-byte words
     data = (pixel_t*)malloc_aligned(32, width * stride * n_channels * sizeof(pixel_t)); //factor of 3 for 3 ch
 
+    //TODO: consider OpenCV copyMakeBorder() for padding http://docs.opencv.org/modules/imgproc/doc/filtering.html?#copymakeborder
+
     //this might be slow ... don't worry, it's just a test:
     for(int y=0; y<height; y++){
         for(int x=0; x<width; x++){
