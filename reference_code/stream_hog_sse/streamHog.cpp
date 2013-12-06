@@ -388,14 +388,14 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
     float sbin_inverse = 1.0f / (float)sbin;
 
 #pragma omp parallel for
-    for(int y=1; y<imgHeight-1; y++){
-        for(int x=1; x<imgWidth-1; x++){
+    for(int y=0; y<imgHeight; y++){
+        for(int x=0; x<imgWidth; x++){
             int best_o = ori[y*imgStride + x]; //orientation bin -- upcast to int
             int v = mag[y*imgStride + x]; //upcast to int
 
             // add to 4 histograms around pixel using linear interpolation
             //float xp = ((float)x+0.5)/(float)sbin - 0.5; //this is expensive (replacing it with 'x/4' gives a 1.5x speedup in hogCell)
-            //float yp = ((float)y+0.5)/(float)sbin - 0.5;
+            //loat yp = ((float)y+0.5)/(float)sbin - 0.5;
             //float xp = x/4; //TEST
             //float yp = y/4;
             float xp = ((float)x+0.5)*sbin_inverse - 0.5;
@@ -470,8 +470,8 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
     //      same deal for y. 
 
 #pragma omp parallel for
-    for(int y=0; y<imgHeight-2; y++){
-        for(int x=0; x < imgWidth-2; x++){
+    for(int y=0; y<imgHeight; y++){
+        for(int x=0; x < imgWidth; x++){
             int curr_ori = ori[y*imgStride + x]; //orientation bin -- upcast to int
             int curr_mag = mag[y*imgStride + x]; //upcast to int
 
@@ -515,7 +515,7 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             if (ixp+1 < outHistWidth && iyp >= 0) {
                 outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
             }
-            if (ixp+1 < outHistWidth && iyp+1 < outHistHeight) {
+            if (ixp >= 0 && iyp+1 < outHistHeight) {
                 outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
             }
             if (ixp+1 < outHistWidth && iyp+1 < outHistHeight) {
