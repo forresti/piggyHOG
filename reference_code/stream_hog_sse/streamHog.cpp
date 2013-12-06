@@ -564,13 +564,21 @@ void streamHog::normalizeCells_voc5(float *__restrict__ hogHist, int histHeight,
                                     float *__restrict__ normImg)
 {
 
+    //TODO: perhaps keep a voc5 version, goofy pointer incrementing and all.
+
+    //TODO: test my ptr indexing vs. voc5 ptr indexing.
+
 #if 0
     // compute features
-    for (int x = 0; x < out[1]; x++) { 
-        for (int y = 0; y < out[0]; y++) {
+    for(int y=1; y < histHeight-1; y++){
+        for(int x=1; x < histWidth-1; x++){
+            //float *dst = feat + x*out[0] + y;
+            //float *src, *p, n1, n2, n3, n4;
+            float n1, n2, n3, n4;
+
+            #if 0 //VOC5
             float *dst = feat + x*out[0] + y;
             float *src, *p, n1, n2, n3, n4;
-
             p = norm + (x+1)*blocks[0] + y+1;
             n1 = 1.0 / sqrt(*p + *(p+1) + *(p+blocks[0]) + *(p+blocks[0]+1) + eps);
             p = norm + (x+1)*blocks[0] + y;
@@ -579,12 +587,36 @@ void streamHog::normalizeCells_voc5(float *__restrict__ hogHist, int histHeight,
             n3 = 1.0 / sqrt(*p + *(p+1) + *(p+blocks[0]) + *(p+blocks[0]+1) + eps);
             p = norm + x*blocks[0] + y;
             n4 = 1.0 / sqrt(*p + *(p+1) + *(p+blocks[0]) + *(p+blocks[0]+1) + eps);
+            #endif
+
+            #if 1 //Forrest
+            float n0 = 1.0 / sqrt(normImg[(y-1)*hogWidth + (x-1)] + //top-left
+                                  normImg[(y-1)*hogWidth + (x)]   +
+                                  normImg[(y)*hogWidth   + (x-1)] +
+                                  normImg[(y)*hogWidth   + (x)]   + eps);
+
+            float n1 = 1.0 / sqrt(normImg[(y-1)*hogWidth + (x)]   + //top-right
+                                  normImg[(y-1)*hogWidth + (x+1)  +
+                                  normImg[(y)*hogWidth   + (x)]   +
+                                  normImg[(y)*hogWidth   + (x+1)] + eps);
+
+            float n2 = 1.0 / sqrt(normImg[(y)*hogWidth   + (x-1)] + //bottom-left
+                                  normImg[(y)*hogWidth   + (x)]   +
+                                  normImg[(y+1)*hogWidth + (x-1)] +
+                                  normImg[(y+1)*hogWidth + (x)]   + eps);
+
+            float n3 = 1.0 / sqrt(normImg[(y)*hogWidth   + (x)]   + //bottom-right
+                                  normImg[(y)*hogWidth   + (x+1)] +
+                                  normImg[(y+1)*hogWidth + (x)]   +
+                                  normImg[(y+1)*hogWidth + (x+1)] + eps);
+            #endif
 
             float t1 = 0;
             float t2 = 0;
             float t3 = 0;
             float t4 = 0;
 
+            #if 1 //VOC5
             // contrast-sensitive features
             src = hist + (x+1)*blocks[0] + (y+1);
             for (int o = 0; o < 18; o++) {
@@ -600,6 +632,27 @@ void streamHog::normalizeCells_voc5(float *__restrict__ hogHist, int histHeight,
                 dst += out[0]*out[1];
                 src += blocks[0]*blocks[1];
             }
+            #endif
+
+            #if 0 //Forrest
+            // contrast-sensitive features
+            src = hist + (x+1)*blocks[0] + (y+1);
+            int hogIdx = 
+            for (int o = 0; o < 18; o++) {
+                float h1 = min(*src * n1, 0.2);
+                float h2 = min(*src * n2, 0.2);
+                float h3 = min(*src * n3, 0.2);
+                float h4 = min(*src * n4, 0.2);
+                
+                *dst = 0.5 * (h1 + h2 + h3 + h4);
+                t1 += h1;
+                t2 += h2;
+                t3 += h3;
+                t4 += h4;
+                dst += out[0]*out[1];
+                src += blocks[0]*blocks[1];
+            }
+            #endif
 
         }
     }

@@ -207,6 +207,8 @@ inline void PgHog::hogBlock_normalize(int hogX, int hogY, PgHogContainer* hogRes
                         normImg.at<float>(hogY_internal+1, hogX_internal+1) + eps);
 
 
+//FIXME: this hogIdx is (hogX_internal+1), (hogY_internal+1) in VOC5. 
+//       but, perhaps my verison does name sense?
     int hogIdx = hogY_internal * hogResult->paddedWidth * hogResult->depth + 
                  hogX_internal * hogResult->depth;  //the location in hogResult->hog to update
     
