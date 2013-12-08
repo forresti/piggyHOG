@@ -170,8 +170,10 @@ void test_computeCells_voc5_vs_streamHOG(){
     int sbin = 4;
 
     SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
-    SimpleImg ori(img.height, img.width, img.stride, 1); //out img has just 1 channel
-    SimpleImg mag(img.height, img.width, img.stride, 1); //out img has just 1 channel
+    SimpleImg ori_stream(img.height, img.width, img.stride, 1); //out img has just 1 channel
+    SimpleImg ori_voc5(img.height, img.width, img.stride, 1);
+    SimpleImg mag_stream(img.height, img.width, img.stride, 1); //out img has just 1 channel
+    SimpleImg mag_voc5(img.height, img.width, img.stride, 1); 
     int hogWidth, hogHeight;
     float* hogBuffer_voc5 = allocate_hist(img.height, img.width, sbin,
                                           hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
@@ -181,16 +183,19 @@ void test_computeCells_voc5_vs_streamHOG(){
     //SimpleImg normImg(hogHeight, hogWidth, hogStride, 1); //gradient energy of histograms
     float* normImg = (float*)malloc_aligned(32, hogWidth * hogHeight * sizeof(float));
 
-  //[mag, ori] = gradient_sse(img)
-    sHog.gradient_sse(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
-    //sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data);
+  //[mag, ori] = gradient_stream(img)
+    sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori_voc5.n_channels, img.data, ori_voc5.data, mag_voc5.data);
+    sHog.gradient_stream(img.height, img.width, img.stride, img.n_channels, ori_stream.n_channels, img.data, ori_stream.data, mag_stream.data); 
+
+//TODO: diff {ori_voc5, ori_stream} and {mag_voc5, mag_stream}
+
 
   //hist = computeCells(mag, ori, sbin)
     sHog.computeCells_voc5_reference(img.height, img.width, img.stride, sbin,
-                                     ori.data, mag.data, 
+                                     ori_stream.data, mag_stream.data, 
                                      hogHeight, hogWidth, hogBuffer_voc5); 
     sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
-                             ori.data, mag.data,
+                             ori_stream.data, mag_stream.data,
                              hogHeight, hogWidth, hogBuffer_streamHog);
 
     int hogDepth = 32;
@@ -233,10 +238,10 @@ void test_streamHog_oneScale(){
                                             hogHeight, hogWidth); //for normalized result
     float* normImg = (float*)malloc_aligned(32, hogWidth * hogHeight * sizeof(float));
 
-  //[mag, ori] = gradient_sse(img)
+  //[mag, ori] = gradient_stream(img)
     double start_timer = read_timer();
     for(int i=0; i<n_iter; i++){
-        sHog.gradient_sse(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
+        sHog.gradient_stream(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
         //sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data);
     }
 
@@ -301,7 +306,7 @@ int main (int argc, char **argv)
 {
     //run_tests_ori_argmax(); //unit test
     test_computeCells_voc5_vs_streamHOG(); //unit test
-    test_streamHog_oneScale(); //timing experiment
+    //test_streamHog_oneScale(); //timing experiment
 
     return 0;
 }

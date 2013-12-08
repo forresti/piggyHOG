@@ -46,6 +46,8 @@ void streamHog::init_atan2_constants(){
 void streamHog::init_atan2_LUT(){
     for (int dy = -255; dy <= 255; ++dy) { //pixels are 0 to 255, so gradient values are -255 to 255
         for (int dx = -255; dx <= 255; ++dx) {
+
+            #if 0 //FFLD style, total of 19 bins [TODO: remove]
             // Angle in the range [-pi, pi]
             double angle = atan2(static_cast<double>(dy), static_cast<double>(dx));
 
@@ -57,6 +59,23 @@ void streamHog::init_atan2_LUT(){
                 angle -= 18.0;
             ATAN2_TABLE[dy + 255][dx + 255] = round( max(angle, 0.0) );
             //printf("ATAN2_TABLE[%d][%d] = %d \n", dx+255, dy+255, ATAN2_TABLE[dy + 255][dx + 255]);
+            #endif
+
+            // snap to one of 18 orientations [VOC5 style]
+            float best_dot = 0;
+            int best_o = 0;
+            for (int o = 0; o < 9; o++) {
+                float dot = uu[o]*dx + vv[o]*dy;
+                if (dot > best_dot) {
+                    best_dot = dot;
+                    best_o = o;
+                }
+                else if (-dot > best_dot) {
+                    best_dot = -dot;
+                    best_o = o+9;
+                }
+            }
+            ATAN2_TABLE[dy + 255][dx + 255] = best_o;
         }
     }
 }
@@ -212,9 +231,9 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
 
 }
 
-//TODO: replace outOri with outGradX_max and outGradY_max. (after calling gradient_sse, you do a lookup table)
+//TODO: replace outOri with outGradX_max and outGradY_max. (after calling gradient_stream, you do a lookup table)
 //  or, just do the lookup in here...
-void streamHog::gradient_sse(int height, int width, int stride, int n_channels_input, int n_channels_output,
+void streamHog::gradient_stream(int height, int width, int stride, int n_channels_input, int n_channels_output,
                   pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag){
     assert(n_channels_input == 3);
     assert(n_channels_output == 1);
