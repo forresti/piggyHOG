@@ -271,8 +271,13 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
                 xLo = _mm_loadu_si128( (__m128i*)(&img[y*stride + x + channel*height*stride    ]) ); //load sixteen 1-byte unsigned char pixels
                 xHi = _mm_loadu_si128( (__m128i*)(&img[y*stride + x + channel*height*stride + 2]) ); //index as chars, THEN cast to __m128i*  
 
-                yLo = _mm_load_si128( (__m128i*)(&img[y*stride + x + channel*height*stride           ]) ); //y-dim is a long stride, easier to do aligned loads
-                yHi = _mm_load_si128( (__m128i*)(&img[y*stride + x + channel*height*stride + 2*stride]) );
+                //yLo = _mm_load_si128( (__m128i*)(&img[y*stride + x + channel*height*stride           ]) ); //y-dim is a long stride, easier to do aligned loads
+                //yHi = _mm_load_si128( (__m128i*)(&img[y*stride + x + channel*height*stride + 2*stride]) );
+
+                //TEST: fix off-by-one error. (need unaligned loads to fix it this way). slow?
+                yLo = _mm_loadu_si128( (__m128i*)(&img[y*stride + (x+1) + channel*height*stride           ]) );
+                yHi = _mm_loadu_si128( (__m128i*)(&img[y*stride + (x+1) + channel*height*stride + 2*stride]) );
+
                 upcast_8bit_to_16bit(xLo, xHi, yLo, yHi,
                                      xLo_0, xHi_0, yLo_0, yHi_0,
                                      xLo_1, xHi_1, yLo_1, yHi_1);
@@ -391,7 +396,7 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
             //outOri[y*stride + x] = best_o;
 
             //to line up with forrest's 0-indexed version....
-            outMag[(y)*stride + (x-1)] = v;
+            outMag[(y-1)*stride + (x-1)] = v;
             //outOri[(y)*stride + (x-1)] = best_o; 
             outOri[(y-1)*stride + (x-1)] = (unsigned char) dy3; //TEST
         }
