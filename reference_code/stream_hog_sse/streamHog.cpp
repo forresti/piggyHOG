@@ -13,7 +13,7 @@ using namespace std;
 
 #define eps 0.0001
 
-#define SCALE_ORI //if defined, scale up the orientation (1 to 18) to make it more visible in output images for debugging
+//#define SCALE_ORI //if defined, scale up the orientation (1 to 18) to make it more visible in output images for debugging
 
 //constructor
 streamHog::streamHog(){
@@ -271,8 +271,8 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
                 xLo = _mm_loadu_si128( (__m128i*)(&img[(y+1)*stride + x + channel*height*stride    ]) ); //load sixteen 1-byte unsigned char pixels
                 xHi = _mm_loadu_si128( (__m128i*)(&img[(y+1)*stride + x + channel*height*stride + 2]) ); //index as chars, THEN cast to __m128i*  
 
-                //yLo = _mm_load_si128( (__m128i*)(&img[y*stride + x + channel*height*stride           ]) ); //y-dim is a long stride, easier to do aligned loads
-                //yHi = _mm_load_si128( (__m128i*)(&img[y*stride + x + channel*height*stride + 2*stride]) );
+                //yLo = _mm_load_si128( (__m128i*)(&img[(y+1)*stride + x + channel*height*stride           ]) ); //y-dim is a long stride, easier to do aligned loads
+                //yHi = _mm_load_si128( (__m128i*)(&img[(y+1)*stride + x + channel*height*stride + 2*stride]) );
 
                 //TEST: fix off-by-one error. (need unaligned loads to fix it this way). slow?
                 yLo = _mm_loadu_si128( (__m128i*)(&img[y*stride + (x+1) + channel*height*stride           ]) );
