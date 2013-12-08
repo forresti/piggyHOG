@@ -17,8 +17,8 @@ using namespace std;
 
 //constructor
 streamHog::streamHog(){
-    init_atan2_LUT(); //similar to FFLD hog
     init_atan2_constants(); //easier to vectorize alternative to lookup table. (similar to VOC5 hog)
+    init_atan2_LUT(); //similar to FFLD hog
 }
 
 //destructor
@@ -43,6 +43,7 @@ void streamHog::init_atan2_constants(){
 }
 
 //TODO: make this much smaller than 512x512.
+// ASSUMES that init_atan2_constants() has already been called.
 void streamHog::init_atan2_LUT(){
     for (int dy = -255; dy <= 255; ++dy) { //pixels are 0 to 255, so gradient values are -255 to 255
         for (int dx = -255; dx <= 255; ++dx) {
@@ -61,6 +62,7 @@ void streamHog::init_atan2_LUT(){
             //printf("ATAN2_TABLE[%d][%d] = %d \n", dx+255, dy+255, ATAN2_TABLE[dy + 255][dx + 255]);
             #endif
 
+#if 1
             // snap to one of 18 orientations [VOC5 style]
             float best_dot = 0;
             int best_o = 0;
@@ -76,6 +78,10 @@ void streamHog::init_atan2_LUT(){
                 }
             }
             ATAN2_TABLE[dy + 255][dx + 255] = best_o;
+            if(best_o != 0){
+                printf("ATAN2_TABLE[%d][%d] = %d \n", dx+255, dy+255, ATAN2_TABLE[dy + 255][dx + 255]);
+            }
+#endif
         }
     }
 }

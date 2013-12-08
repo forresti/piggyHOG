@@ -144,6 +144,23 @@ float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin,
     return hogBuffer;
 } 
 
+void diff_imgs_8bit(unsigned char* img_gold, unsigned char* img_test, int imgHeight, int imgWidth, int imgDepth,
+               string img_gold_name, string img_test_name){
+
+    for(int y=0; y<imgHeight; y++){
+        for(int x=0; x<imgWidth; x++){
+            for(int d=0; d<imgDepth; d++){
+                unsigned char gold_element = img_gold[x*imgDepth + y*imgWidth*imgDepth + d];
+                unsigned char test_element = img_test[x*imgDepth + y*imgWidth*imgDepth + d];
+                if(test_element != gold_element){
+                    //e.g. x=1, y=1, d=31, voc5=..., streamHog=...
+                    printf("x=%d, y=%d, d=%d. %s=%d, %s=%d \n", x, y, d, 
+                            img_gold_name.c_str(), gold_element, img_test_name.c_str(), test_element);
+                }
+            }
+        }
+    }
+}
 
 void diff_hogs(float* hog_gold, float* hog_test, int hogHeight, int hogWidth, int hogDepth,
                string hog_gold_name, string hog_test_name){
@@ -187,7 +204,8 @@ void test_computeCells_voc5_vs_streamHOG(){
     sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori_voc5.n_channels, img.data, ori_voc5.data, mag_voc5.data);
     sHog.gradient_stream(img.height, img.width, img.stride, img.n_channels, ori_stream.n_channels, img.data, ori_stream.data, mag_stream.data); 
 
-//TODO: diff {ori_voc5, ori_stream} and {mag_voc5, mag_stream}
+    //diff_imgs_8bit(ori_voc5.data, ori_stream.data, img.height, img.width, 1, "ori_voc5", "ori_streamHog");
+    //diff_imgs_8bit(mag_voc5.data, mag_stream.data, img.height, img.width, 1, "mag_voc5", "mag_streamHog"); //TODO: use 16-bit
 
 
   //hist = computeCells(mag, ori, sbin)
