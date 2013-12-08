@@ -33,7 +33,10 @@ SimpleImg::SimpleImg(string fname){
 
     //TODO: consider OpenCV copyMakeBorder() for padding http://docs.opencv.org/modules/imgproc/doc/filtering.html?#copymakeborder
 
+    double start_time = read_timer();
+
     //this might be slow ... don't worry, it's just a test:
+    //#pragma omp parallel for
     for(int y=0; y<height; y++){
         for(int x=0; x<width; x++){
             for(int channel = 0; channel < 3; channel++){
@@ -42,6 +45,9 @@ SimpleImg::SimpleImg(string fname){
             }
         }
     }
+
+    double response_time = read_timer() - start_time;
+    //printf("transposed img in %f ms \n", response_time);
 }
 
 //write the current image object's data out to file.
