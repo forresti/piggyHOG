@@ -13,7 +13,7 @@ using namespace std;
 
 #define eps 0.0001
 
-//#define SCALE_ORI //if defined, scale up the orientation (1 to 18) to make it more visible in output images for debugging
+#define SCALE_ORI //if defined, scale up the orientation (1 to 18) to make it more visible in output images for debugging
 
 //constructor
 streamHog::streamHog(){
