@@ -266,7 +266,6 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
             magMax = magMax_0 = magMax_1 = _mm_setzero_si128();
 
             for(int channel=0; channel<3; channel++){ //TODO: unroll channels
-                //magIsArgmax_0_ch[channel] = magIsArgmax_1_ch[channel] = _mm_setzero_si128(); 
 
                 xLo = _mm_loadu_si128( (__m128i*)(&img[(y+1)*stride + x + channel*height*stride    ]) ); //load sixteen 1-byte unsigned char pixels
                 xHi = _mm_loadu_si128( (__m128i*)(&img[(y+1)*stride + x + channel*height*stride + 2]) ); //index as chars, THEN cast to __m128i*  
