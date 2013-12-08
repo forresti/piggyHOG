@@ -210,7 +210,7 @@ void test_computeCells_voc5_vs_streamHOG(){
     ori_voc5.simple_imwrite("ori_voc5.jpg");
     ori_stream.simple_imwrite("ori_stream.jpg");
 
-//    diff_imgs_8bit(ori_voc5.data, ori_stream.data, img.height, img.width, 1, "ori_voc5", "ori_streamHog");
+    diff_imgs_8bit(ori_voc5.data, ori_stream.data, img.height, img.width, 1, "ori_voc5", "ori_streamHog");
     //diff_imgs_8bit(mag_voc5.data, mag_stream.data, img.height, img.width, 1, "mag_voc5", "mag_streamHog"); //TODO: use 16-bit
 
 /*
