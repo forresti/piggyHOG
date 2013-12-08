@@ -204,7 +204,13 @@ void test_computeCells_voc5_vs_streamHOG(){
     sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori_voc5.n_channels, img.data, ori_voc5.data, mag_voc5.data);
     sHog.gradient_stream(img.height, img.width, img.stride, img.n_channels, ori_stream.n_channels, img.data, ori_stream.data, mag_stream.data); 
 
-    //diff_imgs_8bit(ori_voc5.data, ori_stream.data, img.height, img.width, 1, "ori_voc5", "ori_streamHog");
+    //mag.simple_csvwrite("mag.csv");
+    mag_voc5.simple_imwrite("mag_voc5.jpg");
+    mag_stream.simple_imwrite("mag_stream.jpg");
+    ori_voc5.simple_imwrite("ori_voc5.jpg");
+    ori_stream.simple_imwrite("ori_stream.jpg");
+
+    diff_imgs_8bit(ori_voc5.data, ori_stream.data, img.height, img.width, 1, "ori_voc5", "ori_streamHog");
     //diff_imgs_8bit(mag_voc5.data, mag_stream.data, img.height, img.width, 1, "mag_voc5", "mag_streamHog"); //TODO: use 16-bit
 
 
@@ -268,10 +274,6 @@ void test_streamHog_oneScale(){
     double gb_per_sec = gb_to_copy / (stream_time/1000); //convert stream_time from ms to sec
     printf("avg (mag, ori) stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec);
 
-    //mag.simple_csvwrite("mag.csv");
-    mag.simple_imwrite("mag.jpg");
-    ori.simple_imwrite("ori.jpg");
-
   //hist = computeCells(mag, ori, sbin)
     start_timer = read_timer();
 
@@ -304,7 +306,6 @@ void test_streamHog_oneScale(){
     gb_to_copy = hogWidth * hogHeight * 18 * sizeof(float) / 1e9; //for each hog cell: read 18 elements, write 1
     gb_per_sec = gb_to_copy / (stream_time/1000); //convert stream_time from ms to sec
     printf("avg hogCell_gradientEnergy stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec); 
-
 
   //blocks = normalizeCells(hist, normImg)
     start_timer = read_timer();

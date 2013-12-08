@@ -13,7 +13,7 @@ using namespace std;
 
 #define eps 0.0001
 
-//#define SCALE_ORI //if defined, scale up the orientation (1 to 18) to make it more visible in output images for debugging
+#define SCALE_ORI //if defined, scale up the orientation (1 to 18) to make it more visible in output images for debugging
 
 //constructor
 streamHog::streamHog(){
@@ -62,7 +62,6 @@ void streamHog::init_atan2_LUT(){
             //printf("ATAN2_TABLE[%d][%d] = %d \n", dx+255, dy+255, ATAN2_TABLE[dy + 255][dx + 255]);
             #endif
 
-#if 1
             // snap to one of 18 orientations [VOC5 style]
             float best_dot = 0;
             int best_o = 0;
@@ -78,10 +77,6 @@ void streamHog::init_atan2_LUT(){
                 }
             }
             ATAN2_TABLE[dy + 255][dx + 255] = best_o;
-            if(best_o != 0){
-                printf("ATAN2_TABLE[%d][%d] = %d \n", dx+255, dy+255, ATAN2_TABLE[dy + 255][dx + 255]);
-            }
-#endif
         }
     }
 }
@@ -391,8 +386,12 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
             #endif
             //v = sqrt(v); //Forrest -- no longer need to sqrt the magnitude
 
-            outMag[y*stride + x] = v;
-            outOri[y*stride + x] = best_o; 
+            //outMag[y*stride + x] = v;
+            //outOri[y*stride + x] = best_o;
+
+            //to line up with forrest's 0-indexed version....
+            outMag[(y-1)*stride + (x-1)] = v;
+            outOri[(y-1)*stride + (x-1)] = best_o;  
         }
     }
 }
