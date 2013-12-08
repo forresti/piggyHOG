@@ -305,7 +305,7 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
                 gradY_ch[channel] = _mm_packs_epi16(gradY_0_ch[channel], gradY_1_ch[channel]); //temporary ... typically, we'd pack up the results later in the pipeline.
 
                 //mag_ch[channel]   = _mm_packs_epi16(mag_0_ch[channel], mag_1_ch[channel]);
-                _mm_store_si128( (__m128i*)(&outOri[y*stride + x]), gradY_ch[channel] ); //outOri[y][x : x+15] = gradX_ch[channel] -- just a test, doesnt make much sense
+                //_mm_store_si128( (__m128i*)(&outOri[y*stride + x]), gradY_ch[channel] ); //outOri[y][x : x+15] = gradX_ch[channel] -- just a test, doesnt make much sense
                 //_mm_store_si128( (__m128i*)(&outMag[y*stride + x]), mag_ch[channel] );
             }
 
@@ -314,7 +314,7 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
             magMax = _mm_packs_epi16(magMax_0, magMax_1);
             _mm_store_si128( (__m128i*)(&outMag[y*stride + x]), magMax );
            
-#if 0 //atan2 nonvectorized LUT. (not tested for correctness)
+#if 1 //atan2 nonvectorized LUT. (not tested for correctness)
             //outOri[y*stride + x + 0:15] = atan2(gradX_max[0:15], gradY_max[0:15])
             ori_atan2_LUT(gradX_max_0, gradX_max_1, gradY_max_0, gradY_max_1, &outOri[y*stride + x]);
 #endif
@@ -397,8 +397,7 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
 
             //to line up with forrest's 0-indexed version....
             outMag[(y-1)*stride + (x-1)] = v;
-            //outOri[(y-1)*stride + (x-1)] = best_o; 
-            outOri[(y-1)*stride + (x-1)] = (unsigned char) dy3; //TEST
+            outOri[(y-1)*stride + (x-1)] = best_o; 
         }
     }
 }
