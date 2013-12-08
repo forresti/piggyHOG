@@ -33,7 +33,7 @@ void init_atan2_constants(){
 }
 
 //FFLD-style lookup table
-void init_lookup_table(){
+void init_atan2_LUT_FFLD_style(){
     for (int dy = -255; dy <= 255; ++dy) { //pixels are 0 to 255, so gradient values are -255 to 255
         for (int dx = -255; dx <= 255; ++dx) {
             // Angle in the range [-pi, pi]
@@ -46,6 +46,32 @@ void init_lookup_table(){
             if (angle >= 18.0)
                 angle -= 18.0;
             ATAN2_TABLE[dy + 255][dx + 255] = round( max(angle, 0.0) );
+            //printf("ATAN2_TABLE[%d][%d] = %d \n", dx+255, dy+255, ATAN2_TABLE[dy + 255][dx + 255]);
+        }
+    }
+}
+
+//FFLD-style lookup table, using VOC5 atan2 math
+void init_atan2_LUT_VOC5_style(){
+    for (int dy = -255; dy <= 255; ++dy) { //pixels are 0 to 255, so gradient values are -255 to 255
+        for (int dx = -255; dx <= 255; ++dx) {
+            // Angle in the range [-pi, pi]
+
+            // snap to one of 18 orientations
+            float best_dot = 0;
+            int best_o = 0;
+            for (int o = 0; o < 9; o++) {
+                float dot = uu[o]*dx + vv[o]*dy;
+                if (dot > best_dot) {
+                    best_dot = dot;
+                    best_o = o;
+                } 
+                else if (-dot > best_dot) {
+                    best_dot = -dot;
+                    best_o = o+9;
+                }
+            }
+            ATAN2_TABLE[dy + 255][dx + 255] = best_o;
             //printf("ATAN2_TABLE[%d][%d] = %d \n", dx+255, dy+255, ATAN2_TABLE[dy + 255][dx + 255]);
         }
     }
@@ -259,8 +285,9 @@ int main (int argc, char **argv)
 {
     //test_int16_range();
     init_atan2_constants(); //stuff for fixedpt
-    init_lookup_table();
-    
+    //init_atan2_LUT_FFLD_style();
+    init_atan2_LUT_VOC5_style();
+
     //writeCsv_LUT(ATAN2_TABLE, 512, 512,  "LUT_FFLD.csv"); //save the FFLD ATAN2 LUT (for visualization in matlab/python)
 
     fixedpt_vs_floatpt(); //compare voc5 floatpt, voc5 fixedpt, FFLD floatpt
