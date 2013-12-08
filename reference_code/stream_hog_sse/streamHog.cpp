@@ -300,7 +300,7 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
                 gradY_ch[channel] = _mm_packs_epi16(gradY_0_ch[channel], gradY_1_ch[channel]); //temporary ... typically, we'd pack up the results later in the pipeline.
 
                 //mag_ch[channel]   = _mm_packs_epi16(mag_0_ch[channel], mag_1_ch[channel]);
-                //_mm_store_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+15] = gradX_ch[channel] -- just a test, doesnt make much sense
+                _mm_store_si128( (__m128i*)(&outOri[y*stride + x]), gradX_ch[channel] ); //outOri[y][x : x+15] = gradX_ch[channel] -- just a test, doesnt make much sense
                 //_mm_store_si128( (__m128i*)(&outMag[y*stride + x]), mag_ch[channel] );
             }
 
@@ -309,7 +309,7 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
             magMax = _mm_packs_epi16(magMax_0, magMax_1);
             _mm_store_si128( (__m128i*)(&outMag[y*stride + x]), magMax );
            
-#if 1 //atan2 nonvectorized LUT. (not tested for correctness)
+#if 0 //atan2 nonvectorized LUT. (not tested for correctness)
             //outOri[y*stride + x + 0:15] = atan2(gradX_max[0:15], gradY_max[0:15])
             ori_atan2_LUT(gradX_max_0, gradX_max_1, gradY_max_0, gradY_max_1, &outOri[y*stride + x]);
 #endif
@@ -348,6 +348,7 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
             double v2 = fabs(dx2) + fabs(dy2);
 
             // third color channel
+            channel=2;
             double dx3 = (double)img[y*stride + (x+1) + channel*height*stride] -
                             (double)img[y*stride + (x-1) + channel*height*stride];
             double dy3 = (double)img[(y+1)*stride + x + channel*height*stride] -
@@ -390,8 +391,12 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
             //outOri[y*stride + x] = best_o;
 
             //to line up with forrest's 0-indexed version....
-            outMag[(y-1)*stride + (x-1)] = v;
-            outOri[(y-1)*stride + (x-1)] = best_o;  
+            outMag[(y)*stride + (x-1)] = v;
+            //outOri[(y)*stride + (x-1)] = best_o; 
+            outOri[(y)*stride + (x-1)] = (unsigned char) dx3; //TEST
+
+            //int channel=2;
+            //outOri[(y-1)*stride + (x-1)] = (int16_t)img[y*stride + (x+1) + channel*height*stride] 
         }
     }
 }
@@ -529,6 +534,7 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             //TODO: instead of doing 'if (ixp >= 0 && iyp >= 0)' on every iteration,
             //      have a separate set of loops for border cases
 
+//TODO: atomic add if race condition shows up
           //the actual computation:
             if (ixp >= 0 && iyp >= 0) //this is expensive. 
             {
@@ -562,7 +568,6 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
 void streamHog::hogCell_gradientEnergy(float *__restrict__ hogHist, int histHeight, int histWidth, 
                                        float *__restrict__ normImg)
 {
-
     const int hogDepth = 32;
 
     //sum up the (0 to 360 degree) hog cells
@@ -591,10 +596,7 @@ void streamHog::normalizeCells_voc5(float *__restrict__ in_hogHist, float *__res
                                     float *__restrict__ out_hogBlocks,
                                     int histHeight, int histWidth)
 {
-
     const int hogDepth = 32;
-
-    //TODO: perhaps keep a voc5 version, goofy pointer incrementing and all.
     //TODO: test my ptr indexing vs. voc5 ptr indexing.
 
 #if 1

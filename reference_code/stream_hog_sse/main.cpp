@@ -213,7 +213,7 @@ void test_computeCells_voc5_vs_streamHOG(){
     diff_imgs_8bit(ori_voc5.data, ori_stream.data, img.height, img.width, 1, "ori_voc5", "ori_streamHog");
     //diff_imgs_8bit(mag_voc5.data, mag_stream.data, img.height, img.width, 1, "mag_voc5", "mag_streamHog"); //TODO: use 16-bit
 
-
+/*
   //hist = computeCells(mag, ori, sbin)
     sHog.computeCells_voc5_reference(img.height, img.width, img.stride, sbin,
                                      ori_stream.data, mag_stream.data, 
@@ -235,7 +235,7 @@ void test_computeCells_voc5_vs_streamHOG(){
   //blocks = normalizeCells(hist, normImg)
     sHog.normalizeCells_voc5(hogBuffer_streamHog, normImg, hogBuffer_streamHog_blocks,
                              hogHeight, hogWidth);
-
+*/
 }
 
 // MAIN TEST OF FUNCTIONALITY
