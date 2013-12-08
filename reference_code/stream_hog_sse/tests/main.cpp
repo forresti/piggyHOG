@@ -263,10 +263,10 @@ int main (int argc, char **argv)
     
     //writeCsv_LUT(ATAN2_TABLE, 512, 512,  "LUT_FFLD.csv"); //save the FFLD ATAN2 LUT (for visualization in matlab/python)
 
-    //fixedpt_vs_floatpt(); //compare voc5 floatpt, voc5 fixedpt, FFLD floatpt
+    fixedpt_vs_floatpt(); //compare voc5 floatpt, voc5 fixedpt, FFLD floatpt
     //analyze_LUT(); //look for patterns/clusters in LUT
 
-    lerp_LUT_vs_voc5();
+    //lerp_LUT_vs_voc5();
 
     return 0;
 }
