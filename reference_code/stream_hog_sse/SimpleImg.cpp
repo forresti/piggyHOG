@@ -9,27 +9,33 @@
 using namespace std;
 
 SimpleImg::SimpleImg(int in_height, int in_width, int in_stride, int in_n_channels){
+    int ALIGN_IN_BYTES=32;
+
     height = in_height;
     width = in_width;
-    stride = in_stride;
+    //stride = in_stride; //TODO: change interface to NOT take an input stride.
+    //stride = (width*sizeof(pixel_t) + (ALIGN_IN_BYTES - (width*sizeof(pixel_t))%ALIGN_IN_BYTES))/sizeof(pixel_t);
+    stride = compute_stride(width, sizeof(pixel_t)); //defined in helpers.cpp -- uses ALIGN_IN_BYTES=32 by default.
     n_channels = in_n_channels;
 
     //TODO: calloc?
     //TODO: align?
     //data = (pixel_t*)malloc(width * stride * sizeof(pixel_t)); 
-    data = (pixel_t*)malloc_aligned(32, width * stride * n_channels * sizeof(pixel_t));
+    data = (pixel_t*)malloc_aligned(ALIGN_IN_BYTES, height * stride * n_channels * sizeof(pixel_t));
 }
 
 SimpleImg::SimpleImg(string fname){
     cv::Mat img = cv::imread(fname); //.c_str()?
     height = img.rows;
     width = img.cols;
-    stride = img.cols; //TODO: select stride by rounding up for alignment
+    //stride = img.cols; //TODO: select stride by rounding up for alignment
+    stride = compute_stride(width, sizeof(pixel_t)); //defined in helpers.cpp
+printf("stride = %d \n", stride);
     n_channels = 3;
 
     assert(img.type() == CV_8UC3); //require that input img is 3-channel, uchar words. 
     assert(sizeof(pixel_t) == 1); //uchar single-byte words
-    data = (pixel_t*)malloc_aligned(32, width * stride * n_channels * sizeof(pixel_t)); //factor of 3 for 3 ch
+    data = (pixel_t*)malloc_aligned(32, height * stride * n_channels * sizeof(pixel_t)); //factor of 3 for 3 ch
 
     //TODO: consider OpenCV copyMakeBorder() for padding http://docs.opencv.org/modules/imgproc/doc/filtering.html?#copymakeborder
 

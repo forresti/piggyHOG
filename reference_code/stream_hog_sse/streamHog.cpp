@@ -411,14 +411,14 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
                                             float *__restrict__ outHist){
 
     assert(outHistHeight == round(imgHeight/sbin));
-    assert(outHistWidth == round(imgWidth/sbin));
+    assert(outHistWidth == round(imgStride/sbin));
 
     //TODO: have mag as an int16_t instead of a uchar. 
 
     const int hogDepth = 32;
     float sbin_inverse = 1.0f / (float)sbin;
 
-#pragma omp parallel for
+//#pragma omp parallel for
     for(int y=0; y<imgHeight; y++){
         for(int x=0; x<imgWidth; x++){
             int best_o = ori[y*imgStride + x]; //orientation bin -- upcast to int
@@ -500,7 +500,7 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
     //      then, have a final 'cleanup' loop for the x=0:2, x=imgHeight-2:imgHeight, etc.
     //      same deal for y. 
 
-#pragma omp parallel for
+//#pragma omp parallel for
     for(int y=0; y<imgHeight; y++){
         for(int x=0; x < imgWidth; x++){
             int curr_ori = ori[y*imgStride + x]; //orientation bin -- upcast to int

@@ -23,6 +23,7 @@ using namespace std;
 void print_epi16(__m128i vec_sse, string vec_name);
 double read_timer();
 //std::string forrestGetImgType(int imgTypeInt);
+int compute_stride(int width, int size_per_element);
 
 #endif
 

@@ -281,6 +281,25 @@ void lerp_LUT_vs_voc5(){
     }
 }   
 
+void test_padding_math(){
+    int ALIGN_IN_BYTES = 32;
+
+    printf("test_padding_math() \n");
+    printf("  for 'unsigned char': \n");
+    int size_of_type = sizeof(unsigned char);
+    for(int width=0; width<60; width++){
+        int stride = (width*size_of_type + (ALIGN_IN_BYTES - (width*size_of_type)%ALIGN_IN_BYTES))/size_of_type;
+        printf("    width=%d, stride=%d \n", width, stride);
+    }
+
+    printf("  for 'float': \n");
+    size_of_type = sizeof(float);
+    for(int width=0; width<60; width++){
+        int stride = (width*size_of_type + (ALIGN_IN_BYTES - (width*size_of_type)%ALIGN_IN_BYTES))/size_of_type;
+        printf("    width=%d, stride=%d \n", width, stride);
+    }
+}
+
 int main (int argc, char **argv)
 {
     //test_int16_range();
@@ -294,6 +313,8 @@ int main (int argc, char **argv)
     //analyze_LUT(); //look for patterns/clusters in LUT
 
     //lerp_LUT_vs_voc5();
+
+    test_padding_math();
 
     return 0;
 }

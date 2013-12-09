@@ -193,9 +193,9 @@ void test_computeCells_voc5_vs_streamHOG(){
     SimpleImg mag_stream(img.height, img.width, img.stride, 1); //out img has just 1 channel
     SimpleImg mag_voc5(img.height, img.width, img.stride, 1); 
     int hogWidth, hogHeight;
-    float* hogBuffer_voc5 = allocate_hist(img.height, img.width, sbin,
+    float* hogBuffer_voc5 = allocate_hist(img.height, img.stride, sbin,
                                           hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
-    float* hogBuffer_streamHog = allocate_hist(img.height, img.width, sbin,
+    float* hogBuffer_streamHog = allocate_hist(img.height, img.stride, sbin,
                                                hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
     int hogStride = hogWidth; //TODO: change this?
     //SimpleImg normImg(hogHeight, hogWidth, hogStride, 1); //gradient energy of histograms
@@ -229,7 +229,7 @@ void test_computeCells_voc5_vs_streamHOG(){
     sHog.hogCell_gradientEnergy(hogBuffer_voc5, hogHeight, hogWidth, normImg); //populates normImg
 
 
-    float* hogBuffer_streamHog_blocks = allocate_hist(img.height, img.width, sbin,
+    float* hogBuffer_streamHog_blocks = allocate_hist(img.height, img.stride, sbin,
                                                       hogHeight, hogWidth); //will contain final output
 
   //blocks = normalizeCells(hist, normImg)
@@ -243,7 +243,6 @@ void test_streamHog_oneScale(){
 
     int sbin = 4;
 
-    int ALIGN_IN_BYTES = 256;
     int n_iter = 200; //not really "iterating" -- just number of times to run the experiment
     if(n_iter < 100){
         printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=100 or greater. \n", n_iter);
@@ -255,9 +254,9 @@ void test_streamHog_oneScale(){
     SimpleImg ori(img.height, img.width, img.stride, 1); //out img has just 1 channel
     SimpleImg mag(img.height, img.width, img.stride, 1); //out img has just 1 channel
     int hogWidth, hogHeight;
-    float* hogBuffer = allocate_hist(img.height, img.width, sbin,
+    float* hogBuffer = allocate_hist(img.height, img.stride, sbin,
                                      hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
-    float* hogBuffer_blocks = allocate_hist(img.height, img.width, sbin,
+    float* hogBuffer_blocks = allocate_hist(img.height, img.stride, sbin,
                                             hogHeight, hogWidth); //for normalized result
     float* normImg = (float*)malloc_aligned(32, hogWidth * hogHeight * sizeof(float));
 
@@ -324,7 +323,7 @@ int main (int argc, char **argv)
 {
     //run_tests_ori_argmax(); //unit test
     test_computeCells_voc5_vs_streamHOG(); //unit test
-    //test_streamHog_oneScale(); //timing experiment
+    test_streamHog_oneScale(); //timing experiment
 
     return 0;
 }
