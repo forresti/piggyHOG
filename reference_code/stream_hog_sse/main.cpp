@@ -216,7 +216,7 @@ void test_computeCells_voc5_vs_streamHOG(){
 
   //hist = computeCells(mag, ori, sbin)
     sHog.computeCells_voc5_reference(img.height, img.width, img.stride, sbin,
-                                     ori_voc5.data, mag_voc5.data, 
+                                     ori_stream.data, mag_stream.data, 
                                      hogHeight, hogWidth, hogBuffer_voc5); 
     sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
                              ori_stream.data, mag_stream.data,
