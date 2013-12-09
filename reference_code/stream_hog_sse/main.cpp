@@ -186,16 +186,16 @@ void test_computeCells_voc5_vs_streamHOG(){
     streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
     int sbin = 4;
 
-    SimpleImg img("./carsgraz001_goofySize_539x471.jpg");
-    //SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
+    //SimpleImg img("./carsgraz001_goofySize_539x471.jpg");
+    SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
     SimpleImg ori_stream(img.height, img.width, img.stride, 1); //out img has just 1 channel
     SimpleImg ori_voc5(img.height, img.width, img.stride, 1);
     SimpleImg mag_stream(img.height, img.width, img.stride, 1); //out img has just 1 channel
     SimpleImg mag_voc5(img.height, img.width, img.stride, 1); 
     int hogWidth, hogHeight;
-    float* hogBuffer_voc5 = allocate_hist(img.height, img.stride, sbin,
+    float* hogBuffer_voc5 = allocate_hist(img.height, img.width, sbin,
                                           hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
-    float* hogBuffer_streamHog = allocate_hist(img.height, img.stride, sbin,
+    float* hogBuffer_streamHog = allocate_hist(img.height, img.width, sbin,
                                                hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
     int hogStride = hogWidth; //TODO: change this?
     //SimpleImg normImg(hogHeight, hogWidth, hogStride, 1); //gradient energy of histograms
@@ -216,7 +216,7 @@ void test_computeCells_voc5_vs_streamHOG(){
 
   //hist = computeCells(mag, ori, sbin)
     sHog.computeCells_voc5_reference(img.height, img.width, img.stride, sbin,
-                                     ori_stream.data, mag_stream.data, 
+                                     ori_voc5.data, mag_voc5.data, 
                                      hogHeight, hogWidth, hogBuffer_voc5); 
     sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
                              ori_stream.data, mag_stream.data,
@@ -229,7 +229,7 @@ void test_computeCells_voc5_vs_streamHOG(){
     sHog.hogCell_gradientEnergy(hogBuffer_voc5, hogHeight, hogWidth, normImg); //populates normImg
 
 
-    float* hogBuffer_streamHog_blocks = allocate_hist(img.height, img.stride, sbin,
+    float* hogBuffer_streamHog_blocks = allocate_hist(img.height, img.width, sbin,
                                                       hogHeight, hogWidth); //will contain final output
 
   //blocks = normalizeCells(hist, normImg)
@@ -254,9 +254,9 @@ void test_streamHog_oneScale(){
     SimpleImg ori(img.height, img.width, img.stride, 1); //out img has just 1 channel
     SimpleImg mag(img.height, img.width, img.stride, 1); //out img has just 1 channel
     int hogWidth, hogHeight;
-    float* hogBuffer = allocate_hist(img.height, img.stride, sbin,
+    float* hogBuffer = allocate_hist(img.height, img.width, sbin,
                                      hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
-    float* hogBuffer_blocks = allocate_hist(img.height, img.stride, sbin,
+    float* hogBuffer_blocks = allocate_hist(img.height, img.width, sbin,
                                             hogHeight, hogWidth); //for normalized result
     float* normImg = (float*)malloc_aligned(32, hogWidth * hogHeight * sizeof(float));
 
@@ -323,7 +323,7 @@ int main (int argc, char **argv)
 {
     //run_tests_ori_argmax(); //unit test
     test_computeCells_voc5_vs_streamHOG(); //unit test
-    test_streamHog_oneScale(); //timing experiment
+    //test_streamHog_oneScale(); //timing experiment
 
     return 0;
 }

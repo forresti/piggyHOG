@@ -14,7 +14,6 @@ SimpleImg::SimpleImg(int in_height, int in_width, int in_stride, int in_n_channe
     height = in_height;
     width = in_width;
     //stride = in_stride; //TODO: change interface to NOT take an input stride.
-    //stride = (width*sizeof(pixel_t) + (ALIGN_IN_BYTES - (width*sizeof(pixel_t))%ALIGN_IN_BYTES))/sizeof(pixel_t);
     stride = compute_stride(width, sizeof(pixel_t)); //defined in helpers.cpp -- uses ALIGN_IN_BYTES=32 by default.
     n_channels = in_n_channels;
 
@@ -30,7 +29,7 @@ SimpleImg::SimpleImg(string fname){
     width = img.cols;
     //stride = img.cols; //TODO: select stride by rounding up for alignment
     stride = compute_stride(width, sizeof(pixel_t)); //defined in helpers.cpp
-printf("stride = %d \n", stride);
+    printf("    stride = %d \n", stride);
     n_channels = 3;
 
     assert(img.type() == CV_8UC3); //require that input img is 3-channel, uchar words. 
