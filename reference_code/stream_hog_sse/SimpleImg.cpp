@@ -61,7 +61,6 @@ void SimpleImg::simple_imwrite(string fname){
     assert(n_channels == 1 || n_channels == 3);
     cv::Mat* out_img;
     if(this->n_channels == 1){
-        //TODO: handle stride, if necessary
         out_img = new cv::Mat(this->height, this->stride, CV_8UC1, this->data); //cv::Mat(int rows, int cols, int type, char* preAllocatedPointerToData)
     }
     else if(this->n_channels == 3){

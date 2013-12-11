@@ -18,7 +18,8 @@ class SimpleImg{
     int height;
     int n_channels;
 
-    SimpleImg(int in_height, int in_width, int in_stride, int in_n_channels){
+    //SimpleImg(int in_height, int in_width, int in_stride, int in_n_channels){
+    SimpleImg(int in_height, int in_width, int in_n_channels){
         int ALIGN_IN_BYTES=32;
 
         height = in_height;
@@ -71,11 +72,10 @@ class SimpleImg{
         assert(n_channels == 1 || n_channels == 3);
         cv::Mat* out_img;
         if(this->n_channels == 1){
-            //TODO: handle stride, if necessary
-            out_img = new cv::Mat(this->height, this->width, CV_8UC1, this->data); //cv::Mat(int rows, int cols, int type, char* preAllocatedPointerToData)
+            out_img = new cv::Mat(this->height, this->stride, CV_8UC1, this->data); //cv::Mat(int rows, int cols, int type, char* preAllocatedPointerToData)
         }
         else if(this->n_channels == 3){
-            out_img = new cv::Mat(this->height, this->width, CV_8UC3, this->data); 
+            out_img = new cv::Mat(this->height, this->stride, CV_8UC3, this->data); 
         }
 
         cv::imwrite(fname, *out_img);
@@ -96,7 +96,7 @@ class SimpleImg{
     }
 
     ~SimpleImg(){
-        free(data);
+        //free(data);
     }
 };
 
