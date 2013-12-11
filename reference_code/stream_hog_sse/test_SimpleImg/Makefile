@@ -23,8 +23,8 @@ main.o : main.cpp helpers.h SimpleImg.hpp
 helpers.o : helpers.cpp helpers.h 
 	$(CC) $(CCOPTS) helpers.cpp
 
-#SimpleImg.o : SimpleImg.cpp SimpleImg.h helpers.h
-#	$(CC) $(CCOPTS) SimpleImg.cpp
+SimpleImg.o : SimpleImg.cpp SimpleImg.h helpers.h
+	$(CC) $(CCOPTS) SimpleImg.cpp
 
 clean : 
 	rm -f *.o $(EXENAME) 2>/dev/null
