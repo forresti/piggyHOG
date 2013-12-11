@@ -322,48 +322,11 @@ void test_streamHog_oneScale(){
     printf("avg normalizeCells_voc5 stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec);
 }
 
-void avg_channels(SimpleImg &in_img, SimpleImg &out_img)
-{
-
-    //SimpleImg* out_img = new SimpleImg(in_img.height, in_img.width, 1); //1 channel 
-
-    //for(int y=0; y<1; y++)
-    for(int y=0; y<in_img.height; y++)
-    {
-        //for(int x=0; x<1; x++)
-        for(int x=0; x<in_img.width; x++)
-        {
-            out_img.data[y*(out_img.stride) + x] = (unsigned char)0;
-            for(int ch=0; ch<3; ch++){
-                //out_img.data[y*(out_img.stride) + x] += 10;
-                out_img.data[y*(out_img.stride) + x] += in_img.data[y*in_img.stride + x + ch*in_img.stride*in_img.height] / 3;
-//                printf("out_img[y=%d][x=%d] += %d \n", y, x, in_img.data[y*in_img.stride + x + ch*in_img.stride*in_img.height] / 3);
-            }
-        }
-    }
-    //return out_img;
-}
-
-void SimpleImg_test(){
-    SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
-    //SimpleImg ori(img.height, img.width, img.stride, 1); //out img has just 1 channel
-    //SimpleImg mag(img.height, img.width, img.stride, 1); //out img has just 1 channel
-
-    //SimpleImg out_img(img.height, img.width, 1);
-    SimpleImg out_img(img.height, img.width, img.stride, 1);
-    avg_channels(img, out_img); //out_img gets filled in
-
-
-    //img.simple_imwrite("./out.jpg");
-    out_img.simple_imwrite("./out.jpg");
-}
-
 int main (int argc, char **argv)
 {
     //run_tests_ori_argmax(); //unit test
     test_computeCells_voc5_vs_streamHOG(); //unit test
     test_streamHog_oneScale(); //timing experiment
-    SimpleImg_test();
 
     return 0;
 }
