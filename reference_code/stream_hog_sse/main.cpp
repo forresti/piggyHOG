@@ -218,13 +218,13 @@ void test_computeCells_voc5_vs_streamHOG(){
   //hist = computeCells(mag, ori, sbin)
     sHog.computeCells_voc5_reference(img.height, img.width, img.stride, sbin,
                                      ori_stream.data, mag_stream.data, 
-                                     hogHeight, hogWidth, hogBuffer_voc5); 
-    sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
-                             ori_stream.data, mag_stream.data,
-                             hogHeight, hogWidth, hogBuffer_streamHog);
+                                     hogHeight, hogWidth, hogBuffer_streamHog); 
+    //sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
+    //                         ori_stream.data, mag_stream.data,
+    //                         hogHeight, hogWidth, hogBuffer_streamHog);
 
     int hogDepth = 32;
-    diff_hogs(hogBuffer_voc5, hogBuffer_streamHog, hogHeight, hogWidth, hogDepth, "voc5_cells", "streamHog_cells");
+//    diff_hogs(hogBuffer_voc5, hogBuffer_streamHog, hogHeight, hogWidth, hogDepth, "voc5_cells", "streamHog_cells");
 
   //normImg(x,y) = sum( hist(x,y,0:17) )
     sHog.hogCell_gradientEnergy(hogBuffer_voc5, hogHeight, hogWidth, normImg); //populates normImg
