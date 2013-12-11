@@ -6,8 +6,8 @@
 //#include <xmmintrin.h>
 //#include <pmmintrin.h> //for _mm_hadd_pd()
 
-#include "SimpleImg.h"
-//#include "SimpleImg.hpp"
+//#include "SimpleImg.h"
+#include "SimpleImg.hpp"
 //#include "streamHog.h"
 //#include "helpers.h"
 using namespace std;
@@ -80,8 +80,8 @@ void SimpleImg_test(){
     //SimpleImg ori(img.height, img.width, img.stride, 1); //out img has just 1 channel
     //SimpleImg mag(img.height, img.width, img.stride, 1); //out img has just 1 channel
 
-    //SimpleImg out_img(img.height, img.width, 1);
-    SimpleImg out_img(img.height, img.width, img.stride, 1);
+    SimpleImg out_img(img.height, img.width, 1);
+    //SimpleImg out_img(img.height, img.width, img.stride, 1);
     avg_channels(img, out_img); //out_img gets filled in
 
 
