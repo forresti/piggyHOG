@@ -135,8 +135,6 @@ bool run_tests_ori_argmax(){
 float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin,
                    int &out_hogHeight, int &out_hogWidth){
 
-printf("round(in_imgWidth/sbin) = %d, (int)round((double)in_imgWidth/(double)sbin) = %d \n", (int)round(in_imgWidth/sbin), (int)round((double)in_imgWidth/(double)sbin));
-
     //out_hogHeight = round(in_imgHeight/sbin);
     //out_hogWidth = round(in_imgWidth/sbin);
     out_hogHeight = (int)round((double)in_imgHeight/(double)sbin);

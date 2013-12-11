@@ -410,8 +410,8 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
                                             int outHistHeight, int outHistWidth,
                                             float *__restrict__ outHist){
 
-    //assert(outHistHeight == round(imgHeight/sbin));
-    //assert(outHistWidth == round(imgWidth/sbin));
+    assert(outHistHeight == (int)round((double)imgHeight/(double)sbin));
+    assert(outHistWidth == (int)round((double)imgWidth/(double)sbin));
 
     //TODO: have mag as an int16_t instead of a uchar. 
 
@@ -480,8 +480,8 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
                                     int outHistHeight, int outHistWidth,
                                     float *__restrict__ outHist){
 
-    //assert(outHistHeight == round(imgHeight/sbin));
-    //assert(outHistWidth == round(imgWidth/sbin));
+    assert(outHistHeight == (int)round((double)imgHeight/(double)sbin));
+    assert(outHistWidth == (int)round((double)imgWidth/(double)sbin));
 
     const int hogDepth = 32;
     float sbin_inverse = 1.0f / (float)sbin;
@@ -502,8 +502,6 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
     //TODO: x=2:imgHeight-2. no checking for 'if ixp>=0,...' 
     //      then, have a final 'cleanup' loop for the x=0:2, x=imgHeight-2:imgHeight, etc.
     //      same deal for y. 
-
-//printf("imgHeight=%d, imgWidth=%d \n", imgHeight, imgWidth);
 
 #pragma omp parallel for
     for(int y=0; y<imgHeight; y++){
