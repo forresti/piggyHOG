@@ -333,10 +333,10 @@ void avg_channels(SimpleImg &in_img, SimpleImg &out_img)
         //for(int x=0; x<1; x++)
         for(int x=0; x<in_img.width; x++)
         {
-//            out_img->data[y*(out_img->stride) + x] = (unsigned char)0;
+            out_img.data[y*(out_img.stride) + x] = (unsigned char)0;
             for(int ch=0; ch<3; ch++){
-                out_img.data[y*(out_img.stride) + x] += 10;
-                //out_img.data[y*(out_img.stride) + x] += in_img.data[y*in_img.stride + x + ch*in_img.stride*in_img.height] / 3;
+                //out_img.data[y*(out_img.stride) + x] += 10;
+                out_img.data[y*(out_img.stride) + x] += in_img.data[y*in_img.stride + x + ch*in_img.stride*in_img.height] / 3;
 //                printf("out_img[y=%d][x=%d] += %d \n", y, x, in_img.data[y*in_img.stride + x + ch*in_img.stride*in_img.height] / 3);
             }
         }
