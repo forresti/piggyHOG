@@ -186,8 +186,9 @@ void test_computeCells_voc5_vs_streamHOG(){
     streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
     int sbin = 4;
 
-    //SimpleImg img("./carsgraz001_goofySize_539x471.jpg");
-    SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
+    SimpleImg img("./carsgraz001_goofySize_539x471.jpg");
+    //SimpleImg img("./carsgraz001_goofySize_641x480.jpg");
+    //SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
     SimpleImg ori_stream(img.height, img.width, img.stride, 1); //out img has just 1 channel
     SimpleImg ori_voc5(img.height, img.width, img.stride, 1);
     SimpleImg mag_stream(img.height, img.width, img.stride, 1); //out img has just 1 channel
