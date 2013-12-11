@@ -1,4 +1,4 @@
-//#include "helpers.h"
+#include "helpers.h"
 //#include "SimpleImg.h"
 #include <opencv2/opencv.hpp> //only used for file I/O
 #include <vector>
@@ -7,6 +7,8 @@
 #include <string>
 #include <sstream>
 using namespace std;
+
+#define pixel_t uint8_t //you modify this 
 
 class SimpleImg{
   public:

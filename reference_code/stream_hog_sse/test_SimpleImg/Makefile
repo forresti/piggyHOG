@@ -2,7 +2,7 @@
 #Created: 1/24/10
 #Modified: 9/6/12
 
-OBJS = main.o  helpers.o SimpleImg.o streamHog.o
+OBJS = main.o  helpers.o SimpleImg.o 
 EXENAME = main
 
 #on sandy bridge, -march=native gives me -mavx -msse2avx
