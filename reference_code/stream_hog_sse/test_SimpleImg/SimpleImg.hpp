@@ -98,7 +98,7 @@ class SimpleImg{
     }
 
     ~SimpleImg(){
-        //free(data);
+        free(data);
     }
 };
 
