@@ -79,6 +79,8 @@ class SimpleImg{
         }
 
         cv::imwrite(fname, *out_img);
+
+        //TODO: delete out_img
     }
 
     void simple_csvwrite(string fname){
