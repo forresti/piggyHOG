@@ -7,6 +7,12 @@
 //#define pixel_t float //you modify this 
 //#define pixel_t __m128
 
+//TODO: make a templatized version of SimpleImg (put this in a separate test file first)
+template<class my_pixel_t>
+class SimpleImg2{
+
+};
+
 //no notion of RGB ... just a series of values (pixelType = char, short int, int, etc)
 class SimpleImg{
   public:
