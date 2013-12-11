@@ -1,5 +1,5 @@
-#include "helpers.h"
-#include "SimpleImg.h"
+//#include "helpers.h"
+//#include "SimpleImg.h"
 #include <opencv2/opencv.hpp> //only used for file I/O
 #include <vector>
 #include <iostream>
@@ -10,6 +10,11 @@ using namespace std;
 
 class SimpleImg{
   public:
+    pixel_t* data;
+    int width;
+    int stride; //width+padding. note that this is row-major.
+    int height;
+    int n_channels;
 
     SimpleImg(int in_height, int in_width, int in_stride, int in_n_channels){
         int ALIGN_IN_BYTES=32;
