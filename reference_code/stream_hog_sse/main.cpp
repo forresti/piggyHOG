@@ -135,8 +135,12 @@ bool run_tests_ori_argmax(){
 float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin,
                    int &out_hogHeight, int &out_hogWidth){
 
-    out_hogHeight = round(in_imgHeight/sbin);
-    out_hogWidth = round(in_imgWidth/sbin);
+printf("round(in_imgWidth/sbin) = %d, (int)round((double)in_imgWidth/(double)sbin) = %d \n", (int)round(in_imgWidth/sbin), (int)round((double)in_imgWidth/(double)sbin));
+
+    //out_hogHeight = round(in_imgHeight/sbin);
+    //out_hogWidth = round(in_imgWidth/sbin);
+    out_hogHeight = (int)round((double)in_imgHeight/(double)sbin);
+    out_hogWidth = (int)round((double)in_imgWidth/(double)sbin);
     const int hogDepth = 32;
 
     float* hogBuffer = (float*)malloc_aligned(32, out_hogWidth * out_hogHeight * hogDepth * sizeof(float));
@@ -218,10 +222,10 @@ void test_computeCells_voc5_vs_streamHOG(){
   //hist = computeCells(mag, ori, sbin)
     sHog.computeCells_voc5_reference(img.height, img.width, img.stride, sbin,
                                      ori_stream.data, mag_stream.data, 
-                                     hogHeight, hogWidth, hogBuffer_streamHog); 
-    //sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
-    //                         ori_stream.data, mag_stream.data,
-    //                         hogHeight, hogWidth, hogBuffer_streamHog);
+                                     hogHeight, hogWidth, hogBuffer_voc5); 
+    sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
+                             ori_stream.data, mag_stream.data,
+                             hogHeight, hogWidth, hogBuffer_streamHog);
 
     int hogDepth = 32;
 //    diff_hogs(hogBuffer_voc5, hogBuffer_streamHog, hogHeight, hogWidth, hogDepth, "voc5_cells", "streamHog_cells");

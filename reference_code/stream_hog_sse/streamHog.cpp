@@ -410,8 +410,8 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
                                             int outHistHeight, int outHistWidth,
                                             float *__restrict__ outHist){
 
-    assert(outHistHeight == round(imgHeight/sbin));
-    assert(outHistWidth == round(imgWidth/sbin));
+    //assert(outHistHeight == round(imgHeight/sbin));
+    //assert(outHistWidth == round(imgWidth/sbin));
 
     //TODO: have mag as an int16_t instead of a uchar. 
 
@@ -480,8 +480,8 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
                                     int outHistHeight, int outHistWidth,
                                     float *__restrict__ outHist){
 
-    assert(outHistHeight == round(imgHeight/sbin));
-    assert(outHistWidth == round(imgWidth/sbin));
+    //assert(outHistHeight == round(imgHeight/sbin));
+    //assert(outHistWidth == round(imgWidth/sbin));
 
     const int hogDepth = 32;
     float sbin_inverse = 1.0f / (float)sbin;
@@ -550,13 +550,13 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
                 outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx1*vy1*curr_mag;
             }
             if (ixp+1 < outHistWidth && iyp >= 0) {
-                outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
+                //outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
             }
             if (ixp >= 0 && iyp+1 < outHistHeight) {
-                outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
+                //outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
             }
             if (ixp+1 < outHistWidth && iyp+1 < outHistHeight) {
-                outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
+                //outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
             }
             //DEBUG printfs.
             //float my_outHist_element = outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori];
