@@ -548,13 +548,13 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
                 outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx1*vy1*curr_mag;
             }
             if (ixp+1 < outHistWidth && iyp >= 0) {
-                //outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
+                outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
             }
             if (ixp >= 0 && iyp+1 < outHistHeight) {
-                //outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
+                outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
             }
             if (ixp+1 < outHistWidth && iyp+1 < outHistHeight) {
-                //outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
+                outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
             }
             //DEBUG printfs.
             //float my_outHist_element = outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori];
