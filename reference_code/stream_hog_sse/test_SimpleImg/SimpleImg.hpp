@@ -23,7 +23,8 @@ class SimpleImg{
     SimpleImg(int in_height, int in_width, int in_n_channels){
         height = in_height;
         width = in_width;
-        stride = compute_stride(width, sizeof(pixel_t), ALIGN_IN_BYTES); //defined in helpers.cpp -- uses ALIGN_IN_BYTES=32 by default.
+        //stride = compute_stride(width, sizeof(pixel_t), ALIGN_IN_BYTES); //defined in helpers.cpp -- uses ALIGN_IN_BYTES=32 by default.
+        stride = compute_stride(width, sizeof(uint8_t), ALIGN_IN_BYTES); 
         n_channels = in_n_channels;
 
         data = (pixel_t*)malloc_aligned(ALIGN_IN_BYTES, height * stride * n_channels * sizeof(pixel_t));
@@ -33,10 +34,10 @@ class SimpleImg{
         cv::Mat img = cv::imread(fname); //.c_str()?
         height = img.rows;
         width = img.cols;
-        stride = compute_stride(width, sizeof(pixel_t), ALIGN_IN_BYTES); //defined in helpers.cpp
+        //stride = compute_stride(width, sizeof(pixel_t), ALIGN_IN_BYTES); //defined in helpers.cpp
+        stride = compute_stride(width, sizeof(uint8_t), ALIGN_IN_BYTES);
         printf("    stride = %d \n", stride);
         n_channels = 3;
-
         assert(img.type() == CV_8UC3); //require that input img is 3-channel, uchar words. 
         assert(sizeof(pixel_t) == 1); //uchar single-byte words
         data = (pixel_t*)malloc_aligned(32, height * stride * n_channels * sizeof(pixel_t)); //factor of 3 for 3 ch
@@ -65,13 +66,24 @@ class SimpleImg{
         //assuming we're using uchar images.
         assert(n_channels == 1 || n_channels == 3);
         cv::Mat* out_img;
-
-        //TODO: check if pixel_t is 8-bit or 16-bit. (and fail on larger data sizes)
-        if(this->n_channels == 1){
-            out_img = new cv::Mat(this->height, this->stride, CV_8UC1, this->data); //cv::Mat(int rows, int cols, int type, char* preAllocatedPointerToData)
+        assert(sizeof(pixel_t) == 1 || sizeof(pixel_t) == 2); //require 1-byte (uint8_t) or 2-byte (int16_t) pixel type
+        //printf("sizeof(pixel_t) = %d \n", sizeof(pixel_t));
+       
+        if(sizeof(pixel_t) == 1){ //unsigned 8-bit 
+            if(this->n_channels == 1){
+                out_img = new cv::Mat(this->height, this->stride, CV_8UC1, this->data); //cv::Mat(int rows, int cols, int type, char* preAllocatedPointerToData)
+            }
+            else if(this->n_channels == 3){
+                out_img = new cv::Mat(this->height, this->stride, CV_8UC3, this->data); 
+            }
         }
-        else if(this->n_channels == 3){
-            out_img = new cv::Mat(this->height, this->stride, CV_8UC3, this->data); 
+        else if(sizeof(pixel_t) == 2){ //signed 16-bit
+            if(this->n_channels == 1){
+                out_img = new cv::Mat(this->height, this->stride, CV_16SC1, this->data); //cv::Mat(int rows, int cols, int type, char* preAllocatedPointerToData)
+            }
+            else if(this->n_channels == 3){
+                out_img = new cv::Mat(this->height, this->stride, CV_16SC3, this->data);
+            }
         }
 
         cv::imwrite(fname, *out_img);
