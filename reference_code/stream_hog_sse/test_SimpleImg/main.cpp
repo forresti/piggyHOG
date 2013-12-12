@@ -34,7 +34,11 @@ void SimpleImg_test(){
     SimpleImg<uint8_t> out_8bit_img(img.height, img.width, 1);
     //avg_channels(img, out_8bit_img); //out_img gets filled in
     avg_channels<uint8_t>(img, out_8bit_img); //out_img gets filled in
-    out_8bit_img.simple_imwrite("./out.jpg");
+    out_8bit_img.simple_imwrite("./out_8bit.jpg");
+
+    SimpleImg<int16_t> out_16bit_img(img.height, img.width, 1);
+    avg_channels<int16_t>(img, out_16bit_img); //out_img gets filled in
+    out_16bit_img.simple_imwrite("./out_16bit.jpg");
 }
 
 int main (int argc, char **argv)
