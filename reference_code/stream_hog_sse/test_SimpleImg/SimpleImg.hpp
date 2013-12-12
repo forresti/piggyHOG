@@ -65,6 +65,8 @@ class SimpleImg{
         //assuming we're using uchar images.
         assert(n_channels == 1 || n_channels == 3);
         cv::Mat* out_img;
+
+        //TODO: check if pixel_t is 8-bit or 16-bit. (and fail on larger data sizes)
         if(this->n_channels == 1){
             out_img = new cv::Mat(this->height, this->stride, CV_8UC1, this->data); //cv::Mat(int rows, int cols, int type, char* preAllocatedPointerToData)
         }
