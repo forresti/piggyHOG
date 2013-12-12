@@ -20,10 +20,10 @@ void print_epi16(__m128i vec_sse, string vec_name){
 }
 
 //size_per_element = sizeof(float), sizeof(char), or whatever data type you're using.
-int compute_stride(int width, int size_per_element){
+int compute_stride(int width, int size_per_element, int ALIGN_IN_BYTES){
     //thanks: http://stackoverflow.com/questions/2403631
 
-    int ALIGN_IN_BYTES=32; //for AVX
+    //int ALIGN_IN_BYTES=32; //for AVX
     int stride = (width*size_per_element + (ALIGN_IN_BYTES - (width*size_per_element)%ALIGN_IN_BYTES))/size_per_element;
     return stride;
 }

@@ -7,16 +7,11 @@
 //#define pixel_t float //you modify this 
 //#define pixel_t __m128
 
-//TODO: make a templatized version of SimpleImg (put this in a separate test file first)
-template<class my_pixel_t>
-class SimpleImg2{
-
-};
-
 //no notion of RGB ... just a series of values (pixelType = char, short int, int, etc)
 class SimpleImg{
   public:
-    SimpleImg(int height, int width, int stride, int n_channels);
+    //SimpleImg(int height, int width, int stride, int n_channels);
+    SimpleImg(int height, int width, int n_channels);
     SimpleImg(string fname);
     ~SimpleImg();
 
@@ -28,6 +23,7 @@ class SimpleImg{
     int stride; //width+padding. note that this is row-major.
     int height;
     int n_channels;
+    const static int ALIGN_IN_BYTES=32; //for SSE/AVX
 };
 
 

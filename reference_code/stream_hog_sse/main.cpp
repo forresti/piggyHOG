@@ -191,17 +191,16 @@ void test_computeCells_voc5_vs_streamHOG(){
     SimpleImg img("./carsgraz001_goofySize_539x471.jpg");
     //SimpleImg img("./carsgraz001_goofySize_641x480.jpg");
     //SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
-    SimpleImg ori_stream(img.height, img.width, img.stride, 1); //out img has just 1 channel
-    SimpleImg ori_voc5(img.height, img.width, img.stride, 1);
-    SimpleImg mag_stream(img.height, img.width, img.stride, 1); //out img has just 1 channel
-    SimpleImg mag_voc5(img.height, img.width, img.stride, 1); 
+    SimpleImg ori_stream(img.height, img.width, 1); //out img has just 1 channel
+    SimpleImg ori_voc5(img.height, img.width, 1);
+    SimpleImg mag_stream(img.height, img.width, 1); //out img has just 1 channel
+    SimpleImg mag_voc5(img.height, img.width, 1); 
     int hogWidth, hogHeight;
     float* hogBuffer_voc5 = allocate_hist(img.height, img.width, sbin,
                                           hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
     float* hogBuffer_streamHog = allocate_hist(img.height, img.width, sbin,
                                                hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
     int hogStride = hogWidth; //TODO: change this?
-    //SimpleImg normImg(hogHeight, hogWidth, hogStride, 1); //gradient energy of histograms
     float* normImg = (float*)malloc_aligned(32, hogWidth * hogHeight * sizeof(float));
 
   //[mag, ori] = gradient_stream(img)
@@ -250,12 +249,11 @@ void test_streamHog_oneScale(){
     if(n_iter < 100){
         printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=100 or greater. \n", n_iter);
     }
-    //int stride = width + (ALIGN_IN_BYTES - width%ALIGN_IN_BYTES); //thanks: http://stackoverflow.com/questions/2403631
-    //SimpleImg img(height, width, stride, n_channels);
+    //SimpleImg img(height, width, n_channels);
 
     SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
-    SimpleImg ori(img.height, img.width, img.stride, 1); //out img has just 1 channel
-    SimpleImg mag(img.height, img.width, img.stride, 1); //out img has just 1 channel
+    SimpleImg ori(img.height, img.width, 1); //out img has just 1 channel
+    SimpleImg mag(img.height, img.width, 1); //out img has just 1 channel
     int hogWidth, hogHeight;
     float* hogBuffer = allocate_hist(img.height, img.width, sbin,
                                      hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
@@ -320,6 +318,9 @@ void test_streamHog_oneScale(){
     gb_to_copy = hogWidth * hogHeight * 18 * sizeof(float) / 1e9; //TODO: think about amt of data to stream
     gb_per_sec = gb_to_copy / (stream_time/1000); //convert stream_time from ms to sec
     printf("avg normalizeCells_voc5 stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec);
+
+    free(hogBuffer);
+    free(hogBuffer_blocks);
 }
 
 int main (int argc, char **argv)
