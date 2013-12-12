@@ -12,7 +12,9 @@
 //#include "helpers.h"
 using namespace std;
 
-void avg_channels(SimpleImg &in_img, SimpleImg &out_img)
+//out_type is uint8_t or int16_t
+template<typename out_type>
+void avg_channels(SimpleImg<uint8_t> &in_img, SimpleImg<out_type> &out_img)
 {
     for(int y=0; y<in_img.height; y++)
     {
@@ -20,7 +22,6 @@ void avg_channels(SimpleImg &in_img, SimpleImg &out_img)
         {
             out_img.data[y*(out_img.stride) + x] = (unsigned char)0;
             for(int ch=0; ch<3; ch++){
-                //out_img.data[y*(out_img.stride) + x] += 10;
                 out_img.data[y*(out_img.stride) + x] += in_img.data[y*in_img.stride + x + ch*in_img.stride*in_img.height] / 3;
             }
         }
@@ -28,12 +29,12 @@ void avg_channels(SimpleImg &in_img, SimpleImg &out_img)
 }
 
 void SimpleImg_test(){
-    SimpleImg img("../../../images_640x480/carsgraz_001.image.jpg");
+    SimpleImg<uint8_t> img("../../../images_640x480/carsgraz_001.image.jpg");
 
-    SimpleImg out_img(img.height, img.width, 1);
-    avg_channels(img, out_img); //out_img gets filled in
-
-    out_img.simple_imwrite("./out.jpg");
+    SimpleImg<uint8_t> out_8bit_img(img.height, img.width, 1);
+    //avg_channels(img, out_8bit_img); //out_img gets filled in
+    avg_channels<uint8_t>(img, out_8bit_img); //out_img gets filled in
+    out_8bit_img.simple_imwrite("./out.jpg");
 }
 
 int main (int argc, char **argv)

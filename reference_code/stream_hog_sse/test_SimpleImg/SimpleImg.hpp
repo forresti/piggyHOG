@@ -8,8 +8,9 @@
 #include <sstream>
 using namespace std;
 
-#define pixel_t uint8_t //you modify this 
+//#define pixel_t uint8_t //you modify this 
 
+template<class pixel_t>
 class SimpleImg{
   public:
     pixel_t* data;
@@ -18,19 +19,16 @@ class SimpleImg{
     int height;
     int n_channels;
 
-    //SimpleImg(int in_height, int in_width, int in_stride, int in_n_channels){
     SimpleImg(int in_height, int in_width, int in_n_channels){
         int ALIGN_IN_BYTES=32;
 
         height = in_height;
         width = in_width;
-        //stride = in_stride; //TODO: change interface to NOT take an input stride.
+
+        //TODO: change compute_stride to take ALIGN_IN_BYTES as an argument 
         stride = compute_stride(width, sizeof(pixel_t)); //defined in helpers.cpp -- uses ALIGN_IN_BYTES=32 by default.
         n_channels = in_n_channels;
 
-        //TODO: calloc?
-        //TODO: align?
-        //data = (pixel_t*)malloc(width * stride * sizeof(pixel_t)); 
         data = (pixel_t*)malloc_aligned(ALIGN_IN_BYTES, height * stride * n_channels * sizeof(pixel_t));
     }
 
@@ -38,7 +36,6 @@ class SimpleImg{
         cv::Mat img = cv::imread(fname); //.c_str()?
         height = img.rows;
         width = img.cols;
-        //stride = img.cols; //TODO: select stride by rounding up for alignment
         stride = compute_stride(width, sizeof(pixel_t)); //defined in helpers.cpp
         printf("    stride = %d \n", stride);
         n_channels = 3;
