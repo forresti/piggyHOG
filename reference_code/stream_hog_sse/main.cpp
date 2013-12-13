@@ -194,8 +194,8 @@ void test_computeCells_voc5_vs_streamHOG(){
     //SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
     SimpleImg<uint8_t> ori_stream(img.height, img.width, 1); //out img has just 1 channel
     SimpleImg<uint8_t> ori_voc5(img.height, img.width, 1);
-    SimpleImg<uint8_t> mag_stream(img.height, img.width, 1); //out img has just 1 channel
-    SimpleImg<uint8_t> mag_voc5(img.height, img.width, 1); 
+    SimpleImg<int16_t> mag_stream(img.height, img.width, 1); //out img has just 1 channel
+    SimpleImg<int16_t> mag_voc5(img.height, img.width, 1); 
     int hogWidth, hogHeight;
     float* hogBuffer_voc5 = allocate_hist(img.height, img.width, sbin,
                                           hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
@@ -254,7 +254,7 @@ void test_streamHog_oneScale(){
 
     SimpleImg<uint8_t> img("../../images_640x480/carsgraz_001.image.jpg");
     SimpleImg<uint8_t> ori(img.height, img.width, 1); //out img has just 1 channel
-    SimpleImg<uint8_t> mag(img.height, img.width, 1); //out img has just 1 channel
+    SimpleImg<int16_t> mag(img.height, img.width, 1); //out img has just 1 channel
     int hogWidth, hogHeight;
     float* hogBuffer = allocate_hist(img.height, img.width, sbin,
                                      hogHeight, hogWidth); //hog{Height,Width} are passed by ref.

@@ -32,18 +32,18 @@ class streamHog{
                        __m128i gradY_max_0, __m128i gradY_max_1, uint8_t* outOri_currPtr);
 
     void gradient_stream(int height, int width, int stride, int n_channels_input, int n_channels_output,
-                         uint8_t *__restrict__ img, uint8_t *__restrict__ outOri, uint8_t *__restrict__ outMag);
+                         uint8_t *__restrict__ img, uint8_t *__restrict__ outOri, int16_t *__restrict__ outMag);
 
     void gradient_voc5_reference(int height, int width, int stride, int n_channels_input, int n_channels_output,
-                  uint8_t *__restrict__ img, uint8_t *__restrict__ outOri, uint8_t *__restrict__ outMag);
+                  uint8_t *__restrict__ img, uint8_t *__restrict__ outOri, int16_t *__restrict__ outMag);
 
     void computeCells_voc5_reference(int imgHeight, int imgWidth, int imgStride, int sbin,
-                                     uint8_t *__restrict__ ori, uint8_t *__restrict__ mag,
+                                     uint8_t *__restrict__ ori, int16_t *__restrict__ mag,
                                      int outHistHeight, int outHistWidth,
                                      float *__restrict__ outHist);
 
     void computeCells_stream(int imgHeight, int imgWidth, int imgStride, int sbin,
-                             uint8_t *__restrict__ ori, uint8_t *__restrict__ mag,
+                             uint8_t *__restrict__ ori, int16_t *__restrict__ mag,
                              int outHistHeight, int outHistWidth,
                              float *__restrict__ outHist);
 
