@@ -6,7 +6,8 @@
 #include <xmmintrin.h>
 #include <pmmintrin.h> //for _mm_hadd_pd()
 
-#include "SimpleImg.h"
+//#include "SimpleImg.h"
+#include "SimpleImg.hpp"
 #include "streamHog.h"
 #include "helpers.h"
 using namespace std;
@@ -188,13 +189,13 @@ void test_computeCells_voc5_vs_streamHOG(){
     streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
     int sbin = 4;
 
-    SimpleImg img("./carsgraz001_goofySize_539x471.jpg");
+    SimpleImg<uint8_t> img("./carsgraz001_goofySize_539x471.jpg");
     //SimpleImg img("./carsgraz001_goofySize_641x480.jpg");
     //SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
-    SimpleImg ori_stream(img.height, img.width, 1); //out img has just 1 channel
-    SimpleImg ori_voc5(img.height, img.width, 1);
-    SimpleImg mag_stream(img.height, img.width, 1); //out img has just 1 channel
-    SimpleImg mag_voc5(img.height, img.width, 1); 
+    SimpleImg<uint8_t> ori_stream(img.height, img.width, 1); //out img has just 1 channel
+    SimpleImg<uint8_t> ori_voc5(img.height, img.width, 1);
+    SimpleImg<uint8_t> mag_stream(img.height, img.width, 1); //out img has just 1 channel
+    SimpleImg<uint8_t> mag_voc5(img.height, img.width, 1); 
     int hogWidth, hogHeight;
     float* hogBuffer_voc5 = allocate_hist(img.height, img.width, sbin,
                                           hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
@@ -251,9 +252,9 @@ void test_streamHog_oneScale(){
     }
     //SimpleImg img(height, width, n_channels);
 
-    SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
-    SimpleImg ori(img.height, img.width, 1); //out img has just 1 channel
-    SimpleImg mag(img.height, img.width, 1); //out img has just 1 channel
+    SimpleImg<uint8_t> img("../../images_640x480/carsgraz_001.image.jpg");
+    SimpleImg<uint8_t> ori(img.height, img.width, 1); //out img has just 1 channel
+    SimpleImg<uint8_t> mag(img.height, img.width, 1); //out img has just 1 channel
     int hogWidth, hogHeight;
     float* hogBuffer = allocate_hist(img.height, img.width, sbin,
                                      hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
