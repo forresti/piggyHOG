@@ -6,7 +6,7 @@
 #include <xmmintrin.h>
 #include <pmmintrin.h> //for _mm_hadd_pd()
 
-#include "SimpleImg.h"
+//#include "SimpleImg.h"
 #include "streamHog.h"
 #include "helpers.h"
 using namespace std;
@@ -47,20 +47,6 @@ void streamHog::init_atan2_constants(){
 void streamHog::init_atan2_LUT(){
     for (int dy = -255; dy <= 255; ++dy) { //pixels are 0 to 255, so gradient values are -255 to 255
         for (int dx = -255; dx <= 255; ++dx) {
-
-            #if 0 //FFLD style, total of 19 bins [TODO: remove]
-            // Angle in the range [-pi, pi]
-            double angle = atan2(static_cast<double>(dy), static_cast<double>(dx));
-
-            // Convert it to the range [9.0, 27.0]
-            angle = angle * (9.0 / M_PI) + 18.0;
-
-            // Convert it to the range [0, 18)
-            if (angle >= 18.0)
-                angle -= 18.0;
-            ATAN2_TABLE[dy + 255][dx + 255] = round( max(angle, 0.0) );
-            //printf("ATAN2_TABLE[%d][%d] = %d \n", dx+255, dy+255, ATAN2_TABLE[dy + 255][dx + 255]);
-            #endif
 
             // snap to one of 18 orientations [VOC5 style]
             float best_dot = 0;
@@ -304,15 +290,11 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
                 gradX_ch[channel] = _mm_packs_epi16(gradX_0_ch[channel], gradX_1_ch[channel]); //16-bit -> 8bit (temporary ... typically, we'd pack up the results later in the pipeline)
                 gradY_ch[channel] = _mm_packs_epi16(gradY_0_ch[channel], gradY_1_ch[channel]); //temporary ... typically, we'd pack up the results later in the pipeline.
 
-                //mag_ch[channel]   = _mm_packs_epi16(mag_0_ch[channel], mag_1_ch[channel]);
                 //_mm_store_si128( (__m128i*)(&outOri[y*stride + x]), gradY_ch[channel] ); //outOri[y][x : x+15] = gradX_ch[channel] -- just a test, doesnt make much sense
-                //_mm_store_si128( (__m128i*)(&outMag[y*stride + x]), mag_ch[channel] );
             }
 
             //TODO: shouldn't the output magnitudes be 16-bit? (to avoid overflow, e.g. (gradX=255 + gradY=255) > 255)
             //  or, rightshift (divide) the magnitude by 2...
-            //magMax = _mm_packs_epi16(magMax_0, magMax_1);
-            //_mm_store_si128( (__m128i*)(&outMag[y*stride + x]), magMax );
             _mm_store_si128( (__m128i*)(&outMag[y*stride + x]                 ), magMax_0 );           
             _mm_store_si128( (__m128i*)(&outMag[y*stride + x + loadSize_16bit]), magMax_1 );
 
@@ -320,7 +302,7 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
             //outOri[y*stride + x + 0:15] = atan2(gradX_max[0:15], gradY_max[0:15])
             ori_atan2_LUT(gradX_max_0, gradX_max_1, gradY_max_0, gradY_max_1, &outOri[y*stride + x]);
 #endif
-#if 0 //atan2 "snap-to ori" based on dot products, like VOC5. (not tested for correctness)
+#if 0 //atan2 "snap-to ori" based on dot products, like VOC5. (matches VOC5)
             __m128i oriMax_0 = approx_atan2_bin(gradX_max_0, gradY_max_0); //input and output packed int16_t
             __m128i oriMax_1 = approx_atan2_bin(gradX_max_1, gradY_max_1); 
             __m128i oriMax = _mm_packs_epi16(oriMax_0, oriMax_1); //16-bit -> 8-bit (values are 1 to 18)
@@ -429,9 +411,7 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
 
             // add to 4 histograms around pixel using linear interpolation
             //float xp = ((float)x+0.5)/(float)sbin - 0.5; //this is expensive (replacing it with 'x/4' gives a 1.5x speedup in hogCell)
-            //loat yp = ((float)y+0.5)/(float)sbin - 0.5;
-            //float xp = x/4; //TEST
-            //float yp = y/4;
+            //float yp = ((float)y+0.5)/(float)sbin - 0.5;
             float xp = ((float)x+0.5)*sbin_inverse - 0.5;
             float yp = ((float)y+0.5)*sbin_inverse - 0.5;
             int ixp = (int)floor(xp);
@@ -440,10 +420,6 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
             float vy0 = yp-iyp;
             float vx1 = 1.0-vx0;
             float vy1 = 1.0-vy0;
-
-            //if(ixp < 0 || iyp < 0){
-            //    printf("x=%d, y=%d, ixp=%d, iyp=%d \n", x, y, ixp, iyp);
-            //}
 
             if (ixp >= 0 && iyp >= 0) 
             { 
