@@ -269,7 +269,7 @@ void test_streamHog_oneScale(){
     }
 
     double stream_time = (read_timer() - start_timer) / n_iter;
-    double gb_to_copy = img.width * img.height * img.n_channels * sizeof(pixel_t) / 1e9;
+    double gb_to_copy = img.width * img.height * img.n_channels * sizeof(uint8_t) / 1e9;
     double gb_per_sec = gb_to_copy / (stream_time/1000); //convert stream_time from ms to sec
     printf("avg (mag, ori) stream time = %f ms, %f GB/s \n", stream_time, gb_per_sec);
 

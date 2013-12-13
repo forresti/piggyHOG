@@ -183,7 +183,7 @@ __m128i streamHog::approx_atan2_bin(__m128i gradX_max, __m128i gradY_max){
 // @param grad{X,Y}_max{0,1} = packed 16-bit gradients of max-mag channel
 // @param outOri_currPtr = &outOri[y*stride + x]. 
 void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1, 
-                              __m128i gradY_max_0, __m128i gradY_max_1, pixel_t* outOri_currPtr)
+                              __m128i gradY_max_0, __m128i gradY_max_1, uint8_t* outOri_currPtr)
 {
     //compute orientation from {gradX_max, gradY_max}. 
     //  implemented as non-vectorized atan2 table lookup. 
@@ -200,8 +200,8 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
     for(int i=0; i<16; i++){ 
         int16_t dx = gradX_max_unpacked[i];
         int16_t dy = gradY_max_unpacked[i];
-        pixel_t ori = ATAN2_TABLE[dy+255][dx+255]; //ATAN2_TABLE is 0-18. (char)
-        //pixel_t ori = ATAN2_TABLE[ (dy>>2) + 255 ][ (dx>>2) + 255 ]; //test LUT quantization -- looks fine.
+        uint8_t ori = ATAN2_TABLE[dy+255][dx+255]; //ATAN2_TABLE is 0-18. (char)
+        //uint8_t ori = ATAN2_TABLE[ (dy>>2) + 255 ][ (dx>>2) + 255 ]; //test LUT quantization -- looks fine.
         #ifdef SCALE_ORI
             ori = ori*9; //to be more visible in output images for debugging
         #endif
@@ -235,7 +235,7 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
 //TODO: replace outOri with outGradX_max and outGradY_max. (after calling gradient_stream, you do a lookup table)
 //  or, just do the lookup in here...
 void streamHog::gradient_stream(int height, int width, int stride, int n_channels_input, int n_channels_output,
-                  pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag){
+                  uint8_t *__restrict__ img, uint8_t *__restrict__ outOri, uint8_t *__restrict__ outMag){
     assert(n_channels_input == 3);
     assert(n_channels_output == 1);
     assert(sizeof(__m128i) == 16);
@@ -329,7 +329,7 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
 
 //gradient code from voc-release5 DPM. (reference impl)
 void streamHog::gradient_voc5_reference(int height, int width, int stride, int n_channels_input, int n_channels_output,
-                  pixel_t *__restrict__ img, pixel_t *__restrict__ outOri, pixel_t *__restrict__ outMag){
+                  uint8_t *__restrict__ img, uint8_t *__restrict__ outOri, uint8_t *__restrict__ outMag){
 
     for(int y=1; y<height-1; y++){
         for(int x=1; x<width-1; x++){
@@ -406,7 +406,7 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
 //assumed output dimensions: outHist[imgHeight/sbin][imgWidth/sbin][hogDepth=32]. row major (like piggyHOG).
 //  output stride = output width. (because we already have 32-dimensional features as the inner dimension)
 void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int imgStride, int sbin, 
-                                            pixel_t *__restrict__ ori, pixel_t *__restrict__ mag,
+                                            uint8_t *__restrict__ ori, uint8_t *__restrict__ mag,
                                             int outHistHeight, int outHistWidth,
                                             float *__restrict__ outHist){
 
@@ -476,7 +476,7 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
 
 //start from stream benchmark, gradually build up the histogram code.
 void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, int sbin,
-                                    pixel_t *__restrict__ ori, pixel_t *__restrict__ mag,
+                                    uint8_t *__restrict__ ori, uint8_t *__restrict__ mag,
                                     int outHistHeight, int outHistWidth,
                                     float *__restrict__ outHist){
 
