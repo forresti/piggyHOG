@@ -38,15 +38,49 @@ void stream_sse(int height,
         //for(int x=0; x<width; x++){
         for(int x=0; x<width; x+=loadSize){
 
+//TODO: use pixel_t=float for this experiment
+#if 0
             __m128 in_vec = _mm_load_ps(&img[y*stride + x]); //floating-pt version doesn't like cast to __m128i. shrug.
 
             __m128 in_vec_sqrt = _mm_sqrt_ps(in_vec); //test
             _mm_store_ps(&outImg[y*stride + x], in_vec_sqrt);
-
-            //_mm_store_ps(&outImg[y*stride + x], in_vec);
+#endif
         }
     }
+}
 
+//try 8bit vs 'expand to 16bit' addition
+void stream_sse_addition(int height, int width, int stride,
+                         pixel_t *__restrict__ img, pixel_t *__restrict__ outImg){
+
+
+    //loadSize example: (128 bits = 16 bytes) / (4 bytes per float) = 4 bytes
+    int loadSize = sizeof(__m128) / sizeof(pixel_t);
+    for(int y=0; y<height; y++){
+        for(int x=0; x<width; x+=loadSize){
+
+//TODO: use pixel_t=uchar for this experiment
+#if 1
+            __m128i in_vec = _mm_load_si128((__m128i*)(&img[y*stride + x])); //floating-pt version doesn't like cast to __m128i. shrug.
+            
+            #if 0 //8-bit add
+            __m128i out_8bit = _mm_add_epi8(in_vec, in_vec); 
+            #endif
+
+            #if 1 //16bit add
+            __m128i in_vec_0 = _mm_unpacklo_epi8(in_vec, _mm_setzero_si128());
+            __m128i in_vec_1 = _mm_unpackhi_epi8(in_vec, _mm_setzero_si128());
+
+            __m128i out_16bit_0 = _mm_add_epi16(in_vec_0, in_vec_0);
+            __m128i out_16bit_1 = _mm_add_epi16(in_vec_1, in_vec_1);
+
+            __m128i out_8bit = _mm_packs_epi16(out_16bit_0, out_16bit_1);
+            #endif
+
+            _mm_store_si128((__m128i*)(&outImg[y*stride + x]), out_8bit);
+#endif
+        }
+    }
 }
 
 void fill_img_with_garbage(ForrestImg& img){
@@ -75,8 +109,9 @@ printf("stride = %d \n", stride);
 
     double start_timer = read_timer();
     for(int i=0; i<n_iter; i++){
-        //stream_simple(img.height, img.width, img.stride, img.data, outImg.data);
-        stream_sse(img.height, img.width, img.stride, img.data, outImg.data);
+        stream_simple(img.height, img.width, img.stride, img.data, outImg.data);
+        //stream_sse(img.height, img.width, img.stride, img.data, outImg.data);
+        stream_sse_addition(img.height, img.width, img.stride, img.data, outImg.data); //test 8bit vs unpack 16bit addition
         //memcpy(outImg.data, img.data, height * stride * sizeof(pixel_t));
     }
     double stream_time = (read_timer() - start_timer) / n_iter;

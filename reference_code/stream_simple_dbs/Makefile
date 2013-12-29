@@ -6,7 +6,7 @@ OBJS = main.o  helpers.o ForrestImg.o
 EXENAME = main
 
 CC = g++
-CCOPTS = -c  -g -O3
+CCOPTS = -c  -g -O3 -mssse3
 LINK = g++
 LINKOPTS = 
 
