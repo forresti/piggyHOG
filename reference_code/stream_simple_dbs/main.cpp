@@ -63,11 +63,11 @@ void stream_sse_addition(int height, int width, int stride,
 #if 1
             __m128i in_vec = _mm_load_si128((__m128i*)(&img[y*stride + x])); //floating-pt version doesn't like cast to __m128i. shrug.
             
-            #if 0 //8-bit add
+            #if 1 //8-bit add
             __m128i out_8bit = _mm_add_epi8(in_vec, in_vec); 
             #endif
 
-            #if 1 //16bit add
+            #if 0 //16bit add
             __m128i in_vec_0 = _mm_unpacklo_epi8(in_vec, _mm_setzero_si128());
             __m128i in_vec_1 = _mm_unpackhi_epi8(in_vec, _mm_setzero_si128());
 
@@ -95,7 +95,7 @@ int main (int argc, char **argv)
 {
     int ALIGN_IN_BYTES = 256;
 
-    int height = 480;
+    int height = 480 * 3;
     int width = 640*3;
     int stride = width + (ALIGN_IN_BYTES - width%ALIGN_IN_BYTES); //thanks: http://stackoverflow.com/questions/2403631
     //int stride = width;
