@@ -63,21 +63,35 @@ void stream_sse_addition(int height, int width, int stride,
 #if 1
             __m128i in_vec = _mm_load_si128((__m128i*)(&img[y*stride + x])); //floating-pt version doesn't like cast to __m128i. shrug.
             
-            #if 1 //8-bit add
-            __m128i out_8bit = _mm_add_epi8(in_vec, in_vec); 
+            #if 0 //8-bit add (assume pixel_t = uchar)
+            __m128i out_vec = _mm_add_epi8(in_vec, in_vec); 
             #endif
 
-            #if 0 //16bit add
+            #if 0 //unpack 8-bit -> 16bit add (assume pixel_t = uchar)
             __m128i in_vec_0 = _mm_unpacklo_epi8(in_vec, _mm_setzero_si128());
             __m128i in_vec_1 = _mm_unpackhi_epi8(in_vec, _mm_setzero_si128());
 
             __m128i out_16bit_0 = _mm_add_epi16(in_vec_0, in_vec_0);
             __m128i out_16bit_1 = _mm_add_epi16(in_vec_1, in_vec_1);
 
-            __m128i out_8bit = _mm_packs_epi16(out_16bit_0, out_16bit_1);
+            __m128i out_vec = _mm_packs_epi16(out_16bit_0, out_16bit_1);
             #endif
 
-            _mm_store_si128((__m128i*)(&outImg[y*stride + x]), out_8bit);
+            #if 0 //16-bit add (assume pixel_t = int16_t)
+            __m128i out_vec = _mm_add_epi16(in_vec, in_vec); 
+            #endif
+
+            #if 1 //unpack 16-bit -> 32bit add (assume pixel_t = int16_t)
+            __m128i in_vec_0 = _mm_unpacklo_epi16(in_vec, _mm_setzero_si128());
+            __m128i in_vec_1 = _mm_unpackhi_epi16(in_vec, _mm_setzero_si128());
+
+            __m128i out_32bit_0 = _mm_add_epi32(in_vec_0, in_vec_0);
+            __m128i out_32bit_1 = _mm_add_epi32(in_vec_1, in_vec_1);
+
+            __m128i out_vec = _mm_packs_epi32(out_32bit_0, out_32bit_1);
+            #endif
+
+            _mm_store_si128((__m128i*)(&outImg[y*stride + x]), out_vec);
 #endif
         }
     }
