@@ -95,7 +95,7 @@ int main (int argc, char **argv)
 {
     int ALIGN_IN_BYTES = 256;
 
-    int height = 480 * 3;
+    int height = 480;
     int width = 640*3;
     int stride = width + (ALIGN_IN_BYTES - width%ALIGN_IN_BYTES); //thanks: http://stackoverflow.com/questions/2403631
     //int stride = width;
