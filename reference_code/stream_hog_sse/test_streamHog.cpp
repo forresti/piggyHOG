@@ -5,6 +5,7 @@
 #include <cassert>
 #include <xmmintrin.h>
 #include <pmmintrin.h> //for _mm_hadd_pd()
+#include <opencv2/opencv.hpp> //only used for file I/O
 
 //#include "SimpleImg.h"
 #include "SimpleImg.hpp"
@@ -131,25 +132,6 @@ bool run_tests_ori_argmax(){
     printf("number of select_epi16 tests failed: %d \n", numFailed); 
 }
 
-#if 0
-//TODO: put this into a class (like PgHogContainer or streamHog), once I decide what data types to use
-//@output-by-ref out_hogWidth out_hogHeight
-//@return hogWidth = memory aligned vector for storing HOG histogram 
-float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin,
-                   int &out_hogHeight, int &out_hogWidth){
-
-    //out_hogHeight = round(in_imgHeight/sbin);
-    //out_hogWidth = round(in_imgWidth/sbin);
-    out_hogHeight = (int)round((double)in_imgHeight/(double)sbin);
-    out_hogWidth = (int)round((double)in_imgWidth/(double)sbin);
-    const int hogDepth = 32;
-
-    float* hogBuffer = (float*)malloc_aligned(32, out_hogWidth * out_hogHeight * hogDepth * sizeof(float));
-    memset(hogBuffer, 0, out_hogWidth * out_hogHeight * hogDepth * sizeof(float));
-    return hogBuffer;
-} 
-#endif
-
 template<class my_pixel_t>
 void diff_imgs(my_pixel_t* img_gold, my_pixel_t* img_test, int imgHeight, int imgWidth, int imgDepth,
                string img_gold_name, string img_test_name){
@@ -250,10 +232,13 @@ void test_computeCells_voc5_vs_streamHOG(){
 }
 
 // MAIN TEST OF FUNCTIONALITY
-void test_streamHog_oneScale(){
+// TODO: return a HOG object
+// TODO: have a 'bool doWrite' input param
+// TODO: have a 'string outFname' param
+void test_streamHog_oneScale(SimpleImg<uint8_t> img, int sbin){
     streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
 
-    int sbin = 4;
+    //int sbin = 4;
 
     int n_iter = 1000; //not really "iterating" -- just number of times to run the experiment
     if(n_iter < 100){
@@ -261,7 +246,7 @@ void test_streamHog_oneScale(){
     }
     //SimpleImg img(height, width, n_channels);
 
-    SimpleImg<uint8_t> img("../../images_640x480/carsgraz_001.image.jpg");
+    //SimpleImg<uint8_t> img("../../images_640x480/carsgraz_001.image.jpg");
     SimpleImg<uint8_t> ori(img.height, img.width, 1); //out img has just 1 channel
     SimpleImg<int16_t> mag(img.height, img.width, 1); //out img has just 1 channel
     int hogWidth, hogHeight;
@@ -332,5 +317,45 @@ void test_streamHog_oneScale(){
     free(hogBuffer);
     free(hogBuffer_blocks);
 }
+
+//wrapper that does a basic sanity check of SPEED
+void test_streamHog_oneScale_default(){
+
+    int sbin = 4; 
+    SimpleImg<uint8_t> img("../../images_640x480/carsgraz_001.image.jpg");
+    test_streamHog_oneScale(img, sbin);
+}
+
+//hand-coded impl of pyramid. (will modularize it better eventually)
+void test_streamHog_pyramid(){
+    int nLevels = 30; //TODO: compute this based on img size
+    int interval = 10;
+    int n_iter = 100; //not really "iterating" -- just number of times to run the experiment
+    if(n_iter < 10){
+        printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=10 or greater. \n", n_iter);
+    }
+
+    float sc = pow(2, 1 / (float)interval);
+    streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
+    //SimpleImg<uint8_t> img("../../images_640x480/carsgraz_001.image.jpg"); //TODO: remove
+    cv::Mat img_Mat = cv::imread("../../images_640x480/carsgraz_001.image.jpg"); 
+    vector< SimpleImg<uint8_t>* > imgPyramid(nLevels);
+
+    for(int i=0; i<interval; i++){
+        float downsampleFactor = 1/pow(sc, i);
+        //printf("downsampleFactor = %f \n", downsampleFactor);
+
+        cv::Mat img_scaled = downsampleWithOpenCV(img_Mat, downsampleFactor);
+        imgPyramid[i] = new SimpleImg<uint8_t>(img_scaled);
+
+        img_scaled = downsampleWithOpenCV(img_Mat, downsampleFactor/2);
+        imgPyramid[i + interval] = new SimpleImg<uint8_t>(img_scaled);;
+
+
+
+    }    
+
+}
+
 
 

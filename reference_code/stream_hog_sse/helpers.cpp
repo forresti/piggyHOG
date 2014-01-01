@@ -1,5 +1,6 @@
-
 #include "helpers.h"
+#include <opencv2/opencv.hpp>
+using namespace cv;
 using namespace std;
 
 double read_timer(){
@@ -43,6 +44,28 @@ float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin,
     float* hogBuffer = (float*)malloc_aligned(32, out_hogWidth * out_hogHeight * hogDepth * sizeof(float));
     memset(hogBuffer, 0, out_hogWidth * out_hogHeight * hogDepth * sizeof(float));
     return hogBuffer;
+}
+
+//use OpenCV's bilinear filter downsampling
+Mat downsampleWithOpenCV(Mat img, double scale){
+    int inWidth = img.cols;
+    int inHeight = img.rows;
+    assert(img.type() == CV_8UC3);
+    int nChannels = 3;
+
+    int outWidth = round(inWidth * scale);
+    int outHeight = round(inHeight * scale);
+    Mat outImg(outHeight, outWidth, CV_8UC3); //col-major for OpenCV 
+    Size outSize = outImg.size();
+
+    cv::resize(img,
+               outImg,
+               outSize,
+               0, //scaleX -- default = outSize.width / img.cols
+               0, //scaleY -- default = outSize.height / img.rows
+               INTER_LINEAR /* use bilinear interpolation */);
+
+    return outImg;
 }
 
 

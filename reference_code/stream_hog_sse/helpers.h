@@ -1,6 +1,6 @@
 #ifndef __HELPERS_H__
 #define __HELPERS_H__
-//#include <opencv2/opencv.hpp>
+#include <opencv2/opencv.hpp>
 #include <math.h>
 #include <sys/time.h>
 #include <stdint.h> //for uintptr_t
@@ -9,7 +9,7 @@
 #include <string>
 
 using namespace std;
-//using namespace cv;
+using namespace cv;
 
 //macros from voc-release5 fconvsse.cc
 #define IS_ALIGNED(ptr) ((((uintptr_t)(ptr)) & 0xF) == 0) 
@@ -26,5 +26,6 @@ double read_timer();
 //std::string forrestGetImgType(int imgTypeInt);
 int compute_stride(int width, int size_per_element, int ALIGN_IN_BYTES);
 float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin, int &out_hogHeight, int &out_hogWidth);
+Mat downsampleWithOpenCV(Mat img, double scale);
 #endif
 
