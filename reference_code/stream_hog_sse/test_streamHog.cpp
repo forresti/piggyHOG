@@ -13,7 +13,6 @@
 #include "test_streamHog.h"
 using namespace std;
 
-#if 0
 
 //test template for: 
 //  bestChannel = argmax(mag[0,1,2]); 
@@ -330,16 +329,6 @@ void test_streamHog_oneScale(){
 
     free(hogBuffer);
     free(hogBuffer_blocks);
-}
-#endif
-
-int main (int argc, char **argv)
-{
-    //run_tests_ori_argmax(); //unit test
-    test_computeCells_voc5_vs_streamHOG(); //unit test
-    test_streamHog_oneScale(); //timing experiment
-
-    return 0;
 }
 
 
