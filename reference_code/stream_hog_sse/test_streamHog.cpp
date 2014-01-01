@@ -235,11 +235,10 @@ void test_computeCells_voc5_vs_streamHOG(){
 // TODO: return a HOG object
 // TODO: have a 'bool doWrite' input param
 // TODO: have a 'string outFname' param
-void test_streamHog_oneScale(SimpleImg<uint8_t> img, int sbin){
+void test_streamHog_oneScale(SimpleImg<uint8_t> &img, int sbin){
     streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
 
     //int sbin = 4;
-#if 0
     int n_iter = 1000; //not really "iterating" -- just number of times to run the experiment
     if(n_iter < 100){
         printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=100 or greater. \n", n_iter);
@@ -316,12 +315,6 @@ void test_streamHog_oneScale(SimpleImg<uint8_t> img, int sbin){
 
     free(hogBuffer);
     free(hogBuffer_blocks);
-#endif
-}
-
-//FIXME: even this triggers a segfault in free(img):
-void dummy(SimpleImg<uint8_t> &img){
-
 }
 
 //wrapper that does a basic sanity check of SPEED
@@ -329,11 +322,7 @@ void test_streamHog_oneScale_default(){
 
     int sbin = 4; 
     SimpleImg<uint8_t> img("../../images_640x480/carsgraz_001.image.jpg");
-
-    //printf("img.height = %d \n", img.height);
-    //printf("img.data ptr = %d \n", img.data);
     test_streamHog_oneScale(img, sbin); //DEBUG segfault: if I remove this, then we don't get a segfault on ~img{ free(img.data) }
-    dummy(img);
 }
 
 //hand-coded impl of pyramid. (will modularize it better eventually)
