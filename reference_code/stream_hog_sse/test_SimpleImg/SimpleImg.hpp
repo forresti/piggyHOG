@@ -43,7 +43,6 @@ class SimpleImg{
 
     //cv::Mat -> instantiate myself (a SimpleImg) -- TODO: make this private 
     void Mat_to_SimpleImg_ctor(cv::Mat img){
-
         height = img.rows;
         width = img.cols;
         //stride = compute_stride(width, sizeof(pixel_t), ALIGN_IN_BYTES); //defined in helpers.cpp
@@ -71,7 +70,6 @@ class SimpleImg{
 
         double response_time = read_timer() - start_time;
         //printf("transposed img in %f ms \n", response_time);
-
     }
 
     //write the current image object's data out to file.
