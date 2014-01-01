@@ -178,6 +178,8 @@ void test_computeCells_voc5_vs_streamHOG(){
     SimpleImg<uint8_t> img("./carsgraz001_goofySize_539x471.jpg");
     //SimpleImg img("./carsgraz001_goofySize_641x480.jpg");
     //SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
+
+//TODO: use STRIDE instead of WIDTH for the following:
     SimpleImg<uint8_t> ori_stream(img.height, img.width, 1); //out img has just 1 channel
     SimpleImg<uint8_t> ori_voc5(img.height, img.width, 1);
     SimpleImg<int16_t> mag_stream(img.height, img.width, 1); //out img has just 1 channel
@@ -235,19 +237,17 @@ void test_computeCells_voc5_vs_streamHOG(){
 // TODO: return a HOG object
 // TODO: have a 'bool doWrite' input param
 // TODO: have a 'string outFname' param
-void test_streamHog_oneScale(SimpleImg<uint8_t> &img, int sbin){
-    streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
+void test_streamHog_oneScale_manyIter(SimpleImg<uint8_t> &img, int sbin, streamHog sHog){
 
-    //int sbin = 4;
-    int n_iter = 1000; //not really "iterating" -- just number of times to run the experiment
+    int n_iter = 10; //not really "iterating" -- just number of times to run the experiment
     if(n_iter < 100){
         printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=100 or greater. \n", n_iter);
     }
     //SimpleImg img(height, width, n_channels);
 
     //SimpleImg<uint8_t> img("../../images_640x480/carsgraz_001.image.jpg");
-    SimpleImg<uint8_t> ori(img.height, img.width, 1); //out img has just 1 channel
-    SimpleImg<int16_t> mag(img.height, img.width, 1); //out img has just 1 channel
+    SimpleImg<uint8_t> ori(img.height, img.stride, 1); //out img has just 1 channel
+    SimpleImg<int16_t> mag(img.height, img.stride, 1); //out img has just 1 channel
     int hogWidth, hogHeight;
     float* hogBuffer = allocate_hist(img.height, img.width, sbin,
                                      hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
@@ -319,42 +319,103 @@ void test_streamHog_oneScale(SimpleImg<uint8_t> &img, int sbin){
 
 //wrapper that does a basic sanity check of SPEED
 void test_streamHog_oneScale_default(){
-
     int sbin = 4; 
+    streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
     SimpleImg<uint8_t> img("../../images_640x480/carsgraz_001.image.jpg");
-    test_streamHog_oneScale(img, sbin); //DEBUG segfault: if I remove this, then we don't get a segfault on ~img{ free(img.data) }
+    test_streamHog_oneScale_manyIter(img, sbin, sHog); //DEBUG segfault: if I remove this, then we don't get a segfault on ~img{ free(img.data) }
+}
+
+//no timers in here ... just crank through it once
+void test_streamHog_oneScale_oneIter(SimpleImg<uint8_t> &img, int sbin, streamHog sHog){
+
+    SimpleImg<uint8_t> ori(img.height, img.stride, 1); //out img has just 1 channel
+    SimpleImg<int16_t> mag(img.height, img.stride, 1); //out img has just 1 channel
+    int hogWidth, hogHeight;
+    float* hogBuffer = allocate_hist(img.height, img.width, sbin,
+                                     hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
+    float* hogBuffer_blocks = allocate_hist(img.height, img.width, sbin,
+                                            hogHeight, hogWidth); //for normalized result
+    float* normImg = (float*)malloc_aligned(32, hogWidth * hogHeight * sizeof(float));
+
+  //[mag, ori] = gradient_stream(img)
+    sHog.gradient_stream(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data); 
+    //sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori.n_channels, img.data, ori.data, mag.data);
+
+    //ori and mag both have size {img.height, img.width}
+
+//    sHog.computeCells_voc5_reference(img.height, img.width, img.stride, sbin,
+//                                      ori.data, mag.data, 
+//                                      hogHeight, hogWidth, hogBuffer); 
+
+    sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
+                             ori.data, mag.data,
+                             hogHeight, hogWidth, hogBuffer);
+
+  //normImg(x,y) = sum( hist(x,y,0:17) )
+    sHog.hogCell_gradientEnergy(hogBuffer, hogHeight, hogWidth, normImg); //populates normImg
+
+  //blocks = normalizeCells(hist, normImg)
+    sHog.normalizeCells_voc5(hogBuffer, normImg, hogBuffer_blocks,
+                             hogHeight, hogWidth);
+
+    free(hogBuffer);
+    free(hogBuffer_blocks);
 }
 
 //hand-coded impl of pyramid. (will modularize it better eventually)
 void test_streamHog_pyramid(){
     int nLevels = 30; //TODO: compute this based on img size
     int interval = 10;
-    int n_iter = 100; //not really "iterating" -- just number of times to run the experiment
+    int n_iter = 1; //not really "iterating" -- just number of times to run the experiment
     if(n_iter < 10){
         printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=10 or greater. \n", n_iter);
     }
 
-    float sc = pow(2, 1 / (float)interval);
     streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
-    //SimpleImg<uint8_t> img("../../images_640x480/carsgraz_001.image.jpg"); //TODO: remove
+    float sc = pow(2, 1 / (float)interval);
     cv::Mat img_Mat = cv::imread("../../images_640x480/carsgraz_001.image.jpg"); 
-    vector< SimpleImg<uint8_t>* > imgPyramid(nLevels);
 
-    for(int i=0; i<interval; i++){
-        float downsampleFactor = 1/pow(sc, i);
-        //printf("downsampleFactor = %f \n", downsampleFactor);
+    vector< SimpleImg<uint8_t>* > imgPyramid(nLevels); //TODO: have these *not* be pointers?
 
-        cv::Mat img_scaled = downsampleWithOpenCV(img_Mat, downsampleFactor);
-        imgPyramid[i] = new SimpleImg<uint8_t>(img_scaled);
+    double start_time = read_timer();
 
-        img_scaled = downsampleWithOpenCV(img_Mat, downsampleFactor/2);
-        imgPyramid[i + interval] = new SimpleImg<uint8_t>(img_scaled);;
+    for(int iter=0; iter<n_iter; iter++){ //do several runs, take the avg time
 
+        //TODO: create an imgPyramid function.
+        #pragma omp parallel for
+        for(int i=0; i<interval; i++){
+            float downsampleFactor = 1/pow(sc, i);
+            //printf("downsampleFactor = %f \n", downsampleFactor);
 
+            cv::Mat img_scaled = downsampleWithOpenCV(img_Mat, downsampleFactor);
+            imgPyramid[i] = new SimpleImg<uint8_t>(img_scaled);
+            img_scaled = downsampleWithOpenCV(img_Mat, downsampleFactor/2);
+            imgPyramid[i + interval] = new SimpleImg<uint8_t>(img_scaled);
+        }
 
-    }    
+        for(int i=0; i<interval; i++){
+            //TODO: catch output HOGs from each scale
+            #if 0 
+            test_streamHog_oneScale_manyIter(*imgPyramid[i], 4, sHog); //sbin=4 -- hogPyramid[i]
+            test_streamHog_oneScale_manyIter(*imgPyramid[i], 8, sHog); //sbin=8 -- hogPyramid[i + interval]
+            test_streamHog_oneScale_manyIter(*imgPyramid[i+interval], 8, sHog); //sbin=8 -- hogPyramid[i + 2*interval]
+            #endif
 
+            #if 1 
+            test_streamHog_oneScale_oneIter(*imgPyramid[i], 4, sHog); //sbin=4 -- hogPyramid[i]
+            test_streamHog_oneScale_oneIter(*imgPyramid[i], 8, sHog); //sbin=8 -- hogPyramid[i + interval]
+            test_streamHog_oneScale_oneIter(*imgPyramid[i+interval], 8, sHog); //sbin=8 -- hogPyramid[i + 2*interval]
+            #endif
+
+        }    
+        for(int i=0; i<nLevels; i++){
+            delete imgPyramid[i];
+        }
+
+    }
+
+    double end_timer = read_timer() - start_time;
+    printf("avg time for multiscale = %f ms \n", end_timer/n_iter);
 }
-
 
 

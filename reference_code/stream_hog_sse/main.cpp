@@ -17,7 +17,9 @@ int main (int argc, char **argv)
 {
     //run_tests_ori_argmax(); //unit test
     //test_computeCells_voc5_vs_streamHOG(); //unit test
-    test_streamHog_oneScale_default(); //timing experiment
+
+//    test_streamHog_oneScale_default(); //timing experiment
+    test_streamHog_pyramid(); //timing experiment
 
     return 0;
 }
