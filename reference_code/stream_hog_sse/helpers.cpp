@@ -27,3 +27,22 @@ int compute_stride(int width, int size_per_element, int ALIGN_IN_BYTES){
     int stride = (width*size_per_element + (ALIGN_IN_BYTES - (width*size_per_element)%ALIGN_IN_BYTES))/size_per_element;
     return stride;
 }
+
+//TODO: put this into a class (like PgHogContainer or streamHog), once I decide what data types to use
+//@output-by-ref out_hogWidth out_hogHeight
+//@return hogWidth = memory aligned vector for storing HOG histogram 
+float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin,
+                   int &out_hogHeight, int &out_hogWidth){
+
+    //out_hogHeight = round(in_imgHeight/sbin);
+    //out_hogWidth = round(in_imgWidth/sbin);
+    out_hogHeight = (int)round((double)in_imgHeight/(double)sbin);
+    out_hogWidth = (int)round((double)in_imgWidth/(double)sbin);
+    const int hogDepth = 32;
+
+    float* hogBuffer = (float*)malloc_aligned(32, out_hogWidth * out_hogHeight * hogDepth * sizeof(float));
+    memset(hogBuffer, 0, out_hogWidth * out_hogHeight * hogDepth * sizeof(float));
+    return hogBuffer;
+}
+
+

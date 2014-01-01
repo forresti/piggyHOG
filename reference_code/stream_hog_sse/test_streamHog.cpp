@@ -131,6 +131,7 @@ bool run_tests_ori_argmax(){
     printf("number of select_epi16 tests failed: %d \n", numFailed); 
 }
 
+#if 0
 //TODO: put this into a class (like PgHogContainer or streamHog), once I decide what data types to use
 //@output-by-ref out_hogWidth out_hogHeight
 //@return hogWidth = memory aligned vector for storing HOG histogram 
@@ -147,6 +148,7 @@ float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin,
     memset(hogBuffer, 0, out_hogWidth * out_hogHeight * hogDepth * sizeof(float));
     return hogBuffer;
 } 
+#endif
 
 template<class my_pixel_t>
 void diff_imgs(my_pixel_t* img_gold, my_pixel_t* img_test, int imgHeight, int imgWidth, int imgDepth,
