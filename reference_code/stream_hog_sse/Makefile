@@ -27,10 +27,10 @@ helpers.o : helpers.cpp helpers.h
 #SimpleImg.o : SimpleImg.cpp SimpleImg.h helpers.h
 #	$(CC) $(CCOPTS) SimpleImg.cpp
 
-streamHog.o : streamHog.cpp streamHog.h helpers.h
+streamHog.o : streamHog.cpp streamHog.h helpers.h SimpleImg.hpp 
 	$(CC) $(CCOPTS) streamHog.cpp
 
-test_streamHog.o : test_streamHog.cpp test_streamHog.h helpers.h
+test_streamHog.o : test_streamHog.cpp test_streamHog.h helpers.h SimpleImg.hpp 
 	$(CC) $(CCOPTS) test_streamHog.cpp
 
 clean : 

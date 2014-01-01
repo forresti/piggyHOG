@@ -42,7 +42,8 @@ class SimpleImg{
     }
 
     //cv::Mat -> instantiate myself (a SimpleImg) -- TODO: make this private 
-    void Mat_to_SimpleImg_ctor(cv::Mat img){
+    void Mat_to_SimpleImg_ctor(cv::Mat img)
+    {
         height = img.rows;
         width = img.cols;
         //stride = compute_stride(width, sizeof(pixel_t), ALIGN_IN_BYTES); //defined in helpers.cpp

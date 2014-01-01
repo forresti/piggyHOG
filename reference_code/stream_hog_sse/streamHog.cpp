@@ -293,8 +293,7 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
                 //_mm_store_si128( (__m128i*)(&outOri[y*stride + x]), gradY_ch[channel] ); //outOri[y][x : x+15] = gradX_ch[channel] -- just a test, doesnt make much sense
             }
 
-            //TODO: shouldn't the output magnitudes be 16-bit? (to avoid overflow, e.g. (gradX=255 + gradY=255) > 255)
-            //  or, rightshift (divide) the magnitude by 2...
+            //magnitude output is 16-bit to avoid overflow.
             _mm_store_si128( (__m128i*)(&outMag[y*stride + x]                 ), magMax_0 );           
             _mm_store_si128( (__m128i*)(&outMag[y*stride + x + loadSize_16bit]), magMax_1 );
 
