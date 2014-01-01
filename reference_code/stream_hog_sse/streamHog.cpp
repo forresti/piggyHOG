@@ -297,11 +297,11 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
             _mm_store_si128( (__m128i*)(&outMag[y*stride + x]                 ), magMax_0 );           
             _mm_store_si128( (__m128i*)(&outMag[y*stride + x + loadSize_16bit]), magMax_1 );
 
-#if 0 //atan2 nonvectorized LUT. (not tested for correctness)
+#if 1 //atan2 nonvectorized LUT. (not tested for correctness)
             //outOri[y*stride + x + 0:15] = atan2(gradX_max[0:15], gradY_max[0:15])
             ori_atan2_LUT(gradX_max_0, gradX_max_1, gradY_max_0, gradY_max_1, &outOri[y*stride + x]);
 #endif
-#if 1 //atan2 "snap-to ori" based on dot products, like VOC5. (matches VOC5)
+#if 0 //atan2 "snap-to ori" based on dot products, like VOC5. (matches VOC5)
             __m128i oriMax_0 = approx_atan2_bin(gradX_max_0, gradY_max_0); //input and output packed int16_t
             __m128i oriMax_1 = approx_atan2_bin(gradX_max_1, gradY_max_1); 
             __m128i oriMax = _mm_packs_epi16(oriMax_0, oriMax_1); //16-bit -> 8-bit (values are 1 to 18)

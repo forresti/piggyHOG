@@ -364,11 +364,12 @@ void test_streamHog_oneScale_oneIter(SimpleImg<uint8_t> &img, int sbin, streamHo
 
 //hand-coded impl of pyramid. (will modularize it better eventually)
 void test_streamHog_pyramid(){
+    printf("test_streamHog_pyramid() \n");
     int nLevels = 30; //TODO: compute this based on img size
     int interval = 10;
-    int n_iter = 1; //not really "iterating" -- just number of times to run the experiment
+    int n_iter = 10; //not really "iterating" -- just number of times to run the experiment
     if(n_iter < 10){
-        printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=10 or greater. \n", n_iter);
+        printf("    WARNING: n_iter = %d. For statistical significance, we recommend n_iter=10 or greater. \n", n_iter);
     }
 
     streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
@@ -377,21 +378,22 @@ void test_streamHog_pyramid(){
 
     vector< SimpleImg<uint8_t>* > imgPyramid(nLevels); //TODO: have these *not* be pointers?
 
+
+    //TODO: create an imgPyramid function.
+    #pragma omp parallel for
+    for(int i=0; i<interval; i++){
+        float downsampleFactor = 1/pow(sc, i);
+        //printf("downsampleFactor = %f \n", downsampleFactor);
+
+        cv::Mat img_scaled = downsampleWithOpenCV(img_Mat, downsampleFactor);
+        imgPyramid[i] = new SimpleImg<uint8_t>(img_scaled);
+        img_scaled = downsampleWithOpenCV(img_Mat, downsampleFactor/2);
+        imgPyramid[i + interval] = new SimpleImg<uint8_t>(img_scaled);
+    }
+
     double start_time = read_timer();
 
     for(int iter=0; iter<n_iter; iter++){ //do several runs, take the avg time
-
-        //TODO: create an imgPyramid function.
-        #pragma omp parallel for
-        for(int i=0; i<interval; i++){
-            float downsampleFactor = 1/pow(sc, i);
-            //printf("downsampleFactor = %f \n", downsampleFactor);
-
-            cv::Mat img_scaled = downsampleWithOpenCV(img_Mat, downsampleFactor);
-            imgPyramid[i] = new SimpleImg<uint8_t>(img_scaled);
-            img_scaled = downsampleWithOpenCV(img_Mat, downsampleFactor/2);
-            imgPyramid[i + interval] = new SimpleImg<uint8_t>(img_scaled);
-        }
 
         for(int i=0; i<interval; i++){
             //TODO: catch output HOGs from each scale
@@ -401,21 +403,22 @@ void test_streamHog_pyramid(){
             test_streamHog_oneScale_manyIter(*imgPyramid[i+interval], 8, sHog); //sbin=8 -- hogPyramid[i + 2*interval]
             #endif
 
+            //TODO: avoid recomputing (ori, mag) for both sbin=4 and sbin=8!!!
             #if 1 
             test_streamHog_oneScale_oneIter(*imgPyramid[i], 4, sHog); //sbin=4 -- hogPyramid[i]
             test_streamHog_oneScale_oneIter(*imgPyramid[i], 8, sHog); //sbin=8 -- hogPyramid[i + interval]
-            test_streamHog_oneScale_oneIter(*imgPyramid[i+interval], 8, sHog); //sbin=8 -- hogPyramid[i + 2*interval]
+       //     test_streamHog_oneScale_oneIter(*imgPyramid[i+interval], 8, sHog); //sbin=8 -- hogPyramid[i + 2*interval]
             #endif
 
         }    
-        for(int i=0; i<nLevels; i++){
-            delete imgPyramid[i];
-        }
-
     }
 
     double end_timer = read_timer() - start_time;
     printf("avg time for multiscale = %f ms \n", end_timer/n_iter);
+
+    for(int i=0; i<nLevels; i++){
+        delete imgPyramid[i];
+    }
 }
 
 
