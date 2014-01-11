@@ -1,13 +1,15 @@
 
 
 function calculate_total_scales()
-    calculate_total_scales_simple()
+    bool_enforce_padding = true;
+    calculate_total_scales_simple(bool_enforce_padding)
 
 end
 
 % adjusted slightly for our Caffe idea
 % simplified (not doing the 'recycle downsampled image with various strides' thing)
-function calculate_total_scales_simple()
+% @param bool_enforce_padding = whether to add padding AFTER downsampling (to have some space between images and avoid polluting receptive fields)
+function calculate_total_scales_simple(bool_enforce_padding)
     %adjusted slightly for our Caffe idea
     sbin = 4; 
     interval = 10;
@@ -21,8 +23,14 @@ function calculate_total_scales_simple()
     %for i = 1:interval
     for i = 1:max_scale
         currScale = 1/sc^(i-1);
-        currX = round(imsize(1)*currScale);
-        currY = round(imsize(2)*currScale);
+        if(bool_enforce_padding)
+            %add some padding so we don't pollute receptive fields
+            currX = round(imsize(1)*currScale) + 16;
+            currY = round(imsize(2)*currScale) + 16;
+        else
+            currX = round(imsize(1)*currScale);
+            currY = round(imsize(2)*currScale);
+        end
 
         currNumPixels = currX * currY
         totalPixels = totalPixels + currNumPixels;    
