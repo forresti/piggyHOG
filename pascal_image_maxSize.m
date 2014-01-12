@@ -1,4 +1,7 @@
 
+
+%this shows that max image size PASCAL VOC 2007 is 500x500 pixels
+
 function pascal_image_maxSize()
     pascal_dir = '/media/big_disk/datasets/VOC2007/JPEGImages'
 
