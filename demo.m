@@ -10,8 +10,7 @@ function demo()
         curr_img = imgs(idx).name
         pyra = time_extract_hog(curr_img, model);
 
-
-        pyra.scales
+        %pyra.scales %look at scales for doing this: (HOG PYRA LOCATION) -> (ORIGINAL IMG LOCATION)
 
         %visHog(pyra)
         %print(gcf, '-dpng', '-r0', [output_dir '/' curr_img]);
