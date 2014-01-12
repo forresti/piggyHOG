@@ -5,9 +5,13 @@ function demo()
     %output_dir = './cascade-results-g02-v1.0-cars';
     load('VOC2007/car_final'); %load 'model' structure
 
-    for idx = 1:length(imgs)
+    %for idx = 1:length(imgs)
+    for idx = 1:1
         curr_img = imgs(idx).name
         pyra = time_extract_hog(curr_img, model);
+
+
+        pyra.scales
 
         %visHog(pyra)
         %print(gcf, '-dpng', '-r0', [output_dir '/' curr_img]);
