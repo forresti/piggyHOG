@@ -14,7 +14,9 @@ function calculate_total_scales_simple(bool_enforce_padding)
     sbin = 4; 
     interval = 10;
     sc = 2^(1/interval);
-    imsize = [480 640];
+    %imsize = [480 640];
+    %imsize = [500 500];
+    imsize = [2000 2000];
     max_scale = 1 + floor(log(min(imsize)/(5*sbin))/log(sc));
 
     inputNumPixels = imsize(1)*imsize(2); %width*height for input img
@@ -37,6 +39,7 @@ function calculate_total_scales_simple(bool_enforce_padding)
     end
 
 
+    display(['    number of scales = ' num2str(max_scale)])
     display(['    pyramid: totalPixels = ' num2str(totalPixels) ' sqrt(totalPixels) = ' num2str(sqrt(totalPixels))])
     display(['    input image: inputNumPixels = ' num2str(inputNumPixels) ' sqrt(inputNumPixels) = ' num2str(sqrt(inputNumPixels))])
 
