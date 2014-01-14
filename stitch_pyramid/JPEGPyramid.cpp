@@ -18,7 +18,7 @@
 // <http://www.gnu.org/licenses/>.
 //--------------------------------------------------------------------------------------------------
 
-#include "HOGPyramid.h"
+#include "JPEGPyramid.h"
 
 #include <algorithm>
 #include <cassert>
@@ -36,11 +36,11 @@ using namespace Eigen;
 using namespace FFLD;
 using namespace std;
 
-HOGPyramid::HOGPyramid() : padx_(0), pady_(0), interval_(0)
+JPEGPyramid::JPEGPyramid() : padx_(0), pady_(0), interval_(0)
 {
 }
 
-HOGPyramid::HOGPyramid(int padx, int pady, int interval, const vector<Level> & levels) : padx_(0),
+JPEGPyramid::JPEGPyramid(int padx, int pady, int interval, const vector<Level> & levels) : padx_(0),
 pady_(0), interval_(0)
 {
 	if ((padx < 1) || (pady < 1) || (interval < 1))
@@ -52,7 +52,7 @@ pady_(0), interval_(0)
 	levels_ = levels;
 }
 
-HOGPyramid::HOGPyramid(const JPEGImage & image, int padx, int pady, int interval) : padx_(0),
+JPEGPyramid::JPEGPyramid(const JPEGImage & image, int padx, int pady, int interval) : padx_(0),
 pady_(0), interval_(0)
 {
 	if (image.empty() || (padx < 1) || (pady < 1) || (interval < 1))
@@ -143,32 +143,32 @@ pady_(0), interval_(0)
 #endif
 }
 
-int HOGPyramid::padx() const
+int JPEGPyramid::padx() const
 {
 	return padx_;
 }
 
-int HOGPyramid::pady() const
+int JPEGPyramid::pady() const
 {
 	return pady_;
 }
 
-int HOGPyramid::interval() const
+int JPEGPyramid::interval() const
 {
 	return interval_;
 }
 
-const vector<HOGPyramid::Level> & HOGPyramid::levels() const
+const vector<JPEGPyramid::Level> & JPEGPyramid::levels() const
 {
 	return levels_;
 }
 
-bool HOGPyramid::empty() const
+bool JPEGPyramid::empty() const
 {
 	return levels().empty();
 }
 
-void HOGPyramid::convolve(const Level & filter, vector<Matrix> & convolutions) const
+void JPEGPyramid::convolve(const Level & filter, vector<Matrix> & convolutions) const
 {
 	// Resize convolutions to hold # levels
 	convolutions.resize(levels_.size());
@@ -180,7 +180,7 @@ void HOGPyramid::convolve(const Level & filter, vector<Matrix> & convolutions) c
 		Convolve(levels_[i], filter, convolutions[i]);
 }
 
-void HOGPyramid::convolve(const Level & filter, vector<SparseMatrix> & convolutions) const
+void JPEGPyramid::convolve(const Level & filter, vector<SparseMatrix> & convolutions) const
 {
 	// Resize convolutions to hold # levels
 	convolutions.resize(levels_.size());
@@ -192,7 +192,7 @@ void HOGPyramid::convolve(const Level & filter, vector<SparseMatrix> & convoluti
 		Convolve(levels_[i], filter, convolutions[i]);
 }
 
-void HOGPyramid::convolve(const vector<Matrix> & labels, Level & sum) const
+void JPEGPyramid::convolve(const vector<Matrix> & labels, Level & sum) const
 {
 	// Nothing to do if the levels or the labels are empty
 	if (empty() || labels.empty()) {
@@ -217,7 +217,7 @@ void HOGPyramid::convolve(const vector<Matrix> & labels, Level & sum) const
 	}
 }
 
-void HOGPyramid::convolve(const vector<SparseMatrix> & labels, Level & sum) const
+void JPEGPyramid::convolve(const vector<SparseMatrix> & labels, Level & sum) const
 {
 	// Nothing to do if the levels or the labels are empty
 	if (empty() || labels.empty()) {
@@ -242,19 +242,19 @@ void HOGPyramid::convolve(const vector<SparseMatrix> & labels, Level & sum) cons
 	}
 }
 
-Map<HOGPyramid::Matrix, Aligned> HOGPyramid::Convert(Level & level)
+Map<JPEGPyramid::Matrix, Aligned> JPEGPyramid::Convert(Level & level)
 {
 	return Map<Matrix, Aligned>(level.data()->data(), level.rows(),
 											  level.cols() * NbFeatures);
 }
 
-Map<const HOGPyramid::Matrix, Aligned> HOGPyramid::Convert(const Level & level)
+Map<const JPEGPyramid::Matrix, Aligned> JPEGPyramid::Convert(const Level & level)
 {
 	return Map<const Matrix, Aligned>(level.data()->data(), level.rows(),
 													level.cols() * NbFeatures);
 }
 
-FFLD::HOGPyramid::Level HOGPyramid::Flip(const HOGPyramid::Level & filter)
+FFLD::JPEGPyramid::Level JPEGPyramid::Flip(const JPEGPyramid::Level & filter)
 {
 	// Symmetric features
 	const int symmetry[NbFeatures] = {
@@ -265,7 +265,7 @@ FFLD::HOGPyramid::Level HOGPyramid::Flip(const HOGPyramid::Level & filter)
 	};
 	
 	// Symmetric filter
-	HOGPyramid::Level result(filter.rows(), filter.cols());
+	JPEGPyramid::Level result(filter.rows(), filter.cols());
 	
 	for (int y = 0; y < filter.rows(); ++y)
 		for (int x = 0; x < filter.cols(); ++x)
@@ -282,8 +282,8 @@ namespace detail
 {
 // Bilinear interpolation among the 4 neighboring cells
 template <class Matrix, int CellSize>
-	inline void interpolate(int x, int y, int bin0, int bin1, HOGPyramid::Scalar magnitude0,
-							HOGPyramid::Scalar magnitude1, Matrix & matrix)
+	inline void interpolate(int x, int y, int bin0, int bin1, JPEGPyramid::Scalar magnitude0,
+							JPEGPyramid::Scalar magnitude1, Matrix & matrix)
 {
 	// Find the bin into which (x, y) falls
 	const int i = (y - CellSize / 2) / CellSize;
@@ -314,7 +314,7 @@ template <class Matrix, int CellSize>
 }
 }
 
-void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
+void JPEGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 					 int cellSize)
 {
 	// Table of all the possible tangents (1MB)
@@ -500,7 +500,7 @@ void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 #endif //DISABLE_HOG_BLOCKS
 }
 #else //use FELZ-style (voc-release5) features
-void HOGPyramid::Hog(const uint8_t * bits, int width, int height, int depth, Level & level,
+void JPEGPyramid::Hog(const uint8_t * bits, int width, int height, int depth, Level & level,
 					 int cellSize)
 {
 	// Adapted from voc-release4.01/features.cc
@@ -675,7 +675,7 @@ void HOGPyramid::Hog(const uint8_t * bits, int width, int height, int depth, Lev
 }
 #endif
 
-void HOGPyramid::Convolve(const Level & x, const Level & y, Matrix & z)
+void JPEGPyramid::Convolve(const Level & x, const Level & y, Matrix & z)
 {
 	// Nothing to do if x is smaller than y
 	if ((x.rows() < y.rows()) || (x.cols() < y.cols())) {
@@ -702,7 +702,7 @@ void HOGPyramid::Convolve(const Level & x, const Level & y, Matrix & z)
 	}
 }
 
-void HOGPyramid::Convolve(const Level & x, const Level & y, SparseMatrix & z)
+void JPEGPyramid::Convolve(const Level & x, const Level & y, SparseMatrix & z)
 {
 	// Nothing to do if x is smaller than y
 	if ((x.rows() < y.rows()) || (x.cols() < y.cols())) {
@@ -746,7 +746,7 @@ void HOGPyramid::Convolve(const Level & x, const Level & y, SparseMatrix & z)
 	z.finalize();
 }
 
-void HOGPyramid::Convolve(const Level & x, const Matrix & z, Level & y)
+void JPEGPyramid::Convolve(const Level & x, const Matrix & z, Level & y)
 {
 	// Nothing to do if x is smaller than z
 	if ((x.rows() < z.rows()) || (x.cols() < z.cols())) {
@@ -774,7 +774,7 @@ void HOGPyramid::Convolve(const Level & x, const Matrix & z, Level & y)
 	}
 }
 
-void HOGPyramid::Convolve(const Level & x, const SparseMatrix & z, Level & y)
+void JPEGPyramid::Convolve(const Level & x, const SparseMatrix & z, Level & y)
 {
 	// Nothing to do if x is smaller than z
 	if ((x.rows() < z.rows()) || (x.cols() < z.cols())) {

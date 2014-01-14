@@ -18,7 +18,7 @@
 // <http://www.gnu.org/licenses/>.
 //--------------------------------------------------------------------------------------------------
 #include "SimpleOpt.h"
-#include "HOGPyramid.h"
+#include "JPEGPyramid.h"
 #include "JPEGImage.h" 
 #include "common/helpers.h"
 
@@ -122,8 +122,8 @@ void parseArgs(int &padding, int &interval, string &file, int argc, char * argv[
     }
 }
 
-void printHogSizes(HOGPyramid pyramid);
-void writePyraToCsv(HOGPyramid pyramid);
+void printHogSizes(JPEGPyramid pyramid);
+void writePyraToCsv(JPEGPyramid pyramid);
 
 // Test a mixture model (compute a ROC curve)
 int main(int argc, char * argv[]){
@@ -150,8 +150,8 @@ int main(int argc, char * argv[]){
 
     int padx = 11; //ignoring cmd-line padding arg.
     int pady = 6; //to match voc5 dims
-    //HOGPyramid pyramid(image, padding, padding, interval);
-    HOGPyramid pyramid(image, padx, pady, interval); 
+    //JPEGPyramid pyramid(image, padding, padding, interval);
+    JPEGPyramid pyramid(image, padx, pady, interval); 
 
     if (pyramid.empty()) {
         showUsage();
@@ -168,7 +168,7 @@ int main(int argc, char * argv[]){
    	return EXIT_SUCCESS;
 }
 
-void printHogSizes(HOGPyramid pyramid){
+void printHogSizes(JPEGPyramid pyramid){
     int nlevels = pyramid.levels().size();
 
     for(int level = 0; level < nlevels; level++){ 
@@ -182,7 +182,7 @@ void printHogSizes(HOGPyramid pyramid){
 
 // nRows = 32
 // nCols = width*height
-void writePyraToCsv(HOGPyramid pyramid){
+void writePyraToCsv(JPEGPyramid pyramid){
     int nlevels = pyramid.levels().size();
     for(int level = 0; level < nlevels; level++){
         //printf("writing to CSV: level %d \n", level);

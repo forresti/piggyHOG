@@ -21,7 +21,7 @@
 #ifndef FFLD_PATCHWORK_H
 #define FFLD_PATCHWORK_H
 
-#include "HOGPyramid.h"
+#include "JPEGPyramid.h"
 #include "Rectangle.h"
 
 #include <utility>
@@ -32,18 +32,18 @@ extern "C" {
 
 namespace FFLD
 {
-/// The Patchwork class computes full convolutions much faster than the HOGPyramid class.
+/// The Patchwork class computes full convolutions much faster than the JPEGPyramid class.
 class Patchwork
 {
 public:
 	/// Type of a scalar value.
-	typedef std::complex<HOGPyramid::Scalar> Scalar;
+	typedef std::complex<JPEGPyramid::Scalar> Scalar;
 	
 	/// Type of a matrix.
 	typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Matrix;
 	
 	/// Type of a patchwork plane cell (fixed-size complex vector of size NbFeatures).
-	typedef Eigen::Array<Scalar, HOGPyramid::NbFeatures, 1> Cell;
+	typedef Eigen::Array<Scalar, JPEGPyramid::NbFeatures, 1> Cell;
 	
 	/// Type of a patchwork plane (matrix of cells).
 	typedef Eigen::Matrix<Cell, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Plane;
@@ -60,7 +60,7 @@ public:
 	/// the Patchwork will be empty.
 	/// @note Assumes that the features of the pyramid levels are zero in the padded regions but for
 	/// the last feature, which is assumed to be one.
-	Patchwork(const HOGPyramid & pyramid);
+	Patchwork(const JPEGPyramid & pyramid);
 	
 	/// Returns the amount of horizontal zero padding (in cells).
 	int padx() const;
@@ -78,7 +78,7 @@ public:
 	/// @param[in] filters The filters.
 	/// @param[out] convolutions The convolutions (filters x levels).
 	void convolve(const std::vector<Filter> & filters,
-				  std::vector<std::vector<HOGPyramid::Matrix> > & convolutions) const;
+				  std::vector<std::vector<JPEGPyramid::Matrix> > & convolutions) const;
 	
 	/// Initializes the FFTW library.
 	/// @param[in] maxRows Maximum number of rows of a pyramid level (including padding).
@@ -98,7 +98,7 @@ public:
 	/// @param[out] result Transformed filter.
 	/// @note If Init was not already called or if the filter is larger than the last maxRows and
 	/// maxCols passed to the Init method the result will be empty.
-	static void TransformFilter(const HOGPyramid::Level & filter, Filter & result);
+	static void TransformFilter(const JPEGPyramid::Level & filter, Filter & result);
 	
 private:
 	// Bottom-Left fill algorithm
@@ -128,10 +128,10 @@ private:
 namespace Eigen
 {
 template <>
-struct NumTraits<Array<FFLD::Patchwork::Scalar, FFLD::HOGPyramid::NbFeatures, 1> > :
-	GenericNumTraits<Array<FFLD::Patchwork::Scalar, FFLD::HOGPyramid::NbFeatures, 1> >
+struct NumTraits<Array<FFLD::Patchwork::Scalar, FFLD::JPEGPyramid::NbFeatures, 1> > :
+	GenericNumTraits<Array<FFLD::Patchwork::Scalar, FFLD::JPEGPyramid::NbFeatures, 1> >
 {
-	static inline FFLD::HOGPyramid::Scalar dummy_precision()
+	static inline FFLD::JPEGPyramid::Scalar dummy_precision()
 	{
 		return 0; // Never actually called
 	}

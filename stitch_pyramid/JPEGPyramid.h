@@ -18,8 +18,8 @@
 // <http://www.gnu.org/licenses/>.
 //--------------------------------------------------------------------------------------------------
 
-#ifndef FFLD_HOGPYRAMID_H
-#define FFLD_HOGPYRAMID_H
+#ifndef FFLD_JPEGPYRAMID_H
+#define FFLD_JPEGPYRAMID_H
 
 #include "JPEGImage.h"
 
@@ -28,17 +28,17 @@
 
 namespace FFLD
 {
-/// The HOGPyramid class computes and stores the HOG features extracted from a jpeg image at
+/// The JPEGPyramid class computes and stores the HOG features extracted from a jpeg image at
 /// multiple scales. The scale of the pyramid level of index @c i is given by the following formula:
 /// 2^(1 - @c i / @c interval), so that the first scale is at double the resolution of the original
 /// image). Each level is padded with zeros horizontally and vertically by a fixed amount. The last
 /// feature is special: it takes the value one in the padding and zero otherwise.
-/// @note Define the PASCAL_HOGPYRAMID_FELZENSZWALB_FEATURES flag during compilation to use
+/// @note Define the PASCAL_JPEGPYRAMID_FELZENSZWALB_FEATURES flag during compilation to use
 /// Felzenszwalb's original features (slower and not as accurate as they do no angular
 /// interpolation, provided for compatibility only).
-/// @note Define the PASCAL_HOGPYRAMID_DOUBLE to use double scalar values instead of float (slower,
+/// @note Define the PASCAL_JPEGPYRAMID_DOUBLE to use double scalar values instead of float (slower,
 /// uses twice the amount of memory, and the increase in precision is not necessarily useful).
-class HOGPyramid
+class JPEGPyramid
 {
 public:
 	/// Number of HOG features (guaranteed to be even). Fixed at compile time for both ease of use
@@ -46,7 +46,7 @@ public:
 	static const int NbFeatures = 32;
 	
 	/// Type of a scalar value.
-#ifndef FFLD_HOGPYRAMID_DOUBLE
+#ifndef FFLD_JPEGPYRAMID_DOUBLE
 	typedef float Scalar;
 #else
 	typedef double Scalar;
@@ -65,7 +65,7 @@ public:
 	typedef Eigen::Matrix<Cell, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Level;
 	
 	/// Constructs an empty pyramid. An empty pyramid has no level.
-	HOGPyramid();
+	JPEGPyramid();
 	
 	/// Constructs a pyramid from parameters and a list of levels.
 	/// @param[in] padx Amount of horizontal zero padding (in cells).
@@ -73,7 +73,7 @@ public:
 	/// @param[in] interval Number of levels per octave in the pyramid.
 	/// @param[in] levels List of pyramid levels.
 	/// @note The amount of padding and the interval should be at least 1.
-	HOGPyramid(int padx, int pady, int interval, const std::vector<Level> & levels);
+	JPEGPyramid(int padx, int pady, int interval, const std::vector<Level> & levels);
 	
 	/// Constructs a pyramid from the JPEGImage of a Scene.
 	/// @param[in] image The JPEGImage of the Scene.
@@ -81,7 +81,7 @@ public:
 	/// @param[in] pady Amount of vertical zero padding (in cells).
 	/// @param[in] interval Number of levels per octave in the pyramid.
 	/// @note The amount of padding and the interval should be at least 1.
-	HOGPyramid(const JPEGImage & image, int padx, int pady, int interval = 10);
+	JPEGPyramid(const JPEGImage & image, int padx, int pady, int interval = 10);
 	
 	/// Returns whether the pyramid is empty. An empty pyramid has no level.
 	bool empty() const;
@@ -139,10 +139,10 @@ public:
 	static Eigen::Map<const Matrix, Eigen::Aligned> Convert(const Level & level);
 	
 	/// Returns the flipped version (horizontally) of a filter.
-	static HOGPyramid::Level Flip(const HOGPyramid::Level & filter);
+	static JPEGPyramid::Level Flip(const JPEGPyramid::Level & filter);
 	
 private:
-#ifndef FFLD_HOGPYRAMID_FELZENSZWALB_FEATURES
+#ifndef FFLD_JPEGPYRAMID_FELZENSZWALB_FEATURES
 	// Efficiently computes Histogram of Oriented Gradient (HOG) features
 	// Code to compute HOG features as described in "Object Detection with Discriminatively Trained
 	// Part Based Models" by Felzenszwalb, Girshick, McAllester and Ramanan, PAMI10
@@ -178,10 +178,10 @@ private:
 namespace Eigen
 {
 template <>
-struct NumTraits<Array<FFLD::HOGPyramid::Scalar, FFLD::HOGPyramid::NbFeatures, 1> > :
-	GenericNumTraits<Array<FFLD::HOGPyramid::Scalar, FFLD::HOGPyramid::NbFeatures, 1> >
+struct NumTraits<Array<FFLD::JPEGPyramid::Scalar, FFLD::JPEGPyramid::NbFeatures, 1> > :
+	GenericNumTraits<Array<FFLD::JPEGPyramid::Scalar, FFLD::JPEGPyramid::NbFeatures, 1> >
 {
-	static inline FFLD::HOGPyramid::Scalar dummy_precision()
+	static inline FFLD::JPEGPyramid::Scalar dummy_precision()
 	{
 		return 0; // Never actually called
 	}

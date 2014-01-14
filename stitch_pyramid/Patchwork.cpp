@@ -37,7 +37,7 @@ Patchwork::Patchwork() : padx_(0), pady_(0), interval_(0)
 {
 }
 
-Patchwork::Patchwork(const HOGPyramid & pyramid) : padx_(pyramid.padx()), pady_(pyramid.pady()),
+Patchwork::Patchwork(const JPEGPyramid & pyramid) : padx_(pyramid.padx()), pady_(pyramid.pady()),
 interval_(pyramid.interval())
 {
 	// Remove the padding from the bottom/right sides since convolutions with Fourier wrap around
@@ -62,19 +62,19 @@ interval_(pyramid.interval())
 	for (int i = 0; i < nbPlanes; ++i) {
 		planes_[i] = Plane::Constant(MaxRows_, HalfCols_, Cell::Zero());
 		
-		Map<HOGPyramid::Level, Aligned>
-			plane(reinterpret_cast<HOGPyramid::Cell *>(planes_[i].data()), MaxRows_, HalfCols_ * 2);
+		Map<JPEGPyramid::Level, Aligned>
+			plane(reinterpret_cast<JPEGPyramid::Cell *>(planes_[i].data()), MaxRows_, HalfCols_ * 2);
 		
 		// Set the last feature to 1
 		for (int y = 0; y < MaxRows_; ++y)
 			for (int x = 0; x < MaxCols_; ++x)
-				plane(y, x)(HOGPyramid::NbFeatures - 1) = 1.0f;
+				plane(y, x)(JPEGPyramid::NbFeatures - 1) = 1.0f;
 	}
 	
 	// Recopy the pyramid levels into the planes
 	for (int i = 0; i < nbLevels; ++i) {
-		Map<HOGPyramid::Level, Aligned>
-			plane(reinterpret_cast<HOGPyramid::Cell *>(planes_[rectangles_[i].second].data()),
+		Map<JPEGPyramid::Level, Aligned>
+			plane(reinterpret_cast<JPEGPyramid::Cell *>(planes_[rectangles_[i].second].data()),
 				  MaxRows_, HalfCols_ * 2);
 		
 		plane.block(rectangles_[i].first.y(), rectangles_[i].first.x(),
@@ -112,7 +112,7 @@ bool Patchwork::Init(int maxRows, int maxCols)
 		return false;
 	
 	// Temporary matrices
-	HOGPyramid::Matrix tmp(maxRows * HOGPyramid::NbFeatures, maxCols + 2);
+	JPEGPyramid::Matrix tmp(maxRows * JPEGPyramid::NbFeatures, maxCols + 2);
 	
 	int dims[2] = {maxRows, maxCols};
 }
@@ -127,7 +127,7 @@ int Patchwork::MaxCols()
 	return MaxCols_;
 }
 
-void Patchwork::TransformFilter(const HOGPyramid::Level & filter, Filter & result)
+void Patchwork::TransformFilter(const JPEGPyramid::Level & filter, Filter & result)
 {
 	// Early return if no filter given or if Init was not called or if the filter is too large
 	if (!filter.size() || !MaxRows_ || (filter.rows() > MaxRows_) || (filter.cols() > MaxCols_)) {
@@ -139,7 +139,7 @@ void Patchwork::TransformFilter(const HOGPyramid::Level & filter, Filter & resul
 	result.first = Plane::Constant(MaxRows_, HalfCols_, Cell::Zero());
 	result.second = pair<int, int>(filter.rows(), filter.cols());
 	
-	Map<HOGPyramid::Level, Aligned> plane(reinterpret_cast<HOGPyramid::Cell *>(result.first.data()),
+	Map<JPEGPyramid::Level, Aligned> plane(reinterpret_cast<JPEGPyramid::Cell *>(result.first.data()),
 										  MaxRows_, HalfCols_ * 2);
 	
 	for (int y = 0; y < filter.rows(); ++y)
