@@ -71,10 +71,7 @@ pady_(0), interval_(0)
 	levels_.resize(maxScale + 1);
     vector<double> scales(maxScale+1);
 
-    //TODO: replace 'i = 0 to interval' with 'i = 0 to maxScale'
-	
 #pragma omp parallel for 
-//	for (int i = 0; i < interval; ++i) 
     for (int i = 0; i <= maxScale; ++i) 
     {
 		double scale = pow(2.0, static_cast<double>(-i) / interval);

@@ -168,6 +168,8 @@ int main(int argc, char * argv[]){
 
     double start_stitch = read_timer();
 
+printf("    pyramid.levels[0].height() = %d \n", pyramid.levels()[0].height());
+
     Patchwork::Init((pyramid.levels()[0].height() - pady + 15) & ~15,
                     (pyramid.levels()[0].width() - padx + 15) & ~15); //TODO: add err checking 
     const Patchwork patchwork(pyramid); //TODO: patchwork.planes_[i] = a JPEGImage

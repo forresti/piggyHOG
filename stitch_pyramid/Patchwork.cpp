@@ -46,6 +46,7 @@ interval_(pyramid.interval())
 	const int nbLevels = pyramid.levels().size();
 
     cout << "    nbLevels = " << nbLevels << endl;
+    printf("    MaxRows_ = %d, MaxCols_=%d \n", MaxRows_, MaxCols_);
 	
 	rectangles_.resize(nbLevels);
 	
@@ -116,6 +117,9 @@ bool Patchwork::Init(int maxRows, int maxCols)
 	JPEGPyramid::Matrix tmp(maxRows * JPEGPyramid::NbChannels, maxCols + 2);
 	
 	int dims[2] = {maxRows, maxCols};
+    MaxRows_ = maxRows;
+    MaxCols_ = maxCols;
+    HalfCols_ = maxCols / 2 + 1;
 }
 
 int Patchwork::MaxRows()
