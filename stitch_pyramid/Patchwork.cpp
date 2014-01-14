@@ -19,11 +19,13 @@
 //--------------------------------------------------------------------------------------------------
 
 #include "Patchwork.h"
+#include "JPEGPyramid.h"
 
 #include <algorithm>
 #include <cstdio>
 #include <numeric>
 #include <set>
+#include <iostream>
 
 using namespace Eigen;
 using namespace FFLD;
@@ -42,6 +44,8 @@ interval_(pyramid.interval())
 {
 	// Remove the padding from the bottom/right sides since convolutions with Fourier wrap around
 	const int nbLevels = pyramid.levels().size();
+
+    cout << "    nbLevels = " << nbLevels << endl;
 	
 	rectangles_.resize(nbLevels);
 	
@@ -52,6 +56,9 @@ interval_(pyramid.interval())
 	
 	// Build the patchwork planes
 	const int nbPlanes = BLF(rectangles_);
+
+    cout << "    nbPlanes = " << nbPlanes << endl;
+
 	
 	// Constructs an empty patchwork in case of error
 	if (nbPlanes <= 0)
@@ -59,7 +66,8 @@ interval_(pyramid.interval())
 	
 	planes_.resize(nbPlanes);
 	for (int i = 0; i < nbPlanes; ++i) {
-		planes_[i] = Plane::Constant(MaxRows_, HalfCols_, Cell::Zero());
+		//planes_[i] = Plane::Constant(MaxRows_, HalfCols_, Cell::Zero());
+        planes_[i] = JPEGImage(MaxCols_, MaxRows_, JPEGPyramid::NbChannels);     //JPEGImage(width, height, depth)
 	}
 
 //TODO: set this up with appropriate data struct. (haven't decided whether to use 'HOG' or 'JPEGImage' as the 'plane' struct...)

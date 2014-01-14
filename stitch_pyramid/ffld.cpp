@@ -172,7 +172,6 @@ int main(int argc, char * argv[]){
                     (pyramid.levels()[0].width() - padx + 15) & ~15); //TODO: add err checking 
     const Patchwork patchwork(pyramid); //TODO: patchwork.planes_[i] = a JPEGImage
 
-
     double time_stitch = read_timer() - start_stitch;
     cout << "  Stitched scales in " << time_stitch << " ms" << endl;
 

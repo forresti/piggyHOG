@@ -42,8 +42,9 @@ public:
 	typedef Eigen::Array<Scalar, JPEGPyramid::NbChannels, 1> Cell;
 	
 	/// Type of a patchwork plane (matrix of cells).
-	typedef Eigen::Matrix<Cell, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Plane;
-	
+	//typedef Eigen::Matrix<Cell, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Plane;
+    typedef JPEGImage Plane;	
+
 	/// Type of a patchwork filter (plane + original filter size).
 	typedef std::pair<Plane, std::pair<int, int> > Filter;
 	
@@ -88,6 +89,8 @@ public:
 	
 	/// Returns the current maximum number of columns of a pyramid level (including padding).
 	static int MaxCols();
+
+    std::vector<Plane> planes_;
 	
 private:
 	// Bottom-Left fill algorithm
@@ -97,7 +100,6 @@ private:
 	int pady_;
 	int interval_;
 	std::vector<std::pair<Rectangle, int> > rectangles_;
-	std::vector<Plane> planes_;
 	
 	static int MaxRows_;
 	static int MaxCols_;
