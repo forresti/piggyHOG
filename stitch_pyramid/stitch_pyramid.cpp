@@ -1,22 +1,4 @@
-//--------------------------------------------------------------------------------------------------
-// Implementation of the paper "Exact Acceleration of Linear Object Detectors", 12th European
-// Conference on Computer Vision, 2012.
-//
-// Copyright (c) 2012 Idiap Research Institute, <http://www.idiap.ch/>
-// Written by Charles Dubout <charles.dubout@idiap.ch>
-//
-// This file is part of FFLD (the Fast Fourier Linear Detector)
-//
-// FFLD is free software: you can redistribute it and/or modify it under the terms of the GNU
-// General Public License version 3 as published by the Free Software Foundation.
-//
-// FFLD is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
-// the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-// Public License for more details.
-//
-// You should have received a copy of the GNU General Public License along with FFLD. If not, see
-// <http://www.gnu.org/licenses/>.
-//--------------------------------------------------------------------------------------------------
+
 #include "SimpleOpt.h"
 #include "JPEGPyramid.h"
 #include "JPEGImage.h" 
@@ -147,9 +129,13 @@ int main(int argc, char * argv[]){
         showUsage();
         cerr << "\nInvalid image " << file << endl;
         return -1;
-    }   
-    // Compute the downsample+stitch
+    }
 
+    //image = image.resize(image.width()*4, image.height()*4); //UPSAMPLE so that Caffe's 16x downsampling looks like 4x downsampling
+    image = image.resize(image.width()*2, image.height()*2); //UPSAMPLE so that Caffe's 16x downsampling looks like 8x downsampling
+   
+
+    // Compute the downsample+stitch
     double start_downsample = read_timer();    
 
     int padx = 11; //ignoring cmd-line padding arg.
@@ -193,25 +179,6 @@ void printHogSizes(JPEGPyramid pyramid){
         int height = pyramid.levels()[level].height();
         int depth = pyramid.NbChannels;
         printf("level %d: width=%d, height=%d, depth=%d \n", level, width, height, depth);
-    }
-}
-
-// nRows = 32
-// nCols = width*height
-void writePyraToCsv(JPEGPyramid pyramid){
-    int nlevels = pyramid.levels().size();
-
-    for(int level = 0; level < nlevels; level++){
-        //printf("writing to CSV: level %d \n", level);
-        //const float* raw_hog = pyramid.levels()[level].data()->data();        
-        const uint8_t* raw_hog = pyramid.levels()[level].bits(); 
-        int width = pyramid.levels()[level].width();
-        int height = pyramid.levels()[level].height();
-        int depth = pyramid.NbChannels;
-        ostringstream fname;
-        fname << "../ffld_results/level" << level << ".csv"; //TODO: get orig img name into the CSV name.
-    
-        //writeCsv_3d_Hog_Float(raw_hog, width, height, depth, fname.str()); //FIXME: make a version of this function that takes uint8_t data
     }
 }
 
