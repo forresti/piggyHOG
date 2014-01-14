@@ -69,53 +69,19 @@ pady_(0), interval_(0)
 	pady_ = pady;
 	interval_ = interval;
 	levels_.resize(maxScale + 1);
-
     vector<double> scales(maxScale+1);
+
+    //TODO: replace 'i = 0 to interval' with 'i = 0 to maxScale'
 	
-	int i;
-#pragma omp parallel for private(i)
-    //i=0;
-	for (i = 0; i < interval; ++i) 
+#pragma omp parallel for 
+	for (int i = 0; i < interval; ++i) 
     {
 		double scale = pow(2.0, static_cast<double>(-i) / interval);
 		JPEGImage scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
 
-#if 0		
-		// First octave at twice the image resolution
-#ifndef FFLD_HOGPYRAMID_FELZENSZWALB_FEATURES
-		Hog(scaled, levels_[i], padx, pady, 4);
-	
-#if 1
-		// Second octave at the original resolution
-		if (i + interval <= maxScale)
-			Hog(scaled, levels_[i + interval], padx, pady, 8);
-		
-		// Remaining octaves
-		for (int j = 2; i + j * interval <= maxScale; ++j) {
-			scale *= 0.5;
-			scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
-			Hog(scaled, levels_[i + j * interval], padx, pady, 8);
-		}
-#endif
-#else
-		Hog(scaled.scanLine(0), scaled.width(), scaled.height(), scaled.depth(), levels_[i], 4);
-
-		// Second octave at the original resolution
-		if (i + interval <= maxScale)
-			Hog(scaled.scanLine(0), scaled.width(), scaled.height(), scaled.depth(),
-				levels_[i + interval], 8);
-        //scales[i + interval] = scale;
-
-		// Remaining octaves
-		for (int j = 2; i + j * interval <= maxScale; ++j) {
-			scale *= 0.5;
-			scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
-			Hog(scaled.scanLine(0), scaled.width(), scaled.height(), scaled.depth(),
-				levels_[i + j * interval], 8);
-           //scales[i + j*interval] = scale;
-		}
-#endif
-#endif
+        //for generic pyramid... not stitched.
+        levels_[i] = Level::Constant(image.height() + pady * 2,
+                                     image.width()  + padx * 2, Cell::Zero());
     }
 
 	// Add padding
@@ -124,12 +90,7 @@ pady_(0), interval_(0)
 		Level tmp = Level::Constant(levels_[i].rows() + (pady + 1) * 2,
 									levels_[i].cols() + (padx + 1) * 2, Cell::Zero());
 		
-		// Set the last feature to 1
-		for (int y = 0; y < tmp.rows(); ++y)
-			for (int x = 0; x < tmp.cols(); ++x)
-				tmp(y, x)(31) = 1;
 		tmp.block(pady + 1, padx + 1, levels_[i].rows(), levels_[i].cols()) = levels_[i];
-		
 		levels_[i].swap(tmp);
 	}
 #endif
@@ -159,39 +120,4 @@ bool JPEGPyramid::empty() const
 {
 	return levels().empty();
 }
-
-#if 0
-Map<JPEGPyramid::Matrix, Aligned> JPEGPyramid::Convert(Level & level)
-{
-	return Map<Matrix, Aligned>(level.data()->data(), level.rows(),
-											  level.cols() * NbFeatures);
-}
-
-Map<const JPEGPyramid::Matrix, Aligned> JPEGPyramid::Convert(const Level & level)
-{
-	return Map<const Matrix, Aligned>(level.data()->data(), level.rows(),
-													level.cols() * NbFeatures);
-}
-
-FFLD::JPEGPyramid::Level JPEGPyramid::Flip(const JPEGPyramid::Level & filter)
-{
-	// Symmetric features
-	const int symmetry[NbFeatures] = {
-		9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 17, 16, 15, 14, 13, 12, 11, 10, // Contrast-sensitive
-		18, 26, 25, 24, 23, 22, 21, 20, 19, // Contrast-insensitive
-		28, 27, 30, 29, // Texture
-		31 // Truncation
-	};
-	
-	// Symmetric filter
-	JPEGPyramid::Level result(filter.rows(), filter.cols());
-	
-	for (int y = 0; y < filter.rows(); ++y)
-		for (int x = 0; x < filter.cols(); ++x)
-			for (int i = 0; i < NbFeatures; ++i)
-				result(y, x)(i) = filter(y, filter.cols() - 1 - x)(symmetry[i]);
-	
-	return result;
-}
-#endif
 

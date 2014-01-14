@@ -99,79 +99,7 @@ public:
 	/// @note Scales are given by the following formula: 2^(1 - @c index / @c interval).
 	const std::vector<Level> & levels() const;
 
-#if 0	
-	/// Returns the convolutions of the pyramid with a filter (useful to compute the SVM margins).
-	/// @param[in] filter Filter.
-	/// @param[out] convolutions Convolution for each level.
-	void convolve(const Level & filter, std::vector<Matrix> & convolutions) const;
-	
-	/// Returns the sparse convolutions of the pyramid with a filter (useful to compute a subset of
-	/// the SVM margins).
-	/// @param[in] filter The filter.
-	/// @param[out] convolutions The results of the convolutions for each level.
-	void convolve(const Level & filter, std::vector<SparseMatrix> & convolutions) const;
-	
-	/// Returns the sum of the convolutions of the pyramid with a pyramid of labels (useful to
-	/// compute the gradient of the SVM loss).
-	/// @param[in] labels The pyramid of labels.
-	/// @param[out] sum The sum of the results of the convolutions.
-	/// @note The size of the sum is inferred from the size of the labels, which should thus
-	/// all have the size of their corresponding level minus the size of the sum plus one.
-	/// @note In case labels are empty the sum will be empty too.
-	void convolve(const std::vector<Matrix> & labels, Level & sum) const;
-	
-	/// Returns the sum of the sparse convolutions of the pyramid with a pyramid of labels (useful
-	/// to compute the gradient of the SVM loss).
-	/// @param[in] labels The pyramid of labels.
-	/// @param[out] sum The sum of the results of the convolutions.
-	/// @note The size of the sum is inferred from the size of the labels, which should thus all
-	/// have the size of their corresponding level minus the size of the sum plus one.
-	/// @note In case labels are empty the sum will be empty too.
-	void convolve(const std::vector<SparseMatrix> & labels, Level & sum) const;
-	
-	/// Converts a pyramid level to a simple matrix (useful to apply standard matrix operations to
-	/// it).
-	/// @note The size of the matrix will be rows x (cols * NbFeatures).
-	static Eigen::Map<Matrix, Eigen::Aligned> Convert(Level & level);
-	
-	/// Converts a const pyramid level to a simple const matrix (useful to apply standard matrix
-	/// operations to it).
-	/// @note The size of the matrix will be rows x (cols * NbFeatures).
-	static Eigen::Map<const Matrix, Eigen::Aligned> Convert(const Level & level);
-	
-	/// Returns the flipped version (horizontally) of a filter.
-	static JPEGPyramid::Level Flip(const JPEGPyramid::Level & filter);
-#endif
-	
 private:
-
-#if 0
-#ifndef FFLD_JPEGPYRAMID_FELZENSZWALB_FEATURES
-	// Efficiently computes Histogram of Oriented Gradient (HOG) features
-	// Code to compute HOG features as described in "Object Detection with Discriminatively Trained
-	// Part Based Models" by Felzenszwalb, Girshick, McAllester and Ramanan, PAMI10
-	// cellSize should be either 4 or 8
-	static void Hog(const JPEGImage & image, Level & level, int padx, int pady,
-					int cellSize = 8);
-#else
-	// Felzenszwalb version (not as accurate, provided for compatibility only)
-	static void Hog(const uint8_t * bits, int width, int height, int depth, Level & level,
-					int cellSize = 8);
-#endif
-
-	// Computes the 2D convolution of a pyramid level with a filter
-	static void Convolve(const Level & x, const Level & y, Matrix & z);
-	
-	// Computes the sparse 2D convolution of a pyramid level with a filter
-	static void Convolve(const Level & x, const Level & y, SparseMatrix & z);
-	
-	// Computes the 2D convolution of a pyramid level with labels
-	static void Convolve(const Level & x, const Matrix & z, Level & y);
-	
-	// Computes the 2D convolution of a pyramid level with sparse labels
-	static void Convolve(const Level & x, const SparseMatrix & z, Level & y);
-#endif
-
 	int padx_;
 	int pady_;
 	int interval_;

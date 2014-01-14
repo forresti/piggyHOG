@@ -14,3 +14,7 @@ This is Forrest's hack to do the following...
     inputFilename_plane1.jpg
     ...
 
+
+#TODO: find/replace NbFeatures for NbChannels.
+       set NbChannels=3
+

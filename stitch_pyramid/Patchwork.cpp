@@ -58,19 +58,12 @@ interval_(pyramid.interval())
 		return;
 	
 	planes_.resize(nbPlanes);
-	
 	for (int i = 0; i < nbPlanes; ++i) {
 		planes_[i] = Plane::Constant(MaxRows_, HalfCols_, Cell::Zero());
-		
-		Map<JPEGPyramid::Level, Aligned>
-			plane(reinterpret_cast<JPEGPyramid::Cell *>(planes_[i].data()), MaxRows_, HalfCols_ * 2);
-		
-		// Set the last feature to 1
-		for (int y = 0; y < MaxRows_; ++y)
-			for (int x = 0; x < MaxCols_; ++x)
-				plane(y, x)(JPEGPyramid::NbFeatures - 1) = 1.0f;
 	}
-	
+
+//TODO: set this up with appropriate data struct. (haven't decided whether to use 'HOG' or 'JPEGImage' as the 'plane' struct...)
+#if 0	
 	// Recopy the pyramid levels into the planes
 	for (int i = 0; i < nbLevels; ++i) {
 		Map<JPEGPyramid::Level, Aligned>
@@ -82,7 +75,7 @@ interval_(pyramid.interval())
 			pyramid.levels()[i].topLeftCorner(rectangles_[i].first.height(),
 											  rectangles_[i].first.width());
 	}
-	
+#endif
 }
 
 int Patchwork::padx() const
