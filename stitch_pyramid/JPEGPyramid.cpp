@@ -64,6 +64,8 @@ pady_(0), interval_(0)
 	// Cannot compute the pyramid on images too small
 	if (maxScale < interval)
 		return;
+
+printf("in JPEGPyramid constructor. padx=%d, pady=%d\n", padx, pady);
 	
 	padx_ = padx;
 	pady_ = pady;

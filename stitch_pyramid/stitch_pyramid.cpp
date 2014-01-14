@@ -113,7 +113,7 @@ void writePatchworkToJPG(Patchwork patchwork);
 int main(int argc, char * argv[]){
 	// Default parameters
     string file;
-	int padding = 12;
+	int padding = 8;
 	int interval = 10;
 
     //parseArgs params are passed by reference, so they get updated here
@@ -136,10 +136,7 @@ int main(int argc, char * argv[]){
   // Compute the downsample+stitch
     double start_downsample = read_timer();    
 
-    int padx = 11; //ignoring cmd-line padding arg.
-    int pady = 6; //to match voc5 dims
-    //JPEGPyramid pyramid(image, padding, padding, interval);
-    JPEGPyramid pyramid(image, padx, pady, interval); //DOWNSAMPLE (but not stitching yet) 
+    JPEGPyramid pyramid(image, padding, padding, interval); //DOWNSAMPLE with (padx == pady == padding)
 
     if (pyramid.empty()) {
         showUsage();
@@ -152,8 +149,8 @@ int main(int argc, char * argv[]){
 
     double start_stitch = read_timer();
 
-    int planeWidth = (pyramid.levels()[0].width() - padx + 15) & ~15; //TODO: don't subtract padx, pady? 
-    int planeHeight = (pyramid.levels()[0].height() - pady + 15) & ~15; 
+    int planeWidth = (pyramid.levels()[0].width() + 15) & ~15; //TODO: don't subtract padx, pady? 
+    int planeHeight = (pyramid.levels()[0].height() + 15) & ~15; 
     Patchwork::Init(planeHeight, planeWidth); 
     const Patchwork patchwork(pyramid); //STITCH
 
