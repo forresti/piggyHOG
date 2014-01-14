@@ -80,29 +80,26 @@ interval_(pyramid.interval())
         //currLevel is source
         const JPEGImage* currLevel = &pyramid.levels()[i]; 
 
-        int srcWidth = currLevel->width;
-        int srcHeight = currLevel->height;
+        int srcWidth = currLevel->width();
+        int srcHeight = currLevel->height();
 
-#if 0        
-        int dstWidth = currPlane->width;
-        int dstHeight = currPlane->height;
+        int dstWidth = currPlane->width();
+        int dstHeight = currPlane->height();
       
             //rectangle packing offsets: 
         int x_off = rectangles_[i].first.x(); //TODO: verifiy that this is indeed the offset
         int y_off = rectangles_[i].first.y();
-     
+    
+        //TODO: test and verify this. 
         for (int y = 0; y < srcHeight; y++){
             for (int x = 0; x < srcWidth; x++){
                 for (int ch = 0; ch < JPEGPyramid::NbChannels; ch++){
 
                     //currPlane.bits[...] = pyramid.levels()[i].data[...];
-                    //TODO: for currPlane index, add offset from rectangle packing
-
-                    currPlane->bits[((y + y_off)*dstWidth*depth) + ((x + x_off)*depth) + ch] = pyramid.levels()[i]->bits[y*srcWidth*depth + x*depth + ch];
+                    currPlane->bits()[((y + y_off)*dstWidth*depth) + ((x + x_off)*depth) + ch] = currLevel->bits()[y*srcWidth*depth + x*depth + ch];
                 }
             }
         }
-#endif
     }
 
 //TODO: set this up with appropriate data struct. (haven't decided whether to use 'HOG' or 'JPEGImage' as the 'plane' struct...)
