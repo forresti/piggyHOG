@@ -46,8 +46,8 @@ interval_(pyramid.interval())
 	rectangles_.resize(nbLevels);
 	
 	for (int i = 0; i < nbLevels; ++i) {
-		rectangles_[i].first.setWidth(pyramid.levels()[i].cols() - padx_);
-		rectangles_[i].first.setHeight(pyramid.levels()[i].rows() - pady_);
+		rectangles_[i].first.setWidth(pyramid.levels()[i].width() - padx_);
+		rectangles_[i].first.setHeight(pyramid.levels()[i].height() - pady_);
 	}
 	
 	// Build the patchwork planes
@@ -105,7 +105,7 @@ bool Patchwork::Init(int maxRows, int maxCols)
 		return false;
 	
 	// Temporary matrices
-	JPEGPyramid::Matrix tmp(maxRows * JPEGPyramid::NbFeatures, maxCols + 2);
+	JPEGPyramid::Matrix tmp(maxRows * JPEGPyramid::NbChannels, maxCols + 2);
 	
 	int dims[2] = {maxRows, maxCols};
 }
@@ -118,27 +118,6 @@ int Patchwork::MaxRows()
 int Patchwork::MaxCols()
 {
 	return MaxCols_;
-}
-
-void Patchwork::TransformFilter(const JPEGPyramid::Level & filter, Filter & result)
-{
-	// Early return if no filter given or if Init was not called or if the filter is too large
-	if (!filter.size() || !MaxRows_ || (filter.rows() > MaxRows_) || (filter.cols() > MaxCols_)) {
-		result = Filter();
-		return;
-	}
-	
-	// Recopy the filter into a plane
-	result.first = Plane::Constant(MaxRows_, HalfCols_, Cell::Zero());
-	result.second = pair<int, int>(filter.rows(), filter.cols());
-	
-	Map<JPEGPyramid::Level, Aligned> plane(reinterpret_cast<JPEGPyramid::Cell *>(result.first.data()),
-										  MaxRows_, HalfCols_ * 2);
-	
-	for (int y = 0; y < filter.rows(); ++y)
-		for (int x = 0; x < filter.cols(); ++x)
-			plane((MaxRows_ - y) % MaxRows_, (MaxCols_ - x) % MaxCols_) = filter(y, x) /
-																		  (MaxRows_ * MaxCols_);
 }
 
 namespace FFLD

@@ -18,3 +18,11 @@ This is Forrest's hack to do the following...
 #TODO: find/replace NbFeatures for NbChannels.
        set NbChannels=3
 
+#TODO: in ffld.cpp, replace {hog, HOG, Hog} to Pyra
+
+#TODO: in Patchwork.{cpp, h}, change the definition of 'Plane' to JPEGImage
+
+DONE:
+ find/replace NbFeatures for NbChannels.
+ set NbChannels=3
+

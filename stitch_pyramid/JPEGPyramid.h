@@ -41,9 +41,7 @@ namespace FFLD
 class JPEGPyramid
 {
 public:
-	/// Number of HOG features (guaranteed to be even). Fixed at compile time for both ease of use
-	/// and optimal performance.
-	static const int NbFeatures = 32;
+	static const int NbChannels = 3; //RGB
 	
 	/// Type of a scalar value.
 #ifndef FFLD_JPEGPYRAMID_DOUBLE
@@ -58,8 +56,8 @@ public:
 	/// Type of a sparse matrix.
 	typedef Eigen::SparseMatrix<Scalar, Eigen::RowMajor> SparseMatrix;
 	
-	/// Type of a pyramid level cell (fixed-size vector of length NbFeatures).
-	typedef Eigen::Array<Scalar, NbFeatures, 1> Cell;
+	/// Type of a pyramid level cell (fixed-size vector of length NbChannels).
+	typedef Eigen::Array<Scalar, NbChannels, 1> Cell;
 	
 	/// Type of a pyramid level (matrix of cells).
 	//typedef Eigen::Matrix<Cell, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Level;
@@ -108,12 +106,12 @@ private:
 };
 }
 
-// Some compilers complain about the lack of a NumTraits for Eigen::Array<Scalar, NbFeatures, 1>
+// Some compilers complain about the lack of a NumTraits for Eigen::Array<Scalar, NbChannels, 1>
 namespace Eigen
 {
 template <>
-struct NumTraits<Array<FFLD::JPEGPyramid::Scalar, FFLD::JPEGPyramid::NbFeatures, 1> > :
-	GenericNumTraits<Array<FFLD::JPEGPyramid::Scalar, FFLD::JPEGPyramid::NbFeatures, 1> >
+struct NumTraits<Array<FFLD::JPEGPyramid::Scalar, FFLD::JPEGPyramid::NbChannels, 1> > :
+	GenericNumTraits<Array<FFLD::JPEGPyramid::Scalar, FFLD::JPEGPyramid::NbChannels, 1> >
 {
 	static inline FFLD::JPEGPyramid::Scalar dummy_precision()
 	{

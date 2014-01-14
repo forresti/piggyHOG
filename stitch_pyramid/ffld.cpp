@@ -173,9 +173,9 @@ void printHogSizes(JPEGPyramid pyramid){
 
     for(int level = 0; level < nlevels; level++){ 
         //const float* raw_hog = pyramid.levels()[level].data()->data();
-        int width = pyramid.levels()[level].cols();
-        int height = pyramid.levels()[level].rows();
-        int depth = pyramid.NbFeatures;
+        int width = pyramid.levels()[level].width();
+        int height = pyramid.levels()[level].height();
+        int depth = pyramid.NbChannels;
         printf("level %d: width=%d, height=%d, depth=%d \n", level, width, height, depth);
     }
 }
@@ -184,24 +184,29 @@ void printHogSizes(JPEGPyramid pyramid){
 // nCols = width*height
 void writePyraToCsv(JPEGPyramid pyramid){
     int nlevels = pyramid.levels().size();
+
     for(int level = 0; level < nlevels; level++){
         //printf("writing to CSV: level %d \n", level);
-        const float* raw_hog = pyramid.levels()[level].data()->data();        int width = pyramid.levels()[level].cols();
-        int height = pyramid.levels()[level].rows();
-        int depth = pyramid.NbFeatures;
+        //const float* raw_hog = pyramid.levels()[level].data()->data();        
+        const uint8_t* raw_hog = pyramid.levels()[level].bits(); 
+        int width = pyramid.levels()[level].width();
+        int height = pyramid.levels()[level].height();
+        int depth = pyramid.NbChannels;
         ostringstream fname;
         fname << "../ffld_results/level" << level << ".csv"; //TODO: get orig img name into the CSV name.
     
-        #if 0 //old 2D csvwrite
-        int nCols = depth; //one descriptor per row
-        int nRows = width*height;
-
-        //TODO: also write (depth, width, height) -- in some order -- to the top of the CSV file.
-        writeCsv_2dFloat(raw_hog, nRows, nCols, fname.str());
-        #endif
-        writeCsv_3d_Hog_Float(raw_hog, width, height, depth, fname.str());
+        //writeCsv_3d_Hog_Float(raw_hog, width, height, depth, fname.str()); //FIXME: make a version of this function that takes uint8_t data
     }
 }
 
+void writePyraToJPG(JPEGPyramid pyramid){
+    int nlevels = pyramid.levels().size();
 
+    for(int level = 0; level < nlevels; level++){
+        ostringstream fname;
+        fname << "../pyra_results/level" << level << ".jpg"; //TODO: get orig img name into the JPEG name.
+
+        pyramid.levels()[level].save(fname.str());
+    }
+}
 

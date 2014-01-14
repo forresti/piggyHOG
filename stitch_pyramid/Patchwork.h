@@ -38,8 +38,8 @@ public:
 	/// Type of a matrix.
 	typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Matrix;
 	
-	/// Type of a patchwork plane cell (fixed-size complex vector of size NbFeatures).
-	typedef Eigen::Array<Scalar, JPEGPyramid::NbFeatures, 1> Cell;
+	/// Type of a patchwork plane cell (fixed-size complex vector of size NbChannels).
+	typedef Eigen::Array<Scalar, JPEGPyramid::NbChannels, 1> Cell;
 	
 	/// Type of a patchwork plane (matrix of cells).
 	typedef Eigen::Matrix<Cell, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Plane;
@@ -89,13 +89,6 @@ public:
 	/// Returns the current maximum number of columns of a pyramid level (including padding).
 	static int MaxCols();
 	
-	/// Returns a transformed version of a filter to be used by the @c convolve method.
-	/// @param[in] filter Filter to transform.
-	/// @param[out] result Transformed filter.
-	/// @note If Init was not already called or if the filter is larger than the last maxRows and
-	/// maxCols passed to the Init method the result will be empty.
-	static void TransformFilter(const JPEGPyramid::Level & filter, Filter & result);
-	
 private:
 	// Bottom-Left fill algorithm
 	static int BLF(std::vector<std::pair<Rectangle, int> > & rectangles);
@@ -112,12 +105,12 @@ private:
 };
 }
 
-// Some compilers complain about the lack of a NumTraits for Eigen::Array<Scalar, NbFeatures, 1>
+// Some compilers complain about the lack of a NumTraits for Eigen::Array<Scalar, NbChannels, 1>
 namespace Eigen
 {
 template <>
-struct NumTraits<Array<FFLD::Patchwork::Scalar, FFLD::JPEGPyramid::NbFeatures, 1> > :
-	GenericNumTraits<Array<FFLD::Patchwork::Scalar, FFLD::JPEGPyramid::NbFeatures, 1> >
+struct NumTraits<Array<FFLD::Patchwork::Scalar, FFLD::JPEGPyramid::NbChannels, 1> > :
+	GenericNumTraits<Array<FFLD::Patchwork::Scalar, FFLD::JPEGPyramid::NbChannels, 1> >
 {
 	static inline FFLD::JPEGPyramid::Scalar dummy_precision()
 	{
