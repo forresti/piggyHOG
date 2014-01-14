@@ -105,8 +105,7 @@ void parseArgs(int &padding, int &interval, string &file, int argc, char * argv[
     }
 }
 
-void printHogSizes(JPEGPyramid pyramid);
-void writePyraToCsv(JPEGPyramid pyramid);
+void printScaleSizes(JPEGPyramid pyramid);
 void writePyraToJPG(JPEGPyramid pyramid);
 void writePatchworkToJPG(Patchwork patchwork);
 
@@ -133,15 +132,14 @@ int main(int argc, char * argv[]){
 
     //image = image.resize(image.width()*4, image.height()*4); //UPSAMPLE so that Caffe's 16x downsampling looks like 4x downsampling
     image = image.resize(image.width()*2, image.height()*2); //UPSAMPLE so that Caffe's 16x downsampling looks like 8x downsampling
-   
 
-    // Compute the downsample+stitch
+  // Compute the downsample+stitch
     double start_downsample = read_timer();    
 
     int padx = 11; //ignoring cmd-line padding arg.
     int pady = 6; //to match voc5 dims
     //JPEGPyramid pyramid(image, padding, padding, interval);
-    JPEGPyramid pyramid(image, padx, pady, interval); 
+    JPEGPyramid pyramid(image, padx, pady, interval); //DOWNSAMPLE (but not stitching yet) 
 
     if (pyramid.empty()) {
         showUsage();
@@ -152,25 +150,24 @@ int main(int argc, char * argv[]){
     double time_downsample = read_timer() - start_downsample;
     cout << "  Multiscale downsampling in " << time_downsample << " ms" << endl;
 
-
     double start_stitch = read_timer();
 
-    Patchwork::Init((pyramid.levels()[0].height() - pady + 15) & ~15,
-                    (pyramid.levels()[0].width() - padx + 15) & ~15); //TODO: add err checking 
-    const Patchwork patchwork(pyramid); //TODO: patchwork.planes_[i] = a JPEGImage
+    int planeWidth = (pyramid.levels()[0].width() - padx + 15) & ~15; //TODO: don't subtract padx, pady? 
+    int planeHeight = (pyramid.levels()[0].height() - pady + 15) & ~15; 
+    Patchwork::Init(planeHeight, planeWidth); 
+    const Patchwork patchwork(pyramid); //STITCH
 
     double time_stitch = read_timer() - start_stitch;
     cout << "  Stitched scales in " << time_stitch << " ms" << endl;
 
-    printHogSizes(pyramid);
-    //writePyraToCsv(pyramid);
+    printScaleSizes(pyramid);
     writePyraToJPG(pyramid);
     writePatchworkToJPG(patchwork);
 
    	return EXIT_SUCCESS;
 }
 
-void printHogSizes(JPEGPyramid pyramid){
+void printScaleSizes(JPEGPyramid pyramid){
     int nlevels = pyramid.levels().size();
 
     for(int level = 0; level < nlevels; level++){ 

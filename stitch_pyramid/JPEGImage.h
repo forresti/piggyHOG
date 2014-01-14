@@ -84,6 +84,8 @@ public:
 	/// and @p height.
 	/// @note The returned image might be smaller if some of the coordinates are outside the image.
 	JPEGImage crop(int x, int y, int width, int height) const;
+
+    JPEGImage pad(int x, int y) const;
 	
 private:
 	// Blur and downscale an image by a factor 2

@@ -248,6 +248,43 @@ JPEGImage JPEGImage::crop(int x, int y, int width, int height) const
 	return result;
 }
 
+//TODO: remove const?
+JPEGImage JPEGImage::pad(int padx, int pady) const
+{
+
+    int height; int width; //TODO: remove
+
+
+    // empty image
+    if( (padx < 0) || (pady < 0) )
+        return JPEGImage();
+	
+	// Crop the coordinates to the image
+    int newWidth = this->width() + 2*padx;
+    int newHeight = this->height() + 2*pady;
+
+	//width = min(x + width - 1, width_ - 1) - max(x, 0) + 1;
+	//height = min(y + height - 1, height_ - 1) - max(y, 0) + 1;
+	//x = max(x, 0);
+	//y = max(y, 0);
+	
+	JPEGImage result;
+    
+	result.width_ = newWidth;
+	result.height_ = newHeight;
+	result.depth_ = depth_;
+	result.bits_.resize(newWidth * newHeight * depth_);
+
+/*	
+	for (int y2 = 0; y2 < height; ++y2)
+		for (int x2 = 0; x2 < width; ++x2)
+			for (int i = 0; i < depth_; ++i)
+				result.bits_[(y2 * width + x2) * depth_ + i] =
+					bits_[((y + y2) * width_ + x + x2) * depth_ + i];
+*/	
+	return result;
+}
+
 // Bilinear interpolation coefficient
 namespace FFLD
 {
