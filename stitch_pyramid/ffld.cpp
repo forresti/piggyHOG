@@ -126,6 +126,7 @@ void parseArgs(int &padding, int &interval, string &file, int argc, char * argv[
 void printHogSizes(JPEGPyramid pyramid);
 void writePyraToCsv(JPEGPyramid pyramid);
 void writePyraToJPG(JPEGPyramid pyramid);
+void writePatchworkToJPG(Patchwork patchwork);
 
 // Test a mixture model (compute a ROC curve)
 int main(int argc, char * argv[]){
@@ -178,6 +179,7 @@ int main(int argc, char * argv[]){
     printHogSizes(pyramid);
     //writePyraToCsv(pyramid);
     writePyraToJPG(pyramid);
+    writePatchworkToJPG(patchwork);
 
    	return EXIT_SUCCESS;
 }
@@ -223,6 +225,18 @@ void writePyraToJPG(JPEGPyramid pyramid){
         //cout << fname.str() << endl;
 
         pyramid.levels()[level].save(fname.str());
+    }
+}
+
+void writePatchworkToJPG(Patchwork patchwork){
+    int nlevels = patchwork.planes_.size();
+
+    for(int level = 0; level < nlevels; level++){
+        ostringstream fname;
+        fname << "../stitched_results/level" << level << ".jpg"; //TODO: get orig img name into the JPEG name.
+        //cout << fname.str() << endl;
+
+        patchwork.planes_[level].save(fname.str());
     }
 }
 
