@@ -50,10 +50,8 @@ interval_(pyramid.interval())
 	rectangles_.resize(nbLevels);
 	
 	for (int i = 0; i < nbLevels; ++i) {
-        rectangles_[i].first.setWidth(pyramid.levels()[i].width()); //stitching should include padding as the img size.
+        rectangles_[i].first.setWidth(pyramid.levels()[i].width()); //stitching includes padding in the img size.
         rectangles_[i].first.setHeight(pyramid.levels()[i].height());
-		//rectangles_[i].first.setWidth(pyramid.levels()[i].width() - padx_);
-		//rectangles_[i].first.setHeight(pyramid.levels()[i].height() - pady_);
 	}
 	
 	// Build the patchwork planes

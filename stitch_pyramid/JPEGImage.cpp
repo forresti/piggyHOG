@@ -278,20 +278,10 @@ JPEGImage JPEGImage::pad(int padx, int pady) const
             for (int ch = 0; ch < depth_; ch++){
 
                 //result.bits_[...] = this->bits_[...];  
-                //result.bits_[(y+y_off)*dstWidth*depth_ + (x+x_off)*depth_ + ch] = this->bits_[y*srcWidth*depth_ + x*depth + ch];
-
-                int8_t dummy = this->bits_[0];
-                result.bits_[0] = 0; 
+                result.bits_[(y+y_off)*dstWidth*depth_ + (x+x_off)*depth_ + ch] = this->bits_[y*srcWidth*depth_ + x*depth_ + ch];
             }
         }
     }
-/*	
-	for (int y2 = 0; y2 < height; ++y2)
-		for (int x2 = 0; x2 < width; ++x2)
-			for (int i = 0; i < depth_; ++i)
-				result.bits_[(y2 * width + x2) * depth_ + i] =
-					bits_[((y + y2) * width_ + x + x2) * depth_ + i];
-*/	
 	return result;
 }
 
