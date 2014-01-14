@@ -98,7 +98,8 @@ public:
 	/// Returns the pyramid levels.
 	/// @note Scales are given by the following formula: 2^(1 - @c index / @c interval).
 	const std::vector<Level> & levels() const;
-	
+
+#if 0	
 	/// Returns the convolutions of the pyramid with a filter (useful to compute the SVM margins).
 	/// @param[in] filter Filter.
 	/// @param[out] convolutions Convolution for each level.
@@ -140,8 +141,11 @@ public:
 	
 	/// Returns the flipped version (horizontally) of a filter.
 	static JPEGPyramid::Level Flip(const JPEGPyramid::Level & filter);
+#endif
 	
 private:
+
+#if 0
 #ifndef FFLD_JPEGPYRAMID_FELZENSZWALB_FEATURES
 	// Efficiently computes Histogram of Oriented Gradient (HOG) features
 	// Code to compute HOG features as described in "Object Detection with Discriminatively Trained
@@ -154,7 +158,7 @@ private:
 	static void Hog(const uint8_t * bits, int width, int height, int depth, Level & level,
 					int cellSize = 8);
 #endif
-	
+
 	// Computes the 2D convolution of a pyramid level with a filter
 	static void Convolve(const Level & x, const Level & y, Matrix & z);
 	
@@ -166,7 +170,8 @@ private:
 	
 	// Computes the 2D convolution of a pyramid level with sparse labels
 	static void Convolve(const Level & x, const SparseMatrix & z, Level & y);
-	
+#endif
+
 	int padx_;
 	int pady_;
 	int interval_;
