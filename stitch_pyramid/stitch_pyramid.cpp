@@ -72,7 +72,10 @@ void parseArgs(int &padding, int &interval, string &file, string &output_stitche
 					exit(1);
 				}
 			}
-		}
+            else if (args.OptionId() == OPT_OUTPUT_STITCHED_DIR) {
+                output_stitched_dir = args.OptionArg();	
+            }
+        }
 		else {
 			showUsage();
 			cerr << "\nUnknown option " << args.OptionText() << endl;
@@ -218,7 +221,7 @@ void writePatchworkToJPG(Patchwork patchwork, string output_stitched_dir, string
     for(int planeID = 0; planeID < nplanes; planeID++){
         ostringstream fname;
         fname << output_stitched_dir << "/" << base_filename << "_plane" << planeID << ".jpg";
-        //cout << fname.str() << endl;
+        cout << fname.str() << endl;
 
         patchwork.planes_[planeID].save(fname.str());
     }
