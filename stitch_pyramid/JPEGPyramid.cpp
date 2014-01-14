@@ -65,8 +65,6 @@ pady_(0), interval_(0)
 	if (maxScale < interval)
 		return;
 
-printf("in JPEGPyramid constructor. padx=%d, pady=%d\n", padx, pady);
-	
 	padx_ = padx;
 	pady_ = pady;
 	interval_ = interval;
@@ -74,29 +72,15 @@ printf("in JPEGPyramid constructor. padx=%d, pady=%d\n", padx, pady);
     vector<double> scales(maxScale+1);
 
 #pragma omp parallel for 
-    for (int i = 0; i <= maxScale; ++i) 
-    {
+    for (int i = 0; i <= maxScale; ++i){
+        //generic pyramid... not stitched.
+
 		double scale = pow(2.0, static_cast<double>(-i) / interval);
 		JPEGImage scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
         scaled = scaled.pad(padx, pady); //an additional deepcopy. (for efficiency, could have 'resize()' accept padding too
 
-        //for generic pyramid... not stitched.
-        //levels_[i] = Level::Constant(image.height() + pady * 2,
-        //                             image.width()  + padx * 2, Cell::Zero());
-
         levels_[i] = scaled;
     }
-
-//Add padding [TODO: do this for JPEGImage version of 'levels_']
-#if 0
-	for (int i = 0; i <= maxScale; ++i) {
-		Level tmp = Level::Constant(levels_[i].rows() + (pady + 1) * 2,
-									levels_[i].cols() + (padx + 1) * 2, Cell::Zero());
-		
-		tmp.block(pady + 1, padx + 1, levels_[i].rows(), levels_[i].cols()) = levels_[i];
-		levels_[i].swap(tmp);
-	}
-#endif
 }
 
 int JPEGPyramid::padx() const

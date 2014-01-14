@@ -172,7 +172,7 @@ void printScaleSizes(JPEGPyramid pyramid){
         int width = pyramid.levels()[level].width();
         int height = pyramid.levels()[level].height();
         int depth = pyramid.NbChannels;
-        printf("level %d: width=%d, height=%d, depth=%d \n", level, width, height, depth);
+        printf("        level %d: width=%d, height=%d, depth=%d \n", level, width, height, depth);
     }
 }
 

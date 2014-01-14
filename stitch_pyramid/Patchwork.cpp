@@ -72,6 +72,7 @@ interval_(pyramid.interval())
 
     // [Forrest implemented... ]
     //COPY scaled images -> fixed-size planes
+#pragma omp parallel for
     for (int i = 0; i < nbLevels; ++i) {
 
         //currPlane is destination
