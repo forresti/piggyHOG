@@ -82,6 +82,7 @@ pady_(0), interval_(0)
         //for generic pyramid... not stitched.
         //levels_[i] = Level::Constant(image.height() + pady * 2,
         //                             image.width()  + padx * 2, Cell::Zero());
+
         levels_[i] = scaled;
     }
 

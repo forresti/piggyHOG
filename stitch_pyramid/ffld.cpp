@@ -20,6 +20,7 @@
 #include "SimpleOpt.h"
 #include "JPEGPyramid.h"
 #include "JPEGImage.h" 
+#include "Patchwork.h"
 #include "common/helpers.h"
 
 #include <algorithm>
@@ -146,8 +147,9 @@ int main(int argc, char * argv[]){
         cerr << "\nInvalid image " << file << endl;
         return -1;
     }   
-    // Compute the HOG features
-    double start_hog = read_timer();    
+    // Compute the downsample+stitch
+
+    double start_downsample = read_timer();    
 
     int padx = 11; //ignoring cmd-line padding arg.
     int pady = 6; //to match voc5 dims
@@ -160,8 +162,19 @@ int main(int argc, char * argv[]){
         return -1;
     }
     
-    double time_hog = read_timer() - start_hog;
-    cout << "Computed HOG features in " << time_hog << " ms" << endl;
+    double time_downsample = read_timer() - start_downsample;
+    cout << "  Multiscale downsampling in " << time_downsample << " ms" << endl;
+
+
+    double start_stitch = read_timer();
+
+    Patchwork::Init((pyramid.levels()[0].height() - pady + 15) & ~15,
+                    (pyramid.levels()[0].width() - padx + 15) & ~15); //TODO: add err checking 
+    const Patchwork patchwork(pyramid); //TODO: patchwork.planes_[i] = a JPEGImage
+
+
+    double time_stitch = read_timer() - start_stitch;
+    cout << "  Stitched scales in " << time_stitch << " ms" << endl;
 
     printHogSizes(pyramid);
     //writePyraToCsv(pyramid);
@@ -201,13 +214,14 @@ void writePyraToCsv(JPEGPyramid pyramid){
     }
 }
 
+//assumes NbChannels == 3
 void writePyraToJPG(JPEGPyramid pyramid){
     int nlevels = pyramid.levels().size();
 
     for(int level = 0; level < nlevels; level++){
         ostringstream fname;
         fname << "../pyra_results/level" << level << ".jpg"; //TODO: get orig img name into the JPEG name.
-        cout << fname.str() << endl;
+        //cout << fname.str() << endl;
 
         pyramid.levels()[level].save(fname.str());
     }
