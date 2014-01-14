@@ -62,8 +62,9 @@ public:
 	typedef Eigen::Array<Scalar, NbFeatures, 1> Cell;
 	
 	/// Type of a pyramid level (matrix of cells).
-	typedef Eigen::Matrix<Cell, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Level;
-	
+	//typedef Eigen::Matrix<Cell, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Level;
+    typedef JPEGImage Level;	
+
 	/// Constructs an empty pyramid. An empty pyramid has no level.
 	JPEGPyramid();
 	

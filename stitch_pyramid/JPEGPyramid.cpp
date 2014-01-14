@@ -80,12 +80,13 @@ pady_(0), interval_(0)
 		JPEGImage scaled = image.resize(image.width() * scale + 0.5, image.height() * scale + 0.5);
 
         //for generic pyramid... not stitched.
-        levels_[i] = Level::Constant(image.height() + pady * 2,
-                                     image.width()  + padx * 2, Cell::Zero());
+        //levels_[i] = Level::Constant(image.height() + pady * 2,
+        //                             image.width()  + padx * 2, Cell::Zero());
+        levels_[i] = scaled;
     }
 
-	// Add padding
-#ifdef FFLD_HOGPYRAMID_FELZENSZWALB_FEATURES
+//Add padding [TODO: do this for JPEGImage version of 'levels_']
+#if 0
 	for (int i = 0; i <= maxScale; ++i) {
 		Level tmp = Level::Constant(levels_[i].rows() + (pady + 1) * 2,
 									levels_[i].cols() + (padx + 1) * 2, Cell::Zero());

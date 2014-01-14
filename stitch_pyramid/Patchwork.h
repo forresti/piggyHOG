@@ -26,10 +26,6 @@
 
 #include <utility>
 
-extern "C" {
-#include <fftw3.h>
-}
-
 namespace FFLD
 {
 /// The Patchwork class computes full convolutions much faster than the JPEGPyramid class.
@@ -113,14 +109,6 @@ private:
 	static int MaxRows_;
 	static int MaxCols_;
 	static int HalfCols_;
-	
-#ifndef FFLD_HOGPYRAMID_DOUBLE
-	static fftwf_plan Forwards_;
-	static fftwf_plan Inverse_;
-#else
-	static fftw_plan Forwards_;
-	static fftw_plan Inverse_;
-#endif
 };
 }
 
