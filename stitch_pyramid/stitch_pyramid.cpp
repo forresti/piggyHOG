@@ -107,24 +107,45 @@ void parseArgs(int &padding, int &interval, string &file, string &output_stitche
     }
 }
 
+//e.g. file = ../../images_640x480/carsgraz_001.image.jpg
+void TEST_file_parsing(string file){
+    size_t lastSlash = file.find_last_of("/\\");
+    size_t lastDot = file.find_last_of('.');
+    cout << "    file.substr(lastDot) = " << file.substr(lastDot) << endl; // .jpg
+    cout << "    file.substr(lastSlash) = " << file.substr(lastSlash) << endl; // /carsgraz_001.image.jpg
+    cout << "    file.substr(lastSlash, lastDot) = " << file.substr(lastSlash, lastDot-lastSlash) << endl; // /carsgraz_001.image
+}
+
+//e.g. file = ../../images_640x480/carsgraz_001.image.jpg
+string parse_base_filename(string file){
+    size_t lastSlash = file.find_last_of("/\\");
+    size_t lastDot = file.find_last_of('.');
+
+    string base_filename = file.substr(lastSlash, lastDot-lastSlash); // /carsgraz_001.image
+    return base_filename;
+}
+
 void printScaleSizes(JPEGPyramid pyramid);
 void writePyraToJPG(JPEGPyramid pyramid);
-void writePatchworkToJPG(Patchwork patchwork);
+void writePatchworkToJPG(Patchwork patchwork, string output_stitched_dir);
 
 // Test a mixture model (compute a ROC curve)
 int main(int argc, char * argv[]){
 	// Default parameters
     string file;
-    string output_stitched_dir;
+    string output_stitched_dir = "../stitched_results";
 	int padding = 8;
 	int interval = 10;
 
     //parseArgs params are passed by reference, so they get updated here
     parseArgs(padding, interval, file, output_stitched_dir, argc, argv); //update parameters with any command-line inputs
+    string base_filename = parse_base_filename(file);
 
     printf("    padding = %d \n", padding);
     printf("    interval = %d \n", interval);
     printf("    file = %s \n", file.c_str());
+    printf("    base_filename = %s \n", base_filename.c_str());
+    printf("    output_stitched_dir = %s \n", output_stitched_dir.c_str());
  
 	JPEGImage image(file);
     if (image.empty()) {
@@ -162,7 +183,7 @@ int main(int argc, char * argv[]){
 
     printScaleSizes(pyramid);
     writePyraToJPG(pyramid);
-    writePatchworkToJPG(patchwork);
+    writePatchworkToJPG(patchwork, output_stitched_dir);
 
    	return EXIT_SUCCESS;
 }
@@ -191,12 +212,13 @@ void writePyraToJPG(JPEGPyramid pyramid){
     }
 }
 
-void writePatchworkToJPG(Patchwork patchwork){
+void writePatchworkToJPG(Patchwork patchwork, string output_stitched_dir){
     int nlevels = patchwork.planes_.size();
 
     for(int level = 0; level < nlevels; level++){
         ostringstream fname;
-        fname << "../stitched_results/level" << level << ".jpg"; //TODO: get orig img name into the JPEG name.
+        //fname << "../stitched_results/level" << level << ".jpg"; //TODO: get orig img name into the JPEG name.
+        fname << output_stitched_dir << "/level" << level << ".jpg";
         //cout << fname.str() << endl;
 
         patchwork.planes_[level].save(fname.str());
