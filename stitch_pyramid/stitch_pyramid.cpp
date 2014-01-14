@@ -34,8 +34,8 @@ void showUsage(){
 	cout << "Usage: test [options] image.jpg, or\n       test [options] image_set.txt\n\n"
 			"Options:\n"
 			"  -h,--help               Display this information\n"
-    		"  -p,--padding <arg>      Amount of zero padding in HOG cells (default 12)\n"
-			"  -e,--interval <arg>     Number of levels per octave in the HOG pyramid (default 10)\n"
+    		"  -p,--padding <arg>      Amount of zero padding in JPEG images (default 8)\n"
+			"  -e,--interval <arg>     Number of levels per octave in the JPEG pyramid (default 10)\n"
 		 << endl;
 }
 
@@ -168,7 +168,6 @@ void printScaleSizes(JPEGPyramid pyramid){
     int nlevels = pyramid.levels().size();
 
     for(int level = 0; level < nlevels; level++){ 
-        //const float* raw_hog = pyramid.levels()[level].data()->data();
         int width = pyramid.levels()[level].width();
         int height = pyramid.levels()[level].height();
         int depth = pyramid.NbChannels;
