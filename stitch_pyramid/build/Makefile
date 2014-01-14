@@ -1,15 +1,14 @@
 CXX = g++
 CFLAGS = -g -fopenmp -O3 -fPIC -I/usr/local/include/ -I../eigen -I.. #-DFFLD_HOGPYRAMID_FELZENSZWALB_FEATURES  
 LDLIBS = -g -lgomp -ljpeg 
-OBJS = JPEGPyramid.o JPEGImage.o helpers.o Patchwork.o Rectangle.o ffld.o
-all:	ffld 
+OBJS = JPEGPyramid.o JPEGImage.o helpers.o Patchwork.o Rectangle.o stitch_pyramid.o
+all:	stitch_pyramid 
 
-ffld: $(OBJS) 
-	$(CXX) -o ffld $(OBJS) $(LDLIBS)
+stitch_pyramid: $(OBJS) 
+	$(CXX) -o stitch_pyramid $(OBJS) $(LDLIBS)
 
-#TODO: rename 'ffld' to 'main'
-ffld.o: ../ffld.cpp ../JPEGPyramid.h ../JPEGImage.h ../Patchwork.h ../common/helpers.h
-	$(CXX) $(CFLAGS) -c ../ffld.cpp
+stitch_pyramid.o: ../stitch_pyramid.cpp ../JPEGPyramid.h ../JPEGImage.h ../Patchwork.h ../common/helpers.h
+	$(CXX) $(CFLAGS) -c ../stitch_pyramid.cpp
 
 JPEGPyramid.o:	../JPEGPyramid.cpp ../JPEGPyramid.h ../JPEGImage.h
 	$(CXX) $(CFLAGS) -c ../JPEGPyramid.cpp 
