@@ -127,7 +127,7 @@ string parse_base_filename(string file){
 
 void printScaleSizes(JPEGPyramid pyramid);
 void writePyraToJPG(JPEGPyramid pyramid);
-void writePatchworkToJPG(Patchwork patchwork, string output_stitched_dir);
+void writePatchworkToJPG(Patchwork patchwork, string output_stitched_dir, string base_filename);
 
 // Test a mixture model (compute a ROC curve)
 int main(int argc, char * argv[]){
@@ -183,7 +183,7 @@ int main(int argc, char * argv[]){
 
     printScaleSizes(pyramid);
     writePyraToJPG(pyramid);
-    writePatchworkToJPG(patchwork, output_stitched_dir);
+    writePatchworkToJPG(patchwork, output_stitched_dir, base_filename); //outputs to output_stitched_dir/base_filename_[planeID].jpg
 
    	return EXIT_SUCCESS;
 }
@@ -212,16 +212,15 @@ void writePyraToJPG(JPEGPyramid pyramid){
     }
 }
 
-void writePatchworkToJPG(Patchwork patchwork, string output_stitched_dir){
-    int nlevels = patchwork.planes_.size();
+void writePatchworkToJPG(Patchwork patchwork, string output_stitched_dir, string base_filename){
+    int nplanes = patchwork.planes_.size();
 
-    for(int level = 0; level < nlevels; level++){
+    for(int planeID = 0; planeID < nplanes; planeID++){
         ostringstream fname;
-        //fname << "../stitched_results/level" << level << ".jpg"; //TODO: get orig img name into the JPEG name.
-        fname << output_stitched_dir << "/level" << level << ".jpg";
+        fname << output_stitched_dir << "/" << base_filename << "_plane" << planeID << ".jpg";
         //cout << fname.str() << endl;
 
-        patchwork.planes_[level].save(fname.str());
+        patchwork.planes_[planeID].save(fname.str());
     }
 }
 
