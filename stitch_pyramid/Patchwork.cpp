@@ -44,9 +44,8 @@ interval_(pyramid.interval())
 {
 	// Remove the padding from the bottom/right sides since convolutions with Fourier wrap around
 	const int nbLevels = pyramid.levels().size();
-
-    cout << "    nbLevels = " << nbLevels << endl;
-    printf("    MaxRows_ = %d, MaxCols_=%d \n", MaxRows_, MaxCols_);
+    //cout << "    nbLevels = " << nbLevels << endl;
+    //printf("    MaxRows_ = %d, MaxCols_=%d \n", MaxRows_, MaxCols_);
 	
 	rectangles_.resize(nbLevels);
 	
@@ -57,9 +56,7 @@ interval_(pyramid.interval())
 	
 	// Build the patchwork planes
 	const int nbPlanes = BLF(rectangles_);
-
     cout << "    nbPlanes = " << nbPlanes << endl;
-
 	
 	// Constructs an empty patchwork in case of error
 	if (nbPlanes <= 0)
@@ -70,6 +67,43 @@ interval_(pyramid.interval())
 		//planes_[i] = Plane::Constant(MaxRows_, HalfCols_, Cell::Zero());
         planes_[i] = JPEGImage(MaxCols_, MaxRows_, JPEGPyramid::NbChannels);     //JPEGImage(width, height, depth)
 	}
+
+    int depth = JPEGPyramid::NbChannels;
+
+    // [Forrest implemented... ]
+    //COPY scaled images -> fixed-size planes
+    for (int i = 0; i < nbLevels; ++i) {
+
+        //currPlane is destination
+        JPEGImage* currPlane = &planes_[rectangles_[i].second]; //TODO: make sure my dereferencing makes sense. (trying to avoid deepcopy)
+
+        //currLevel is source
+        const JPEGImage* currLevel = &pyramid.levels()[i]; 
+
+        int srcWidth = currLevel->width;
+        int srcHeight = currLevel->height;
+
+#if 0        
+        int dstWidth = currPlane->width;
+        int dstHeight = currPlane->height;
+      
+            //rectangle packing offsets: 
+        int x_off = rectangles_[i].first.x(); //TODO: verifiy that this is indeed the offset
+        int y_off = rectangles_[i].first.y();
+     
+        for (int y = 0; y < srcHeight; y++){
+            for (int x = 0; x < srcWidth; x++){
+                for (int ch = 0; ch < JPEGPyramid::NbChannels; ch++){
+
+                    //currPlane.bits[...] = pyramid.levels()[i].data[...];
+                    //TODO: for currPlane index, add offset from rectangle packing
+
+                    currPlane->bits[((y + y_off)*dstWidth*depth) + ((x + x_off)*depth) + ch] = pyramid.levels()[i]->bits[y*srcWidth*depth + x*depth + ch];
+                }
+            }
+        }
+#endif
+    }
 
 //TODO: set this up with appropriate data struct. (haven't decided whether to use 'HOG' or 'JPEGImage' as the 'plane' struct...)
 #if 0	
