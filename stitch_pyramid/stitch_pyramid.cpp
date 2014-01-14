@@ -16,7 +16,7 @@ using namespace std;
 // SimpleOpt array of valid options
 enum
 {
-    OPT_HELP, OPT_PADDING, OPT_INTERVAL
+    OPT_HELP, OPT_PADDING, OPT_INTERVAL, OPT_OUTPUT_STITCHED_DIR
 };
 
 CSimpleOpt::SOption SOptions[] =
@@ -27,6 +27,7 @@ CSimpleOpt::SOption SOptions[] =
 	{ OPT_PADDING, "--padding", SO_REQ_SEP },
 	{ OPT_INTERVAL, "-e", SO_REQ_SEP },
 	{ OPT_INTERVAL, "--interval", SO_REQ_SEP },
+    { OPT_OUTPUT_STITCHED_DIR, "--output-stitched-dir", SO_REQ_SEP },
 	SO_END_OF_OPTIONS
 };
 
@@ -36,12 +37,13 @@ void showUsage(){
 			"  -h,--help               Display this information\n"
     		"  -p,--padding <arg>      Amount of zero padding in JPEG images (default 8)\n"
 			"  -e,--interval <arg>     Number of levels per octave in the JPEG pyramid (default 10)\n"
+            "  --output-stitched-dir <arg>   Where to save stitched pyramids (default ../stitched_results)\n"
 		 << endl;
 }
 
 // Parse command line parameters
 //   put the appropriate values in (padding, interval, file) based on cmd-line args
-void parseArgs(int &padding, int &interval, string &file, int argc, char * argv[]){
+void parseArgs(int &padding, int &interval, string &file, string &output_stitched_dir, int argc, char * argv[]){
 	CSimpleOpt args(argc, argv, SOptions);
 
 	while (args.Next()) {
@@ -113,11 +115,12 @@ void writePatchworkToJPG(Patchwork patchwork);
 int main(int argc, char * argv[]){
 	// Default parameters
     string file;
+    string output_stitched_dir;
 	int padding = 8;
 	int interval = 10;
 
     //parseArgs params are passed by reference, so they get updated here
-    parseArgs(padding, interval, file, argc, argv); //update parameters with any command-line inputs
+    parseArgs(padding, interval, file, output_stitched_dir, argc, argv); //update parameters with any command-line inputs
 
     printf("    padding = %d \n", padding);
     printf("    interval = %d \n", interval);
