@@ -251,30 +251,40 @@ JPEGImage JPEGImage::crop(int x, int y, int width, int height) const
 //TODO: remove const?
 JPEGImage JPEGImage::pad(int padx, int pady) const
 {
-
-    int height; int width; //TODO: remove
-
-
     // empty image
     if( (padx < 0) || (pady < 0) )
         return JPEGImage();
-	
-	// Crop the coordinates to the image
-    int newWidth = this->width() + 2*padx;
-    int newHeight = this->height() + 2*pady;
 
-	//width = min(x + width - 1, width_ - 1) - max(x, 0) + 1;
-	//height = min(y + height - 1, height_ - 1) - max(y, 0) + 1;
-	//x = max(x, 0);
-	//y = max(y, 0);
+    int srcWidth = this->width();
+    int srcHeight = this->height();
 	
+	// new size with padding
+    int dstWidth = srcWidth + 2*padx;
+    int dstHeight = srcHeight + 2*pady;
+
 	JPEGImage result;
-    
-	result.width_ = newWidth;
-	result.height_ = newHeight;
+	result.width_ = dstWidth;
+	result.height_ = dstHeight;
 	result.depth_ = depth_;
-	result.bits_.resize(newWidth * newHeight * depth_);
+	result.bits_.resize(dstWidth * dstHeight * depth_);
 
+    //rectangle packing offsets: 
+    int x_off = padx; 
+    int y_off = pady;
+
+    //copy to padded image
+    for (int y = 0; y < srcHeight; y++){
+        for (int x = 0; x < srcWidth; x++){
+            for (int ch = 0; ch < depth_; ch++){
+
+                //result.bits_[...] = this->bits_[...];  
+                //result.bits_[(y+y_off)*dstWidth*depth_ + (x+x_off)*depth_ + ch] = this->bits_[y*srcWidth*depth_ + x*depth + ch];
+
+                int8_t dummy = this->bits_[0];
+                result.bits_[0] = 0; 
+            }
+        }
+    }
 /*	
 	for (int y2 = 0; y2 < height; ++y2)
 		for (int x2 = 0; x2 < width; ++x2)

@@ -89,10 +89,9 @@ interval_(pyramid.interval())
         int dstHeight = currPlane->height();
       
             //rectangle packing offsets: 
-        int x_off = rectangles_[i].first.x(); //TODO: verifiy that this is indeed the offset
+        int x_off = rectangles_[i].first.x(); 
         int y_off = rectangles_[i].first.y();
     
-        //TODO: test and verify this. 
         for (int y = 0; y < srcHeight; y++){
             for (int x = 0; x < srcWidth; x++){
                 for (int ch = 0; ch < JPEGPyramid::NbChannels; ch++){
@@ -103,21 +102,6 @@ interval_(pyramid.interval())
             }
         }
     }
-
-//TODO: set this up with appropriate data struct. (haven't decided whether to use 'HOG' or 'JPEGImage' as the 'plane' struct...)
-#if 0	
-	// Recopy the pyramid levels into the planes
-	for (int i = 0; i < nbLevels; ++i) {
-		Map<JPEGPyramid::Level, Aligned>
-			plane(reinterpret_cast<JPEGPyramid::Cell *>(planes_[rectangles_[i].second].data()),
-				  MaxRows_, HalfCols_ * 2);
-		
-		plane.block(rectangles_[i].first.y(), rectangles_[i].first.x(),
-					rectangles_[i].first.height(), rectangles_[i].first.width()) =
-			pyramid.levels()[i].topLeftCorner(rectangles_[i].first.height(),
-											  rectangles_[i].first.width());
-	}
-#endif
 }
 
 int Patchwork::padx() const
