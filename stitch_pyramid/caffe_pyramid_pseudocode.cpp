@@ -87,7 +87,7 @@ pyramid_and_Forward(filename){
     //thanks: http://stackoverflow.com/questions/19185574 
     boost::python::object pyramid_float_py_boost(boost::python::handle<>((PyObject*)pyramid_float_py));
     boost::python::list blobs_top_boost;
-    blobs_top_boost.append(pyramid_float_py);
+    blobs_top_boost.append(pyramid_float_py_boost);
 
 
 }

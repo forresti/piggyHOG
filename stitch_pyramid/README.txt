@@ -14,11 +14,6 @@ This is Forrest's hack to do the following...
     inputFilename_plane1.jpg
     ...
 
-#TODO: padding...
-       add a JPEGImage::pad() function that creates a padded copy.
-
-#TODO: in stitch_pyramid.cpp, replace {hog, HOG, Hog} to Pyra
-
 DONE:
  find/replace NbFeatures for NbChannels.
  set NbChannels=3
@@ -26,4 +21,9 @@ DONE:
  in Patchwork.{cpp, h}, change the definition of 'Plane' to JPEGImage
 
  in stitch_pyramid.cpp, call Patchwork(), with MaxRows_ and MaxCols_ as 'biggest pyra scale, rounded up to a factor of 16'
+
+ add a JPEGImage::pad() function that creates a padded copy.
+
+ in stitch_pyramid.cpp, replace {hog, HOG, Hog} to JPEG
+
 
