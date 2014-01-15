@@ -178,14 +178,17 @@ int main(int argc, char * argv[]){
 
     int planeWidth = (pyramid.levels()[0].width() + 15) & ~15; //TODO: don't subtract padx, pady? 
     int planeHeight = (pyramid.levels()[0].height() + 15) & ~15; 
+    planeWidth = max(planeWidth, planeHeight);  //SQUARE planes for Caffe convnet
+    planeHeight = max(planeWidth, planeHeight);
+
     Patchwork::Init(planeHeight, planeWidth); 
     const Patchwork patchwork(pyramid); //STITCH
 
     double time_stitch = read_timer() - start_stitch;
     cout << "  Stitched scales in " << time_stitch << " ms" << endl;
 
-    printScaleSizes(pyramid);
-    writePyraToJPG(pyramid);
+    //printScaleSizes(pyramid);
+    //writePyraToJPG(pyramid);
     writePatchworkToJPG(patchwork, output_stitched_dir, base_filename); //outputs to output_stitched_dir/base_filename_[planeID].jpg
 
    	return EXIT_SUCCESS;
@@ -221,7 +224,7 @@ void writePatchworkToJPG(Patchwork patchwork, string output_stitched_dir, string
     for(int planeID = 0; planeID < nplanes; planeID++){
         ostringstream fname;
         fname << output_stitched_dir << "/" << base_filename << "_plane" << planeID << ".jpg";
-        cout << fname.str() << endl;
+        //cout << fname.str() << endl;
 
         patchwork.planes_[planeID].save(fname.str());
     }
