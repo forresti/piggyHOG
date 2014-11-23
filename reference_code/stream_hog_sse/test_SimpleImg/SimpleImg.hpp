@@ -28,6 +28,7 @@ class SimpleImg{
         n_channels = in_n_channels;
 
         data = (pixel_t*)malloc_aligned(ALIGN_IN_BYTES, height * stride * n_channels * sizeof(pixel_t));
+        memset(this->data, 0, height * stride * n_channels * sizeof(pixel_t));
     }
 
     //constructor 'from file'
@@ -53,6 +54,7 @@ class SimpleImg{
         assert(img.type() == CV_8UC3); //require that input img is 3-channel, uchar words. 
         assert(sizeof(pixel_t) == 1); //uchar single-byte words
         this->data = (pixel_t*)malloc_aligned(32, height * stride * n_channels * sizeof(pixel_t)); //factor of 3 for 3 ch
+        memset(this->data, 0, height * stride * n_channels * sizeof(pixel_t));
 
         //TODO: consider OpenCV copyMakeBorder() for padding http://docs.opencv.org/modules/imgproc/doc/filtering.html?#copymakeborder
 
