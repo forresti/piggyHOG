@@ -224,7 +224,6 @@ void test_computeCells_voc5_vs_streamHOG(){
   //normImg(x,y) = sum( hist(x,y,0:17) )
     sHog.hogCell_gradientEnergy(hogBuffer_voc5, hogHeight, hogWidth, normImg); //populates normImg
 
-
     float* hogBuffer_streamHog_blocks = allocate_hist(img.height, img.width, sbin,
                                                       hogHeight, hogWidth); //will contain final output
 
@@ -239,7 +238,7 @@ void test_computeCells_voc5_vs_streamHOG(){
 // TODO: have a 'string outFname' param
 void test_streamHog_oneScale_manyIter(SimpleImg<uint8_t> &img, int sbin, streamHog sHog){
 
-    int n_iter = 10; //not really "iterating" -- just number of times to run the experiment
+    int n_iter = 1; //not really "iterating" -- just number of times to run the experiment
     if(n_iter < 100){
         printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=100 or greater. \n", n_iter);
     }
@@ -331,6 +330,8 @@ void test_streamHog_oneScale_oneIter(SimpleImg<uint8_t> &img, int sbin, streamHo
     SimpleImg<uint8_t> ori(img.height, img.stride, 1); //out img has just 1 channel
     SimpleImg<int16_t> mag(img.height, img.stride, 1); //out img has just 1 channel
     int hogWidth, hogHeight;
+    
+     
     float* hogBuffer = allocate_hist(img.height, img.width, sbin,
                                      hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
     float* hogBuffer_blocks = allocate_hist(img.height, img.width, sbin,
@@ -394,22 +395,26 @@ void test_streamHog_pyramid(){
     double start_time = read_timer();
 
     for(int iter=0; iter<n_iter; iter++){ //do several runs, take the avg time
-
+//#pragma omp parallel for //gives 'bus error' even if loop is basically empty.
         for(int i=0; i<interval; i++){
+            //double perScale_start = read_timer();
+
             //TODO: catch output HOGs from each scale
             #if 0 
             test_streamHog_oneScale_manyIter(*imgPyramid[i], 4, sHog); //sbin=4 -- hogPyramid[i]
-            test_streamHog_oneScale_manyIter(*imgPyramid[i], 8, sHog); //sbin=8 -- hogPyramid[i + interval]
-            test_streamHog_oneScale_manyIter(*imgPyramid[i+interval], 8, sHog); //sbin=8 -- hogPyramid[i + 2*interval]
+            test_streamHog_oneScale_manyIter(*imgPyramid[i+interval], 8, sHog); //sbin=8 -- hogPyramid[i + interval]
+            test_streamHog_oneScale_manyIter(*imgPyramid[i + 2*interval], 8, sHog); //sbin=8 -- hogPyramid[i + 2*interval]
             #endif
 
             //TODO: avoid recomputing (ori, mag) for both sbin=4 and sbin=8!!!
             #if 1 
             test_streamHog_oneScale_oneIter(*imgPyramid[i], 4, sHog); //sbin=4 -- hogPyramid[i]
             test_streamHog_oneScale_oneIter(*imgPyramid[i], 8, sHog); //sbin=8 -- hogPyramid[i + interval]
-       //     test_streamHog_oneScale_oneIter(*imgPyramid[i+interval], 8, sHog); //sbin=8 -- hogPyramid[i + 2*interval]
+            test_streamHog_oneScale_oneIter(*imgPyramid[i + interval], 8, sHog); //sbin=8 -- hogPyramid[i + 2*interval]
             #endif
 
+            //double perScale_end = read_timer() - perScale_start;
+            //printf("    scale %d, hog extraction time = %f ms \n", i, perScale_end);
         }    
     }
 

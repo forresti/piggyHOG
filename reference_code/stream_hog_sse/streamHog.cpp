@@ -501,6 +501,11 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             //tested: my LUT matches VOC5 
             int ixp = ipos_LUT[x%sbin] + floor(x*sbin_inverse);
             int iyp = ipos_LUT[y%sbin] + floor(y*sbin_inverse);
+
+            //assert( (ixp<outHistWidth) && (iyp < outHistHeight) ); //doesn't compile?
+            if ( !(ixp < outHistWidth) || !(iyp < outHistHeight) )
+                continue;
+
             float vx0 = v0_LUT[x%sbin];
             float vy0 = v0_LUT[y%sbin];
             float vx1 = v1_LUT[x%sbin];
@@ -525,6 +530,7 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
                 //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += curr_mag;
                 outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx1*vy1*curr_mag;
             }
+#if 0
             if (ixp+1 < outHistWidth && iyp >= 0) {
                 outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
             }
@@ -534,6 +540,7 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             if (ixp+1 < outHistWidth && iyp+1 < outHistHeight) {
                 outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
             }
+#endif
             //DEBUG printfs.
             //float my_outHist_element = outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori];
             //if(my_outHist_element > 512)
