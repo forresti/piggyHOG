@@ -214,7 +214,10 @@ void test_computeCells_voc5_vs_streamHOG(){
     sHog.computeCells_voc5_reference(img.height, img.width, img.stride, sbin,
                                      ori_stream.data, mag_stream.data, 
                                      hogHeight, hogWidth, hogBuffer_voc5); 
-    sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
+    //sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
+    //                         ori_stream.data, mag_stream.data,
+    //                         hogHeight, hogWidth, hogBuffer_streamHog);
+    sHog.computeCells_stream_noBoundsCheck(img.height, img.width, img.stride, sbin,
                              ori_stream.data, mag_stream.data,
                              hogHeight, hogWidth, hogBuffer_streamHog);
 
@@ -238,7 +241,7 @@ void test_computeCells_voc5_vs_streamHOG(){
 // TODO: have a 'string outFname' param
 void test_streamHog_oneScale_manyIter(SimpleImg<uint8_t> &img, int sbin, streamHog sHog){
 
-    int n_iter = 1000; //not really "iterating" -- just number of times to run the experiment
+    int n_iter = 10000; //not really "iterating" -- just number of times to run the experiment
     if(n_iter < 10000){
         printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=10000 or greater. \n", n_iter);
     }
@@ -280,13 +283,19 @@ void test_streamHog_oneScale_manyIter(SimpleImg<uint8_t> &img, int sbin, streamH
 //                                         ori.data, mag.data, 
 //                                         hogHeight, hogWidth, hogBuffer); 
 
-        sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
-                                 ori.data, mag.data,
-                                 hogHeight, hogWidth, hogBuffer);
+//        sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
+//                                 ori.data, mag.data,
+//                                 hogHeight, hogWidth, hogBuffer);
 
 //        sHog.computeCells_stream_output_16bit(img.height, img.width, img.stride, sbin,
 //                                 ori.data, mag.data,
 //                                 hogHeight, hogWidth, hogBuffer_16bit);
+
+        sHog.computeCells_stream_noBoundsCheck(img.height, img.width, img.stride, sbin,
+                                 ori.data, mag.data,
+                                 hogHeight, hogWidth, hogBuffer);
+                                
+
     }
 
     stream_time = (read_timer() - start_timer) / n_iter;
@@ -356,7 +365,11 @@ void test_streamHog_oneScale_oneIter(SimpleImg<uint8_t> &img, int sbin, streamHo
 //                                      ori.data, mag.data, 
 //                                      hogHeight, hogWidth, hogBuffer); 
 
-    sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
+//    sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
+//                             ori.data, mag.data,
+//                             hogHeight, hogWidth, hogBuffer);
+
+    sHog.computeCells_stream_noBoundsCheck(img.height, img.width, img.stride, sbin,
                              ori.data, mag.data,
                              hogHeight, hogWidth, hogBuffer);
 

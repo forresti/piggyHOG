@@ -405,6 +405,7 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
 #pragma omp parallel for
     for(int y=0; y<imgHeight; y++){
         for(int x=0; x<imgWidth; x++){
+
             int best_o = ori[y*imgStride + x]; //orientation bin -- upcast to int
             int v = mag[y*imgStride + x]; //upcast to int
 
@@ -482,9 +483,25 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
     //      then, have a final 'cleanup' loop for the x=0:2, x=imgHeight-2:imgHeight, etc.
     //      same deal for y. 
 
-#pragma omp parallel for
+    const int N_UNROLL=4; //guaranteed 32-aligned x dim if curr_ori and curr_mag are allocated with SimpleImg.
+    assert( (imgStride%N_UNROLL) == 0); //we don't have a cleanup loop, so we need this to divide cleanly.
+//#pragma omp parallel for
     for(int y=0; y<imgHeight; y++){
-        for(int x=0; x < imgWidth; x++){
+    //for(int y_outer=0; y_outer < imgHeight; y_outer+=N_UNROLL){
+    //  #pragma unroll
+    //  for(int y_inner=0; y_inner<N_UNROLL; y_inner++)
+      {
+    //    int y = y_outer + y_inner;
+    //    if(y>imgHeight) continue;
+
+        for(int x=0; x<imgWidth; x++){
+        //for(int x_outer=0; x_outer<imgWidth; x_outer+=N_UNROLL)
+          {
+          //#pragma unroll
+          //for(int x_inner=0; x_inner<N_UNROLL; x_inner++){
+          //  int x = x_outer + x_inner;
+            //if(x > imgWidth) continue; //might hurt the unrolling? ... makes "(imgStride%N_UNROLL) == 0" unnecessary.
+
             int curr_ori = ori[y*imgStride + x]; //orientation bin -- upcast to int
             int curr_mag = mag[y*imgStride + x]; //upcast to int
 
@@ -548,7 +565,9 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
             {
 //                printf("outHist[ixp=%d][iyp=%d][curr_ori=%d] = %f \n", ixp, iyp, curr_ori, my_outHist_element);
             }
+          }
         }
+      }
     } 
 }
 
@@ -609,6 +628,145 @@ void streamHog::computeCells_stream_output_16bit(int imgHeight, int imgWidth, in
             }
         }
     } 
+}
+
+//don't go near the border, and avoid bounds checking.
+void streamHog::computeCells_stream_noBoundsCheck(int imgHeight, int imgWidth, int imgStride, int sbin,
+                                    uint8_t *__restrict__ ori, int16_t *__restrict__ mag,
+                                    int outHistHeight, int outHistWidth,
+                                    float *__restrict__ outHist){
+
+    assert(outHistHeight == (int)round((double)imgHeight/(double)sbin));
+    assert(outHistWidth == (int)round((double)imgWidth/(double)sbin));
+
+    const int hogDepth = 32;
+    float sbin_inverse = 1.0f / (float)sbin;
+
+    float pos_LUT[sbin]; //xp,yp ... access as pos_LUT[x%sbin]
+    int ipos_LUT[sbin]; //ixp, iyp
+    float v0_LUT[sbin]; //vx0, vy0
+    float v1_LUT[sbin]; //vx1, vy1
+
+    //main idea: xp, yp are cyclic. so, just cache the cycle, and later on add the x,y offset.
+    for(int i=0; i<sbin; i++){
+        pos_LUT[i] = ((float)(i%sbin)+0.5)/(float)sbin - 0.5;
+        ipos_LUT[i] = floor(pos_LUT[i]);
+        v0_LUT[i] = pos_LUT[i] - ipos_LUT[i]; //xp-ixp
+        v1_LUT[i] = 1.0f - v0_LUT[i]; //1.0-vx0
+    }
+
+#if 1
+#pragma omp parallel for
+    //for(int y=0; y<imgHeight; y++)
+    //for(int y=1; y<imgHeight-1; y++)
+    for(int y=sbin; y<imgHeight-sbin; y++)
+    {
+        //for(int x=0; x < imgWidth; x++)
+        //for(int x=1; x < imgWidth-1; x++)
+        for(int x=sbin; x < imgWidth-sbin; x++)
+        {
+            int curr_ori = ori[y*imgStride + x]; //orientation bin -- upcast to int
+            int curr_mag = mag[y*imgStride + x]; //upcast to int
+            //tested: my LUT matches VOC5 
+            int ixp = ipos_LUT[x%sbin] + floor(x*sbin_inverse);
+            int iyp = ipos_LUT[y%sbin] + floor(y*sbin_inverse);
+
+            if ( !(ixp < outHistWidth) || !(iyp < outHistHeight) )
+                continue;
+
+            float vx0 = v0_LUT[x%sbin];
+            float vy0 = v0_LUT[y%sbin];
+            float vx1 = v1_LUT[x%sbin];
+            float vy1 = v1_LUT[y%sbin];
+
+            outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx1*vy1*curr_mag;
+            outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
+            outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
+            outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
+        }
+    }
+#endif
+
+    //borders
+#if 1
+    int x_iter[2*sbin]; //enumerate the border pixels that we need to calculate
+    for(int i=0; i<sbin; i++){
+        x_iter[i] = i; //left
+        x_iter[i+sbin] = imgWidth - sbin + i; //right
+    }
+
+#pragma omp parallel for
+    for(int y=0; y<imgHeight; y++){
+        #pragma unroll
+        for(int x_=0; x_<2*sbin; x_++) //TODO: perhaps templatize sbin, so that this unrolling works.
+        {
+            int x = x_iter[x_];
+
+            //TODO: modularize.
+            int curr_ori = ori[y*imgStride + x];
+            int curr_mag = mag[y*imgStride + x];
+            int ixp = ipos_LUT[x%sbin] + floor(x*sbin_inverse);
+            int iyp = ipos_LUT[y%sbin] + floor(y*sbin_inverse);
+            float vx0 = v0_LUT[x%sbin];
+            float vy0 = v0_LUT[y%sbin];
+            float vx1 = v1_LUT[x%sbin];
+            float vy1 = v1_LUT[y%sbin];
+            if (ixp >= 0 && iyp >= 0) //this is expensive. 
+            {
+                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx1*vy1*curr_mag;
+            }
+            if (ixp+1 < outHistWidth && iyp >= 0) {
+                outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
+            }
+            if (ixp >= 0 && iyp+1 < outHistHeight) {
+                outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
+            }
+            if (ixp+1 < outHistWidth && iyp+1 < outHistHeight) {
+                outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
+            }
+
+            //if( !(ixp >= 0 && iyp >= 0) || !(ixp+1 < outHistWidth && iyp >= 0) || !(ixp >= 0 && iyp+1 < outHistHeight) || !(ixp+1 < outHistWidth && iyp+1 < outHistHeight))
+            //    printf("bounds check handled: x=%d, y=%d, ixp=%d, outHistWidth=%d, iyp=%d, outHistHeight=%d \n", x, y, ixp, outHistWidth, iyp, outHistHeight);
+        }
+    }
+#endif
+
+#if 1 
+    int y_iter[2*sbin]; //enumerate the border pixels that we need to calculate
+    for(int i=0; i<sbin; i++){
+        y_iter[i] = i; //top
+        y_iter[i+sbin] = imgHeight - sbin + i; //bottom
+    }
+#pragma omp parallel for
+    for(int y_=0; y_<2*sbin; y_++){
+        int y = y_iter[y_];
+        #pragma unroll
+        for(int x=0; x<imgWidth; x++){
+
+            int curr_ori = ori[y*imgStride + x];
+            int curr_mag = mag[y*imgStride + x];
+            int ixp = ipos_LUT[x%sbin] + floor(x*sbin_inverse);
+            int iyp = ipos_LUT[y%sbin] + floor(y*sbin_inverse);
+            float vx0 = v0_LUT[x%sbin];
+            float vy0 = v0_LUT[y%sbin];
+            float vx1 = v1_LUT[x%sbin];
+            float vy1 = v1_LUT[y%sbin];
+            if (ixp >= 0 && iyp >= 0) //this is expensive. 
+            {
+                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx1*vy1*curr_mag;
+            }
+            if (ixp+1 < outHistWidth && iyp >= 0) {
+                outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx0*vy1*curr_mag;
+            }
+            if (ixp >= 0 && iyp+1 < outHistHeight) {
+                outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx1*vy0*curr_mag;
+            }
+            if (ixp+1 < outHistWidth && iyp+1 < outHistHeight) {
+                outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += vx0*vy0*curr_mag;
+            }
+        }
+    }
+#endif
 }
 
 
