@@ -475,6 +475,7 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
         ipos_LUT[i] = floor(pos_LUT[i]);
         v0_LUT[i] = pos_LUT[i] - ipos_LUT[i]; //xp-ixp
         v1_LUT[i] = 1.0f - v0_LUT[i]; //1.0-vx0
+        //printf("v0_LUT[%d] = %f, v1_LUT[%d] = %f \n", i, v0_LUT[i], i, v1_LUT[i]);
     }
 
     //TODO: x=2:imgHeight-2. no checking for 'if ixp>=0,...' 
@@ -524,9 +525,9 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
           //the actual computation:
             if (ixp >= 0 && iyp >= 0) //this is expensive. 
             {
-                //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + 0] = curr_mag; //simple benchmark [2.6 GB/s = .91ms on laptop]
-                //outHist[x_hist*hogDepth + y_hist*outHistWidth*hogDepth + curr_ori] = curr_mag; //[2.1 GB/s = 1.15ms on laptop]
-                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + 0] = curr_mag*vx1*vy1;
+                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + 0] = curr_mag; //simple benchmark [2.6 GB/s = .91ms on laptop]
+                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] = curr_mag; //[2.1 GB/s = 1.15ms on laptop]
+                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + 0] = curr_mag*vx1*vy1; 
                 //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += curr_mag;
                 outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += vx1*vy1*curr_mag;
             }
@@ -550,6 +551,66 @@ void streamHog::computeCells_stream(int imgHeight, int imgWidth, int imgStride, 
         }
     } 
 }
+
+//use 16-bit output operands
+void streamHog::computeCells_stream_output_16bit(int imgHeight, int imgWidth, int imgStride, int sbin,
+                                    uint8_t *__restrict__ ori, int16_t *__restrict__ mag,
+                                    int outHistHeight, int outHistWidth,
+                                    int16_t *__restrict__ outHist){
+
+    assert(outHistHeight == (int)round((double)imgHeight/(double)sbin));
+    assert(outHistWidth == (int)round((double)imgWidth/(double)sbin));
+
+    const int hogDepth = 32;
+    float sbin_inverse = 1.0f / (float)sbin;
+
+    float pos_LUT[sbin]; //xp,yp ... access as pos_LUT[x%sbin]
+    int ipos_LUT[sbin]; //ixp, iyp
+    float v0_LUT[sbin]; //vx0, vy0
+    float v1_LUT[sbin]; //vx1, vy1
+
+    //main idea: xp, yp are cyclic. so, just cache the cycle, and later on add the x,y offset.
+    for(int i=0; i<sbin; i++){
+        pos_LUT[i] = ((float)(i%sbin)+0.5)/(float)sbin - 0.5;
+        ipos_LUT[i] = floor(pos_LUT[i]);
+        v0_LUT[i] = pos_LUT[i] - ipos_LUT[i]; //xp-ixp
+        v1_LUT[i] = 1.0f - v0_LUT[i]; //1.0-vx0
+    }
+
+#pragma omp parallel for
+    for(int y=0; y<imgHeight; y++){
+        for(int x=0; x < imgWidth; x++){
+            int curr_ori = ori[y*imgStride + x]; //orientation bin -- upcast to int
+            int curr_mag = mag[y*imgStride + x]; //upcast to int
+            //tested: my LUT matches VOC5 
+            int ixp = ipos_LUT[x%sbin] + floor(x*sbin_inverse);
+            int iyp = ipos_LUT[y%sbin] + floor(y*sbin_inverse);
+
+            if ( !(ixp < outHistWidth) || !(iyp < outHistHeight) )
+                continue;
+
+            float vx0 = v0_LUT[x%sbin];
+            float vy0 = v0_LUT[y%sbin];
+            float vx1 = v1_LUT[x%sbin];
+            float vy1 = v1_LUT[y%sbin];
+
+            if (ixp >= 0 && iyp >= 0) //this is expensive. 
+            {
+                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += (int16_t)vx1*vy1*curr_mag;
+            }
+            if (ixp+1 < outHistWidth && iyp >= 0) {
+                outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + curr_ori] += (int16_t)vx0*vy1*curr_mag;
+            }
+            if (ixp >= 0 && iyp+1 < outHistHeight) {
+                outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += (int16_t)vx1*vy0*curr_mag;
+            }
+            if (ixp+1 < outHistWidth && iyp+1 < outHistHeight) {
+                outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + curr_ori] += (int16_t)vx0*vy0*curr_mag;
+            }
+        }
+    } 
+}
+
 
 //TODO: handle hog padding. (for now, just use padded HOG dims as input here)
 //@in-out normImg = 1-channel img of size (histWidth x histHeight). we populate this with hist sums.

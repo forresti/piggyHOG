@@ -46,6 +46,22 @@ float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin,
     return hogBuffer;
 }
 
+//TODO: make allocate_hist() into a template that can work on any data type.
+int16_t* allocate_hist_16bit(int in_imgHeight, int in_imgWidth, int sbin,
+                   int &out_hogHeight, int &out_hogWidth){
+
+    //out_hogHeight = round(in_imgHeight/sbin);
+    //out_hogWidth = round(in_imgWidth/sbin);
+    out_hogHeight = (int)round((double)in_imgHeight/(double)sbin);
+    out_hogWidth = (int)round((double)in_imgWidth/(double)sbin);
+    const int hogDepth = 32;
+
+    int16_t* hogBuffer = (int16_t*)malloc_aligned(32, out_hogWidth * out_hogHeight * hogDepth * sizeof(int16_t));
+    memset(hogBuffer, 0, out_hogWidth * out_hogHeight * hogDepth * sizeof(int16_t));
+    return hogBuffer;
+}
+
+
 //use OpenCV's bilinear filter downsampling
 Mat downsampleWithOpenCV(Mat img, double scale){
     int inWidth = img.cols;

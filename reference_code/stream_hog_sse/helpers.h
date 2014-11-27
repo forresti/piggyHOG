@@ -26,6 +26,9 @@ double read_timer();
 //std::string forrestGetImgType(int imgTypeInt);
 int compute_stride(int width, int size_per_element, int ALIGN_IN_BYTES);
 float* allocate_hist(int in_imgHeight, int in_imgWidth, int sbin, int &out_hogHeight, int &out_hogWidth);
+int16_t* allocate_hist_16bit(int in_imgHeight, int in_imgWidth, int sbin,
+                   int &out_hogHeight, int &out_hogWidth);
+
 Mat downsampleWithOpenCV(Mat img, double scale);
 #endif
 

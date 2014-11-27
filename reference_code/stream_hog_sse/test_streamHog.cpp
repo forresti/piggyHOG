@@ -238,9 +238,9 @@ void test_computeCells_voc5_vs_streamHOG(){
 // TODO: have a 'string outFname' param
 void test_streamHog_oneScale_manyIter(SimpleImg<uint8_t> &img, int sbin, streamHog sHog){
 
-    int n_iter = 1; //not really "iterating" -- just number of times to run the experiment
-    if(n_iter < 100){
-        printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=100 or greater. \n", n_iter);
+    int n_iter = 1000; //not really "iterating" -- just number of times to run the experiment
+    if(n_iter < 10000){
+        printf("WARNING: n_iter = %d. For statistical significance, we recommend n_iter=10000 or greater. \n", n_iter);
     }
     //SimpleImg img(height, width, n_channels);
 
@@ -253,6 +253,10 @@ void test_streamHog_oneScale_manyIter(SimpleImg<uint8_t> &img, int sbin, streamH
     float* hogBuffer_blocks = allocate_hist(img.height, img.width, sbin,
                                             hogHeight, hogWidth); //for normalized result
     float* normImg = (float*)malloc_aligned(32, hogWidth * hogHeight * sizeof(float));
+
+    //16bit is temporary -- for speed test.
+    int16_t* hogBuffer_16bit = allocate_hist_16bit(img.height, img.width, sbin,
+                                     hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
 
   //[mag, ori] = gradient_stream(img)
     double start_timer = read_timer();
@@ -279,6 +283,10 @@ void test_streamHog_oneScale_manyIter(SimpleImg<uint8_t> &img, int sbin, streamH
         sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
                                  ori.data, mag.data,
                                  hogHeight, hogWidth, hogBuffer);
+
+//        sHog.computeCells_stream_output_16bit(img.height, img.width, img.stride, sbin,
+//                                 ori.data, mag.data,
+//                                 hogHeight, hogWidth, hogBuffer_16bit);
     }
 
     stream_time = (read_timer() - start_timer) / n_iter;
@@ -368,7 +376,7 @@ void test_streamHog_pyramid(){
     printf("test_streamHog_pyramid() \n");
     int nLevels = 30; //TODO: compute this based on img size
     int interval = 10;
-    int n_iter = 10; //not really "iterating" -- just number of times to run the experiment
+    int n_iter = 100; //not really "iterating" -- just number of times to run the experiment
     if(n_iter < 10){
         printf("    WARNING: n_iter = %d. For statistical significance, we recommend n_iter=10 or greater. \n", n_iter);
     }
@@ -395,7 +403,7 @@ void test_streamHog_pyramid(){
     double start_time = read_timer();
 
     for(int iter=0; iter<n_iter; iter++){ //do several runs, take the avg time
-//#pragma omp parallel for //gives 'bus error' even if loop is basically empty.
+#pragma omp parallel for //gives 'bus error' even if loop is basically empty.
         for(int i=0; i<interval; i++){
             //double perScale_start = read_timer();
 
