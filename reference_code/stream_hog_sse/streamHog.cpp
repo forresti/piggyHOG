@@ -425,8 +425,8 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
             { 
                 //*(hist + ixp*imgHeight + iyp + best_o*imgHeight*imgWidth) += vx1*vy1*v; //from VOC5
 
-                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + best_o] += vx1*vy1*v; //[5.6ms on laptop, 640x480, 1 level, sbin=4, only accumulate to 1 cell]
-                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + best_o] += v; //test -- avoid multiplying by weights [5.5ms on laptop]
+                //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + best_o] += vx1*vy1*v; //[5.6ms on laptop, 640x480, 1 level, sbin=4, only accumulate to 1 cell]
+                outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth + best_o] += v; //test -- avoid multiplying by weights [5.5ms on laptop]
                 //outHist[ixp*hogDepth + iyp*outHistWidth*hogDepth] += v; //test -- always use bin 0. [3.2ms on laptop]
             } 
 
@@ -434,19 +434,22 @@ void streamHog::computeCells_voc5_reference(int imgHeight, int imgWidth, int img
             if (ixp+1 < outHistWidth && iyp >= 0) { 
                 //*(hist + (ixp+1)*imgHeight + iyp + best_o*imgHeight*imgWidth) += vx0*vy1*v;
 
-                outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + best_o] += vx0*vy1*v;
+                //outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + best_o] += vx0*vy1*v;
+                outHist[(ixp+1)*hogDepth + iyp*outHistWidth*hogDepth + best_o] += v;
             } 
 
             if (ixp >= 0 && iyp+1 < outHistHeight) { 
                 //*(hist + ixp*imgHeight + (iyp+1) + best_o*imgHeight*imgWidth) += vx1*vy0*v;
 
-                outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + best_o] += vx1*vy0*v;
+                //outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + best_o] += vx1*vy0*v;
+                outHist[ixp*hogDepth + (iyp+1)*outHistWidth*hogDepth + best_o] += v;
             } 
 
             if (ixp+1 < outHistWidth && iyp+1 < outHistHeight) { 
                 //*(hist + (ixp+1)*imgHeight + (iyp+1) + best_o*imgHeight*imgWidth) += vx0*vy0*v;
 
-                outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + best_o] += vx0*vy0*v;
+                //outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + best_o] += vx0*vy0*v;
+                outHist[(ixp+1)*hogDepth + (iyp+1)*outHistWidth*hogDepth + best_o] += v;
             } 
 #endif
         }
@@ -776,11 +779,23 @@ void streamHog::computeCells_stream_gather(int imgHeight, int imgWidth, int imgS
     assert(outHistHeight == (int)round((double)imgHeight/(double)sbin));
     assert(outHistWidth == (int)round((double)imgWidth/(double)sbin));
 
+    float v0_LUT[sbin]; //vx0, vy0
+    float v1_LUT[sbin]; //vx1, vy1
+
+    //main idea: xp, yp are cyclic. so, just cache the cycle, and later on add the x,y offset.
+    for(int i=0; i<sbin; i++){
+        float xp = ((float)(i%sbin)+0.5)/(float)sbin - 0.5;
+        int ixp = floor(xp);
+        v0_LUT[i] = xp-ixp; //lookup weight based on pixel location.
+    }
+
+
     const int hogDepth = 32;
     float sbin_inverse = 1.0f / (float)sbin;
 
     const int n_ori = 18; //TODO: take this as input and assert it's true?
     float local_hist[n_ori]; //accumulate locally, then save to outHist
+    int half_sbin = (int)ceil((float)sbin/2);
 
     //for each HOG cell
 //#pragma omp parallel for
@@ -789,25 +804,25 @@ void streamHog::computeCells_stream_gather(int imgHeight, int imgWidth, int imgS
 
             memset(&local_hist[0], 0, n_ori*sizeof(float));
 
-#if 0
             //range of pixels that influence this hog cell
-            // example: hogX=2, sbin=4. 
-            //          look at pixels[x = 4 5 6|7 8 9]
-            int minPx_x = max(0, hogX*sbin - sbin + 1);
-            int maxPx_x = min(hogX*sbin + sbin - 1, imgWidth-1);
-            int minPx_y = max(0, hogY*sbin - sbin + 1);
-            int maxPx_y = min(hogY*sbin + sbin - 1, imgHeight-1);
-#endif
+            //     explained in test_scatter_gather.py: px_gather()
+            //     confirmed to match voc-release5 for sbin=4, 6, 7, and 8.
 
-            //2nd try at this...
-            // example: hogX=2, sbin=4. center pixel = 10.5 
-            //          look at pixels[x = 7 8 9 10|11 12 13 14].
-            //          minPx_x = 7 = 8 - 2 + 1 = hogX*sbin - sbin/2 + 1 
-            //          maxPx_x = 14 = hogX*sbin + 2*sbin - 2
-            int minPx_x = max(0, hogX*sbin - sbin/2 + 1); 
-            int maxPx_x = min(hogX*sbin + 2*sbin - 2, imgWidth-1);
-            int minPx_y = max(0, hogY*sbin - sbin/2 + 1);
-            int maxPx_y = min(hogY*sbin + 2*sbin - 2, imgHeight-1);
+            // example: hogX=2, sbin=4. center pixel = 9.5
+            //          look at pixels[x = 6 7 8 9 | 10 11 12 13]
+
+            #if 0 //this is totally correct based on my tests
+            int minPx_x = min( 0, hogX*sbin - (int)ceil((float)sbin)/2); //TODO: precompute 'ceil(float(sbin/2)
+            int maxPx_x = max( hogX*sbin + 2*sbin - (int)ceil((float)sbin/2) - 1, imgWidth-1);
+            int minPx_y = min( 0, hogY*sbin - (int)ceil((float)sbin)/2); 
+            int maxPx_y = max( hogY*sbin + 2*sbin - (int)ceil((float)sbin/2) - 1, imgHeight-1);
+            #endif
+
+            //same as above, with cached value of half_sbin
+            int minPx_x = max( 0, hogX*sbin - half_sbin); 
+            int maxPx_x = min( hogX*sbin + 2*sbin - half_sbin - 1, imgWidth-1 );
+            int minPx_y = max( 0, hogY*sbin - half_sbin ); 
+            int maxPx_y = min( hogY*sbin + 2*sbin - half_sbin - 1, imgHeight-1 );
 
             //debug
             //if(hogX<5 && hogY<5)
@@ -817,12 +832,14 @@ void streamHog::computeCells_stream_gather(int imgHeight, int imgWidth, int imgS
             for(int y=minPx_y; y<=maxPx_y; y++){
                 for(int x=minPx_x; x<=maxPx_x; x++){
                     int curr_ori = ori[y*imgStride + x];
-                    int curr_mag = mag[y*imgStride + x];
+                    float curr_mag = (float)mag[y*imgStride + x];
 
-                    //int offsetX = x%sbin; //right?
-                    //float weightX = 1.0f - ((float)abs(sbin - offsetX + 0.5f) / sbin); //from PgHog ... should verify this.
-                    //local_hist[curr_ori] += curr_mag; //TODO: vx, vy
-                    local_hist[0] += curr_mag; //debug
+                    float vx0 = v0_LUT[x%sbin];
+                    float vy0 = v0_LUT[y%sbin];
+
+                    //local_hist[0] += curr_mag; //debug
+                    local_hist[curr_ori] += curr_mag; //TODO: vx, vy
+                    //local_hist[curr_ori] += curr_mag * vx0 * vy0;
                 }
             } 
 

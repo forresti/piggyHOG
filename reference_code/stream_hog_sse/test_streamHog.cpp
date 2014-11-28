@@ -217,10 +217,12 @@ void test_computeCells_voc5_vs_streamHOG(){
     //sHog.computeCells_stream(img.height, img.width, img.stride, sbin,
     //                         ori_stream.data, mag_stream.data,
     //                         hogHeight, hogWidth, hogBuffer_streamHog);
-    sHog.computeCells_stream_noBoundsCheck(img.height, img.width, img.stride, sbin,
+    //sHog.computeCells_stream_noBoundsCheck(img.height, img.width, img.stride, sbin,
+    //                         ori_stream.data, mag_stream.data,
+    //                         hogHeight, hogWidth, hogBuffer_streamHog);
+    sHog.computeCells_stream_gather(img.height, img.width, img.stride, sbin,
                              ori_stream.data, mag_stream.data,
                              hogHeight, hogWidth, hogBuffer_streamHog);
-
     int hogDepth = 32;
     diff_hogs(hogBuffer_voc5, hogBuffer_streamHog, hogHeight, hogWidth, hogDepth, "voc5_cells", "streamHog_cells");
 
