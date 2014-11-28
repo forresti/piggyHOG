@@ -671,9 +671,6 @@ void streamHog::computeCells_stream_noBoundsCheck(int imgHeight, int imgWidth, i
             int ixp = ipos_LUT[x%sbin] + floor(x*sbin_inverse);
             int iyp = ipos_LUT[y%sbin] + floor(y*sbin_inverse);
 
-            if ( !(ixp < outHistWidth) || !(iyp < outHistHeight) )
-                continue;
-
             float vx0 = v0_LUT[x%sbin];
             float vy0 = v0_LUT[y%sbin];
             float vx1 = v1_LUT[x%sbin];
@@ -769,6 +766,77 @@ void streamHog::computeCells_stream_noBoundsCheck(int imgHeight, int imgWidth, i
 #endif
 }
 
+//traditional approach: "for each pixel, add it to the relevant output cells"
+//computeCells_stream_gather(): "for each cell, accumulate all the input pixels"
+void streamHog::computeCells_stream_gather(int imgHeight, int imgWidth, int imgStride, int sbin,
+                                    uint8_t *__restrict__ ori, int16_t *__restrict__ mag,
+                                    int outHistHeight, int outHistWidth,
+                                    float *__restrict__ outHist){
+
+    assert(outHistHeight == (int)round((double)imgHeight/(double)sbin));
+    assert(outHistWidth == (int)round((double)imgWidth/(double)sbin));
+
+    const int hogDepth = 32;
+    float sbin_inverse = 1.0f / (float)sbin;
+
+    const int n_ori = 18; //TODO: take this as input and assert it's true?
+    float local_hist[n_ori]; //accumulate locally, then save to outHist
+
+    //for each HOG cell
+//#pragma omp parallel for
+    for(int hogY=0; hogY<outHistHeight; hogY++){
+        for(int hogX=0; hogX<outHistWidth; hogX++){
+
+            memset(&local_hist[0], 0, n_ori*sizeof(float));
+
+#if 0
+            //range of pixels that influence this hog cell
+            // example: hogX=2, sbin=4. 
+            //          look at pixels[x = 4 5 6|7 8 9]
+            int minPx_x = max(0, hogX*sbin - sbin + 1);
+            int maxPx_x = min(hogX*sbin + sbin - 1, imgWidth-1);
+            int minPx_y = max(0, hogY*sbin - sbin + 1);
+            int maxPx_y = min(hogY*sbin + sbin - 1, imgHeight-1);
+#endif
+
+            //2nd try at this...
+            // example: hogX=2, sbin=4. center pixel = 10.5 
+            //          look at pixels[x = 7 8 9 10|11 12 13 14].
+            //          minPx_x = 7 = 8 - 2 + 1 = hogX*sbin - sbin/2 + 1 
+            //          maxPx_x = 14 = hogX*sbin + 2*sbin - 2
+            int minPx_x = max(0, hogX*sbin - sbin/2 + 1); 
+            int maxPx_x = min(hogX*sbin + 2*sbin - 2, imgWidth-1);
+            int minPx_y = max(0, hogY*sbin - sbin/2 + 1);
+            int maxPx_y = min(hogY*sbin + 2*sbin - 2, imgHeight-1);
+
+            //debug
+            //if(hogX<5 && hogY<5)
+            //    printf("hogX=%d, minPx_x=%d, maxPx_x=%d, ... hogY=%d, minPx_y=%d, maxPx_y=%d \n", hogX, minPx_x, maxPx_x, hogY, minPx_y, maxPx_y);
+
+            //TODO: make "one cell" a separate inline function?
+            for(int y=minPx_y; y<=maxPx_y; y++){
+                for(int x=minPx_x; x<=maxPx_x; x++){
+                    int curr_ori = ori[y*imgStride + x];
+                    int curr_mag = mag[y*imgStride + x];
+
+                    //int offsetX = x%sbin; //right?
+                    //float weightX = 1.0f - ((float)abs(sbin - offsetX + 0.5f) / sbin); //from PgHog ... should verify this.
+                    //local_hist[curr_ori] += curr_mag; //TODO: vx, vy
+                    local_hist[0] += curr_mag; //debug
+                }
+            } 
+
+            //write back results. (TODO: use memcpy instead?)
+            int outHist_idx = hogX*hogDepth + hogY*outHistWidth*hogDepth; 
+            for(int o=0; o<n_ori; o++)
+            {
+                outHist[outHist_idx + o] = local_hist[o];
+            }
+
+        }
+    } 
+
+}
 
 //TODO: handle hog padding. (for now, just use padded HOG dims as input here)
 //@in-out normImg = 1-channel img of size (histWidth x histHeight). we populate this with hist sums.

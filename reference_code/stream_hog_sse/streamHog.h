@@ -57,6 +57,11 @@ class streamHog{
                                     int outHistHeight, int outHistWidth,
                                     float *__restrict__ outHist);
 
+    void computeCells_stream_gather(int imgHeight, int imgWidth, int imgStride, int sbin,
+                                    uint8_t *__restrict__ ori, int16_t *__restrict__ mag,
+                                    int outHistHeight, int outHistWidth,
+                                    float *__restrict__ outHist);
+
     void hogCell_gradientEnergy(float *__restrict__ hogHist, int histHeight, int histWidth,     
                                 float *__restrict__ normImg);
 

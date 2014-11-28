@@ -291,10 +291,14 @@ void test_streamHog_oneScale_manyIter(SimpleImg<uint8_t> &img, int sbin, streamH
 //                                 ori.data, mag.data,
 //                                 hogHeight, hogWidth, hogBuffer_16bit);
 
-        sHog.computeCells_stream_noBoundsCheck(img.height, img.width, img.stride, sbin,
+//        sHog.computeCells_stream_noBoundsCheck(img.height, img.width, img.stride, sbin,
+//                                 ori.data, mag.data,
+//                                 hogHeight, hogWidth, hogBuffer);
+                                
+
+        sHog.computeCells_stream_gather(img.height, img.width, img.stride, sbin,
                                  ori.data, mag.data,
                                  hogHeight, hogWidth, hogBuffer);
-                                
 
     }
 
@@ -369,7 +373,11 @@ void test_streamHog_oneScale_oneIter(SimpleImg<uint8_t> &img, int sbin, streamHo
 //                             ori.data, mag.data,
 //                             hogHeight, hogWidth, hogBuffer);
 
-    sHog.computeCells_stream_noBoundsCheck(img.height, img.width, img.stride, sbin,
+//    sHog.computeCells_stream_noBoundsCheck(img.height, img.width, img.stride, sbin,
+//                             ori.data, mag.data,
+//                             hogHeight, hogWidth, hogBuffer);
+
+    sHog.computeCells_stream_gather(img.height, img.width, img.stride, sbin,
                              ori.data, mag.data,
                              hogHeight, hogWidth, hogBuffer);
 
