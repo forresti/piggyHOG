@@ -51,6 +51,49 @@ def px_gather(ixp, sbin):
     return px_range
     #TODO: vx0?
 
+#"I'm a bin, I found a pixel, how do I weight it?"
+#idx_in_bin -- in range of (0 to #elements contributing to bin)
+def get_vx0(idx_in_bin, sbin):
+
+    #making this up as I go...
+    dist_from_center = abs(idx_in_bin - sbin) + 1
+    print dist_from_center
+    vx0 = 1.0 - ( (dist_from_center - 0.5)/4.0 ) 
+    return vx0
+
+    '''
+    #vx0_range = list(xrange(1.5, sbin+0.5)) + list(xrange(sbin+0.5, 1.5, -1)) 
+    vx0_range = np.array(sbin/2 - 1) 
+    
+    '''
+
+def test_get_vx0(sbin):
+    print "***test_get_vx0()"
+    #sbin=4
+    vx0 = []
+    for i in xrange(0, sbin*2):
+        vx0.append(get_vx0(i, sbin))
+    print vx0
+
+#lookup table of weights for pixels to be added to a hog cell.
+def init_v_LUT(sbin):
+
+    v_LUT = []
+    #preallocate.
+    for i in xrange(0, sbin*2):
+        v_LUT.append(0)
+
+    #e.g. (i=1) -> v_LUT[i]=3/8
+    for i in xrange(0, sbin):
+        #e.g. for sbin=4, v_LUT = [1/8, 3/8, 5/8, 7/8, 7/8, 5/8, 3/8, 1/8]
+        if sbin%2 == 0:
+            v_LUT[i] = (i*2 + 1.0)/(sbin*2.0) #TODO: check if floating-pt is needed for odd values of sbin
+        if sbin%2 == 1: #special case for odd (rarely if ever used)
+            v_LUT[i] = (i*2)/(sbin*2.0)
+        v_LUT[sbin*2 - 1 - i] = v_LUT[i] #weights for right-hand pixels 
+
+    print v_LUT
+
 #input: [[-1, 0], ... [4, 5]] where each sub-array i is the list of bins where pixel i contributes.
 #output: [[-1 ... 6], [3 ... 7]] where each sub-array i is the list of pixels in bin i
 def scatter_to_gather(px_to_ixp):
@@ -99,9 +142,9 @@ def gather_vs_scatter_correctness():
     for px in xrange(0, len(px_to_ixp_experimental)):
         print ("px_to_ixp_experimental[%d] = " %px), px_to_ixp_experimental[px] 
 
-def test_scatter_gather_weights():
+def test_scatter_gather_weights(sbin):
     print "\n***gather_vs_scatter_weights()"
-    sbin = 4
+    #sbin = 4
     num_px = 50
 
     #ground truth (scatter)
@@ -113,6 +156,12 @@ def test_scatter_gather_weights():
 if __name__ == "__main__":
 
     #test_by_eyeball()
-    gather_vs_scatter_correctness()
-    #test_scatter_gather_weights()
- 
+    #gather_vs_scatter_correctness()
+
+    sbin = 7
+    test_scatter_gather_weights(sbin)
+
+    #test_get_vx0(sbin)
+    init_v_LUT(sbin)
+
+
