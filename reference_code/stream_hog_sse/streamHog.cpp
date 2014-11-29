@@ -779,17 +779,6 @@ void streamHog::computeCells_stream_gather(int imgHeight, int imgWidth, int imgS
     assert(outHistHeight == (int)round((double)imgHeight/(double)sbin));
     assert(outHistWidth == (int)round((double)imgWidth/(double)sbin));
 
-#if 0
-    float v0_LUT[sbin]; //vx0, vy0
-
-    //main idea: xp, yp are cyclic. so, just cache the cycle, and later on add the x,y offset.
-    for(int i=0; i<sbin*2; i++){
-        float xp = ((float)(i%sbin)+0.5)/(float)sbin - 0.5;
-        int ixp = floor(xp);
-        v0_LUT[i] = xp-ixp; //lookup weight based on pixel location.
-        //printf("v0_LUT[%d] = %f \n", i, v0_LUT[i]); //doesn't make sense... think about this in tests.
-    }
-#endif
     assert( (sbin % 2) == 0); //v_LUT[] is only verified for even sbin values
     float v_LUT[sbin*2]; //vx, vy
     for(int i=0; i<sbin; i++){
@@ -829,31 +818,25 @@ void streamHog::computeCells_stream_gather(int imgHeight, int imgWidth, int imgS
             int maxPx_y = min( hogY*sbin + 2*sbin - half_sbin - 1, imgHeight-1 );
 
             //indices into v_LUT
-            int startX_local = abs(minPx_x) - abs(minPx_x_unclamped); //account for clamping 
-            int startY_local = abs(minPx_y) - abs(minPx_y_unclamped); 
+            int startX_local = abs(abs(minPx_x) - abs(minPx_x_unclamped)); //account for clamping 
+            int startY_local = abs(abs(minPx_y) - abs(minPx_y_unclamped)); 
 
-            //debug
-            //if(hogX<5 && hogY<5)
-            //    printf("hogX=%d, minPx_x=%d, maxPx_x=%d, ... hogY=%d, minPx_y=%d, maxPx_y=%d \n", hogX, minPx_x, maxPx_x, hogY, minPx_y, maxPx_y);
-
-            int y_local = 0;
+            int y_local = startY_local;
 
             //TODO: make "one cell" a separate inline function?
             for(int y=minPx_y; y<=maxPx_y; y++){
 
-                int x_local = 0;
+                //int x_local = startX_local; //21ms on R8
+                int x_local = 0; //14ms on R8 (breaks hogX=0 ... all else is fine.)
                 for(int x=minPx_x; x<=maxPx_x; x++){
                     int curr_ori = ori[y*imgStride + x];
                     float curr_mag = (float)mag[y*imgStride + x];
-
-                    //float vx0 = v0_LUT[x%sbin];
-                    //float vy0 = v0_LUT[y%sbin];
 
                     float vx = v_LUT[x_local];
                     float vy = v_LUT[y_local];
 
                     //local_hist[0] += curr_mag; //debug
-                    //local_hist[curr_ori] += curr_mag; //TODO: vx, vy
+                    //local_hist[curr_ori] += curr_mag; //debug
                     local_hist[curr_ori] += curr_mag * vx * vy;
                     x_local++;
                 }
@@ -869,7 +852,6 @@ void streamHog::computeCells_stream_gather(int imgHeight, int imgWidth, int imgS
 
         }
     } 
-
 }
 
 //TODO: handle hog padding. (for now, just use padded HOG dims as input here)
