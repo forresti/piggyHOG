@@ -23,6 +23,20 @@ tic
 for i=1:nRuns
     [M,O] = gradientMag( I,0,0,0,1 );
 end
-gradFps = nRuns/toc;
-disp(['gradient only fps: ' num2str(gradFps) ' fps'])
+gradTime = toc;
+gradNormalizedTime = gradTime/nRuns;
+gradFps = nRuns/gradTime;
+disp(['gradient only. time:' num2str(gradNormalizedTime) ' sec. ' num2str(gradFps) ' fps'])
+
+
+tic
+for i=1:nRuns
+    %I think this includes cell histogram and block normalization. 
+    %Is it possible to disable block normalization?
+    H = gradientHist(M, O, 8, 9);
+end
+cellTime = toc;
+cellNormalizedTime = cellTime/nRuns;
+cellFps = nRuns/cellTime;
+disp(['hist cells only. time:' num2str(cellNormalizedTime) ' sec. ' num2str(cellFps) ' fps'])
 
