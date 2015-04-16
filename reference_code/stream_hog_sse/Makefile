@@ -3,7 +3,7 @@
 #Modified: 9/6/12
 
 #OBJS = main.o  helpers.o SimpleImg.o streamHog.o
-OBJS = main.o helpers.o streamHog.o test_streamHog.o
+OBJS = main.o helpers.o streamHog.o test_streamHog.o driver_streamHog.o
 EXENAME = main
 
 #on sandy bridge, -march=native gives me -mavx -msse2avx
@@ -18,7 +18,7 @@ all : $(EXENAME)
 $(EXENAME) : $(OBJS)
 	$(LINK) -o $(EXENAME) $(OBJS) $(LINKOPTS)
 
-main.o : main.cpp helpers.h SimpleImg.hpp streamHog.h test_streamHog.h
+main.o : main.cpp helpers.h SimpleImg.hpp streamHog.h test_streamHog.h driver_streamHog.h
 	$(CC) $(CCOPTS) main.cpp
 
 helpers.o : helpers.cpp helpers.h 
@@ -32,6 +32,9 @@ streamHog.o : streamHog.cpp streamHog.h helpers.h SimpleImg.hpp
 
 test_streamHog.o : test_streamHog.cpp test_streamHog.h helpers.h SimpleImg.hpp 
 	$(CC) $(CCOPTS) test_streamHog.cpp
+
+driver_streamHog.o : driver_streamHog.cpp driver_streamHog.h helpers.h SimpleImg.hpp
+	$(CC) $(CCOPTS) driver_streamHog.cpp
 
 clean : 
 	rm -f *.o $(EXENAME) 2>/dev/null

@@ -124,7 +124,7 @@ def test_by_eyeball():
 
 def gather_vs_scatter_correctness():
     print "\n***gather_vs_scatter_correctness()" 
-    sbin = 4
+    sbin = 2
     num_px = 50
 
     #ground truth (scatter)
@@ -156,12 +156,12 @@ def test_scatter_gather_weights(sbin):
 if __name__ == "__main__":
 
     #test_by_eyeball()
-    #gather_vs_scatter_correctness()
+    gather_vs_scatter_correctness()
 
     sbin = 7
-    test_scatter_gather_weights(sbin)
+    #test_scatter_gather_weights(sbin)
 
     #test_get_vx0(sbin)
-    init_v_LUT(sbin)
+    #init_v_LUT(sbin)
 
 

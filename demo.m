@@ -5,6 +5,8 @@ function demo()
     %output_dir = './cascade-results-g02-v1.0-cars';
     load('VOC2007/car_final'); %load 'model' structure
 
+n_iter = 10
+for i=1:n_iter
     %for idx = 1:length(imgs)
     for idx = 1:1
         curr_img = imgs(idx).name
@@ -15,6 +17,7 @@ function demo()
         %visHog(pyra)
         %print(gcf, '-dpng', '-r0', [output_dir '/' curr_img]);
     end
+end
 
 function pyra = time_extract_hog(img_name, model)
     im = imread(img_name);

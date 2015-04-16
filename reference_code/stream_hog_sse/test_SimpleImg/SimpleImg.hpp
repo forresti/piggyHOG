@@ -49,7 +49,7 @@ class SimpleImg{
         width = img.cols;
         //stride = compute_stride(width, sizeof(pixel_t), ALIGN_IN_BYTES); //defined in helpers.cpp
         stride = compute_stride(width, sizeof(uint8_t), ALIGN_IN_BYTES);
-        printf("    stride = %d \n", stride);
+        //printf("    stride = %d \n", stride);
         n_channels = 3;
         assert(img.type() == CV_8UC3); //require that input img is 3-channel, uchar words. 
         assert(sizeof(pixel_t) == 1); //uchar single-byte words

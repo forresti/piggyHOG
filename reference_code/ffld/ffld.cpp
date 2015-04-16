@@ -131,6 +131,7 @@ int main(int argc, char * argv[]){
     string file;
 	int padding = 12;
 	int interval = 10;
+    int n_iter = 10;
 
     //parseArgs params are passed by reference, so they get updated here
     parseArgs(padding, interval, file, argc, argv); //update parameters with any command-line inputs
@@ -150,20 +151,24 @@ int main(int argc, char * argv[]){
 
     int padx = 11; //ignoring cmd-line padding arg.
     int pady = 6; //to match voc5 dims
-    //HOGPyramid pyramid(image, padding, padding, interval);
-    HOGPyramid pyramid(image, padx, pady, interval); 
 
-    if (pyramid.empty()) {
-        showUsage();
-        cerr << "\nInvalid image " << file << endl;
-        return -1;
+    for(int i=0; i<n_iter; i++){
+
+        //HOGPyramid pyramid(image, padding, padding, interval);
+        HOGPyramid pyramid(image, padx, pady, interval); 
+
+        if (pyramid.empty()) {
+            showUsage();
+            cerr << "\nInvalid image " << file << endl;
+            return -1;
+        }
     }
     
     double time_hog = read_timer() - start_hog;
-    cout << "Computed HOG features in " << time_hog << " ms" << endl;
+    cout << "Computed HOG features in " << time_hog/n_iter << " ms" << endl;
 
     printHogSizes(pyramid);
-    writePyraToCsv(pyramid);
+//    writePyraToCsv(pyramid);
 
    	return EXIT_SUCCESS;
 }
