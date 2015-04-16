@@ -167,7 +167,7 @@ int main(int argc, char * argv[]){
     double time_hog = read_timer() - start_hog;
     cout << "Computed HOG features in " << time_hog/n_iter << " ms" << endl;
 
-    printHogSizes(pyramid);
+//    printHogSizes(pyramid);
 //    writePyraToCsv(pyramid);
 
    	return EXIT_SUCCESS;
