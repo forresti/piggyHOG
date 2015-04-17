@@ -23,8 +23,8 @@ int main (int argc, char **argv)
 //    test_streamHog_oneScale_default(); //timing experiment
 //    test_streamHog_pyramid(); //timing experiment
 
-//    streamHog_pyramid(); //run the pyramid for real
-    outerLoopParallel_streamHog_pyramid();
+    streamHog_pyramid(); //run the pyramid for real
+//    outerLoopParallel_streamHog_pyramid();
  
     return 0;
 }

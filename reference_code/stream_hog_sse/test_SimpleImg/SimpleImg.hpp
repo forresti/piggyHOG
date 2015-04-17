@@ -67,6 +67,7 @@ class SimpleImg{
                 for(int channel = 0; channel < 3; channel++){
                     //this->data[y*stride*3 + x*3 + channel] = img.at<cv::Vec3b>(y,x)[channel];  //channels as inner dimension
                     this->data[y*stride + x + channel*stride*height] = img.at<cv::Vec3b>(y,x)[channel]; //channels as outer dimension 
+                    //this->data[y*stride + x + channel*stride*height] = img.data[y*width*3 + x*width + channel];
                 }
             }
         }

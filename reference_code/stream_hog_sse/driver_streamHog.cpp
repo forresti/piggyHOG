@@ -32,7 +32,7 @@ void streamHog_pyramid(){
     printf("streamHog_pyramid() \n");
     int nLevels = 40; //TODO: compute this based on img size
     int interval = 10;
-    int n_iter = 100; //not really "iterating" -- just number of times to run the experiment
+    int n_iter = 300; //not really "iterating" -- just number of times to run the experiment
     if(n_iter < 10){
         printf("    WARNING: n_iter = %d. For statistical significance, we recommend n_iter=10 or greater. \n", n_iter);
     }
@@ -52,6 +52,7 @@ void streamHog_pyramid(){
 
     double start_time = read_timer();
     double img_pyra_time;
+    double alloc_time;
     double grad_time;
     double hist_time;
     double norm_time;
@@ -85,8 +86,17 @@ void streamHog_pyramid(){
             imgPyramid[i + 3*interval] = new SimpleImg<uint8_t>(img_scaled); //use w/ sbin=8
         }
 
+//TEMP -- TODO remove
+//        for(int s=0; s<nLevels; s++){
+//            delete imgPyramid[s];
+//        }
+
+        img_pyra_time += (read_timer() - img_pyra_start); 
 //step 1.1: now that we know img dimensions, allocate memory for HOG stuff
 
+        double alloc_start = read_timer();
+
+        //FIXME: half the time in here is going into memset for allocate_hist()
         #pragma omp parallel for
         for(int s=0; s<nLevels; s++){
 
@@ -103,9 +113,10 @@ void streamHog_pyramid(){
 
         }
 
-        img_pyra_time += (read_timer() - img_pyra_start); 
+        alloc_time += (read_timer() - alloc_start);
 
 
+#if 0
 
 //step 2: gradients
         double grad_start = read_timer();
@@ -160,10 +171,11 @@ void streamHog_pyramid(){
             free(hogBuffer_blocks[s]);
             free(normImg[s]);
         }
+#endif
     }
     double end_timer = read_timer() - start_time;
     printf("avg time for multiscale = %f ms \n", end_timer/n_iter);
-    printf("img pyramid:%f ms, gradients: %f ms, hist: %f ms, norm: %f ms\n", img_pyra_time/n_iter, grad_time/n_iter, hist_time/n_iter, norm_time/n_iter);
+    printf("img pyramid:%f ms, malloc:%f ms, gradients: %f ms, hist: %f ms, norm: %f ms\n", img_pyra_time/n_iter, alloc_time/n_iter, grad_time/n_iter, hist_time/n_iter, norm_time/n_iter);
 
 
 }
