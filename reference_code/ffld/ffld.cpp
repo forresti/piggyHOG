@@ -131,7 +131,7 @@ int main(int argc, char * argv[]){
     string file;
 	int padding = 12;
 	int interval = 10;
-    int n_iter = 10;
+    int n_iter = 100;
 
     //parseArgs params are passed by reference, so they get updated here
     parseArgs(padding, interval, file, argc, argv); //update parameters with any command-line inputs

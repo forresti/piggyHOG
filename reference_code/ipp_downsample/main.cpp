@@ -85,7 +85,7 @@ Mat downsampleWithIPP(Mat img, double scale){
 vector<Mat> downsamplePyramid(Mat img){
     int interval = 10;
     float sc = pow(2, 1 / (float)interval);
-    vector<Mat> imgPyramid(interval*2); //100% down to 25% of orig size (two octaves, 10 scales per octave)
+    vector<Mat> imgPyramid(interval*3); //100% down to 25% of orig size (two octaves, 10 scales per octave)
 
     omp_set_num_threads(5); //TODO: be careful with num threads. on R8, 2-6 threads is good, more is just noisy
     #pragma omp parallel for
@@ -95,15 +95,19 @@ vector<Mat> downsamplePyramid(Mat img){
         float downsampleFactor = 1/pow(sc, i);
         //printf("downsampleFactor = %f \n", downsampleFactor);
 
-#if 1 //OpenCV downsample
+#if 0 //OpenCV downsample
         imgPyramid[i] = downsampleWithOpenCV(img, downsampleFactor);
-        imgPyramid[i+interval] = downsampleWithOpenCV(img, downsampleFactor/2);          
+        imgPyramid[i+interval] = downsampleWithOpenCV(img, downsampleFactor/2);
+        imgPyramid[i+2*interval] = downsampleWithOpenCV(img, downsampleFactor/4);
+          
         //imgPyramid[i+interval] = downsampleWithIPP(imgPyramid[i], downsampleFactor); //start from already downsampled img, go down an other octave
 #endif
 
-#if 0 //IPP downsample
+#if 1 //IPP downsample
         imgPyramid[i] = downsampleWithIPP(img, downsampleFactor); 
         imgPyramid[i+interval] = downsampleWithIPP(img, downsampleFactor/2);
+        imgPyramid[i+2*interval] = downsampleWithIPP(img, downsampleFactor/4);
+
         //imgPyramid[i+interval] = downsampleWithIPP(imgPyramid[i], downsampleFactor); //start from already downsampled img, go down an other octave
 #endif
     }
@@ -131,11 +135,15 @@ int main (int argc, char **argv){
     //one downsample
     downsampleDemo(img);
 
+    int n_iter = 100;
+
     //downsample pyramid
     double start_pyra = read_timer();
-    vector<Mat> imgPyramid = downsamplePyramid(img);
+    for(int i=0; i<n_iter; i++){
+        vector<Mat> imgPyramid = downsamplePyramid(img);
+    }
     double time_pyra = read_timer() - start_pyra;
-    printf("    downsample image for HOG pyramid in %f ms \n", time_pyra);
+    printf("    downsample image for HOG pyramid in %f ms \n", time_pyra/n_iter);
     //TODO: have a function to write imgPyramid out to img files
 
     return 0;
