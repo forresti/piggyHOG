@@ -26,6 +26,25 @@ int get_sbin_for_scale(int scaleIdx, int interval){
     return sbin;
 }
 
+//number of pixels (per channel)
+int get_imgPyra_num_px(vector< SimpleImg<uint8_t>* > imgPyramid){
+    int num_px = 0;
+    for(int s=0; s<imgPyramid.size(); s++){
+        num_px += imgPyramid[s]->height * imgPyramid[s]->width;
+    }
+    return num_px;
+}
+
+//GB of data output from histogram
+double get_hist_gb(vector< int > hogHeight, vector< int > hogWidth){
+    int hist_bytes = 0;
+    for(int s=0; s<hogHeight.size(); s++){
+        hist_bytes += hogHeight[s] * hogWidth[s] * 18 * 4; //18 bins, 4-byte float data
+    }
+    double hist_gb = ((double)hist_bytes) / 1e9;
+    return hist_gb;
+}
+
 //hand-coded impl of pyramid. (will modularize it better eventually)
 // typical: img pyramid:16.901926 ms, gradients: 4.586978 ms, hist: 9.008650 ms, norm: 6.529126 ms
 void streamHog_pyramid(){
@@ -50,12 +69,15 @@ void streamHog_pyramid(){
     vector< int > hogHeight(nLevels);
     vector< int > hogWidth(nLevels);
 
-    double start_time = read_timer();
+    int num_px = 0;
+    double hist_gb = 0;
+
     double img_pyra_time;
     double alloc_time;
     double grad_time;
     double hist_time;
     double norm_time;
+    double start_time = read_timer();
 
     for(int iter=0; iter<n_iter; iter++){ //do several runs, take the avg time
 
@@ -92,6 +114,7 @@ void streamHog_pyramid(){
 //        }
 
         img_pyra_time += (read_timer() - img_pyra_start); 
+        num_px = get_imgPyra_num_px(imgPyramid);
 //step 1.1: now that we know img dimensions, allocate memory for HOG stuff
 
         double alloc_start = read_timer();
@@ -115,8 +138,9 @@ void streamHog_pyramid(){
 
         alloc_time += (read_timer() - alloc_start);
 
+        hist_gb = get_hist_gb(hogHeight, hogWidth);
 
-#if 0
+#if 1
 
 //step 2: gradients
         double grad_start = read_timer();
@@ -175,9 +199,18 @@ void streamHog_pyramid(){
     }
     double end_timer = read_timer() - start_time;
     printf("avg time for multiscale = %f ms \n", end_timer/n_iter);
-    printf("img pyramid:%f ms, malloc:%f ms, gradients: %f ms, hist: %f ms, norm: %f ms\n", img_pyra_time/n_iter, alloc_time/n_iter, grad_time/n_iter, hist_time/n_iter, norm_time/n_iter);
+    printf("  img pyramid:%f ms, malloc:%f ms, gradients: %f ms, hist: %f ms, norm: %f ms\n", img_pyra_time/n_iter, alloc_time/n_iter, grad_time/n_iter, hist_time/n_iter, norm_time/n_iter);
+    
 
-
+    double px_gb = ((double)num_px * 3) / 1e9;
+    printf("  img pyramid: %d pixels = %f GB, hist output: %f GB \n", num_px, px_gb, hist_gb);
+    printf("  img pyramid: %f GB/s, gradients: %f GB/s, hist: %f GB/s, norm: %f GB/s \n", 
+           px_gb/(img_pyra_time/(n_iter * 1000)),
+           px_gb/(grad_time/(n_iter * 1000)),
+           px_gb/(hist_time/(n_iter * 1000)),
+           hist_gb/(norm_time/(n_iter * 1000)) ); //w.r.t GB of input data. and ms to sec.
+    //note: input to grad = num_px*3 channels. input to hist = num_px * (1 byte ori + 2 byte mag). input to hist and grad are same size.
+    //note: output from hist and output from norm are approx the same size
 }
 
 
@@ -300,8 +333,7 @@ void outerLoopParallel_streamHog_pyramid(){
     double end_timer = read_timer() - start_time;
     printf("avg time for multiscale = %f ms \n", end_timer/n_iter);
     //printf("img pyramid:%f ms, gradients: %f ms, hist: %f ms, norm: %f ms\n", img_pyra_time/n_iter, grad_time/n_iter, hist_time/n_iter, norm_time/n_iter);
-    printf("img pyramid:%f ms, grad+hist+norm: %f ms\n", img_pyra_time/n_iter, grad_hist_norm_time/n_iter);
-
+    printf("  img pyramid:%f ms, grad+hist+norm: %f ms\n", img_pyra_time/n_iter, grad_hist_norm_time/n_iter);
 }
 
 
