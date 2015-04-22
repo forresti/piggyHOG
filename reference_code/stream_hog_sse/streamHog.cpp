@@ -877,8 +877,6 @@ void streamHog::hogCell_gradientEnergy(float *__restrict__ hogHist, int histHeig
     }
 }
 
-//TODO: compute 9 contrast-insensitive features
-
 //hog cells -> hog blocks
 //@param in_hogHist = hog cells
 //@param in_normImg = result of hogCell_gradientEnergy()
@@ -987,10 +985,8 @@ void streamHog::normalizeCells_voc5(float *__restrict__ in_hogHist, float *__res
                 float h2 = min(sum * n2, 0.2f);
                 float h3 = min(sum * n3, 0.2f);
                 float h4 = min(sum * n4, 0.2f);
-                //*dst = 0.5 * (h1 + h2 + h3 + h4);
-                //dst += out[0]*out[1];
-                //src += blocks[0]*blocks[1];
-                out_hogBlocks[hogIdx + o + 18] = sum;
+
+                out_hogBlocks[hogIdx + o + 18] = 0.5 * (h1 + h2 + h3 + h4);
             }
             out_hogBlocks[hogIdx + 27] = 0.2357f * t1;
             out_hogBlocks[hogIdx + 28] = 0.2357f * t2;
@@ -1001,5 +997,86 @@ void streamHog::normalizeCells_voc5(float *__restrict__ in_hogHist, float *__res
     }
 #endif
 }
+
+//hog cells -> hog blocks
+//@param in_hogHist = hog cells
+//@param in_normImg = result of hogCell_gradientEnergy()
+//@param out_hogBlocks = normalized hog blocks
+void streamHog::normalizeCells_stream(float *__restrict__ in_hogHist, float *__restrict__ in_normImg, 
+                                    float *__restrict__ out_hogBlocks,
+                                    int histHeight, int histWidth)
+{
+    const int hogDepth = 32;
+    //TODO: test my ptr indexing vs. voc5 ptr indexing.
+
+    // compute features
+#pragma omp parallel for
+    for(int y=1; y < histHeight-1; y++){
+        for(int x=1; x < histWidth-1; x++){
+
+            float n1 = 1.0 / sqrt(in_normImg[(y-1)*histWidth + (x-1)] + //top-left
+                                  in_normImg[(y-1)*histWidth + (x)]   +
+                                  in_normImg[(y)*histWidth   + (x-1)] +
+                                  in_normImg[(y)*histWidth   + (x)]   + eps);
+
+            float n2 = 1.0 / sqrt(in_normImg[(y-1)*histWidth + (x)]   + //top-right
+                                  in_normImg[(y-1)*histWidth + (x+1)] +
+                                  in_normImg[(y)*histWidth   + (x)]   +
+                                  in_normImg[(y)*histWidth   + (x+1)] + eps);
+
+            float n3 = 1.0 / sqrt(in_normImg[(y)*histWidth   + (x-1)] + //bottom-left
+                                  in_normImg[(y)*histWidth   + (x)]   +
+                                  in_normImg[(y+1)*histWidth + (x-1)] +
+                                  in_normImg[(y+1)*histWidth + (x)]   + eps);
+
+            float n4 = 1.0 / sqrt(in_normImg[(y)*histWidth   + (x)]   + //bottom-right
+                                  in_normImg[(y)*histWidth   + (x+1)] +
+                                  in_normImg[(y+1)*histWidth + (x)]   +
+                                  in_normImg[(y+1)*histWidth + (x+1)] + eps);
+            float t1 = 0;
+            float t2 = 0;
+            float t3 = 0;
+            float t4 = 0;
+
+            // contrast-sensitive features
+            //src = hist + (x+1)*blocks[0] + (y+1);
+            int hogIdx = (x+1)*hogDepth + (y+1)*histWidth*hogDepth; 
+            for (int o = 0; o < 18; o++) {
+                float in_bin = in_hogHist[hogIdx + o]; 
+
+                float h1 = min(in_bin * n1, 0.2f);
+                float h2 = min(in_bin * n2, 0.2f);
+                float h3 = min(in_bin * n3, 0.2f);
+                float h4 = min(in_bin * n4, 0.2f);
+               
+                //*dst = 0.5 * (h1 + h2 + h3 + h4); 
+                out_hogBlocks[hogIdx + o] = 0.5f * (h1 + h2 + h3 + h4);
+
+                t1 += h1;
+                t2 += h2;
+                t3 += h3;
+                t4 += h4;
+            }
+
+            // contrast-insensitive features
+            //src = hist + (x+1)*blocks[0] + (y+1);
+            for (int o = 0; o < 9; o++) {
+                //float sum = *src + *(src + 9*blocks[0]*blocks[1]);
+                float sum = in_hogHist[hogIdx + o] + in_hogHist[hogIdx+ o+9]; 
+                float h1 = min(sum * n1, 0.2f);
+                float h2 = min(sum * n2, 0.2f);
+                float h3 = min(sum * n3, 0.2f);
+                float h4 = min(sum * n4, 0.2f);
+
+                out_hogBlocks[hogIdx + o + 18] = 0.5 * (h1 + h2 + h3 + h4);
+            }
+            out_hogBlocks[hogIdx + 27] = 0.2357f * t1;
+            out_hogBlocks[hogIdx + 28] = 0.2357f * t2;
+            out_hogBlocks[hogIdx + 29] = 0.2357f * t3;
+            out_hogBlocks[hogIdx + 30] = 0.2357f * t4;
+        }
+    }
+}
+
 
 

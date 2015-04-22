@@ -69,6 +69,10 @@ class streamHog{
                              float *__restrict__ out_hogBlocks,
                              int histHeight, int histWidth);
 
+    void normalizeCells_stream(float *__restrict__ in_hogHist, float *__restrict__ in_normImg,
+                               float *__restrict__ out_hogBlocks,
+                               int histHeight, int histWidth);
+
   private:
     char ATAN2_TABLE[512][512]; // values are 0 to 18
 
