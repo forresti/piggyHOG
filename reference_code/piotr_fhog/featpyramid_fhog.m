@@ -22,6 +22,8 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
     im=imResample(single(im)/255,[h w]); %from Piotr's codebase
     hog_time = 0;
     scale_time = 0;
+    grad_time = 0;
+    hist_norm_time = 0;
 
     if nargin < 3
     [padx, pady] = getpadding(model);
@@ -58,20 +60,28 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
 
         if extra_interval > 0
             % Optional (sbin/4) x (sbin/4) features
-            pyra.feat{i} = fhog(scaled_single, sbin/4);
+            [pyra.feat{i}, gT, hT] = fhog(scaled_single, sbin/4);
+            grad_time = grad_time + gT;
+            hist_norm_time = hist_norm_time + hT;
             pyra.scales(i) = 4/sc^(i-1);
         end
 
         % (sbin/2) x (sbin/2) features
           hog_tic = tic();
-        pyra.feat{i+extra_interval} = fhog(scaled_single, sbin/2);
+        [pyra.feat{i+extra_interval}, gT, hT] = fhog(scaled_single, sbin/2);
           hog_time = hog_time + toc(hog_tic);
+        grad_time = grad_time + gT;
+        hist_norm_time = hist_norm_time + hT;
+
         pyra.scales(i+extra_interval) = 2/sc^(i-1);
 
         % sbin x sbin HOG features
           hog_tic = tic();
-        pyra.feat{i+extra_interval+interval} = fhog(scaled_single, sbin);
+        [pyra.feat{i+extra_interval+interval}, gT, hT] = fhog(scaled_single, sbin);
           hog_time = hog_time + toc(hog_tic);
+        grad_time = grad_time + gT;
+        hist_norm_time = hist_norm_time + hT;
+
         pyra.scales(i+extra_interval+interval) = 1/sc^(i-1);
 
         % Remaining pyramid octaves 
@@ -88,14 +98,20 @@ function pyra = featpyramid_fhog(im, model, padx, pady)
               scale_time = scale_time + toc(scale_tic);
  
               hog_tic = tic();
-            pyra.feat{j+extra_interval+interval} = fhog(scaled_single, sbin);
+            [pyra.feat{j+extra_interval+interval}, gT, hT] = fhog(scaled_single, sbin);
               hog_time = hog_time + toc(hog_tic); 
+
+            grad_time = grad_time + gT;
+            hist_norm_time = hist_norm_time + hT;
+
         end
     end
 
 
     display(sprintf('    spent %f sec downsampling images.', scale_time))
     display(sprintf('    spent %f sec extracting HOG. Not including downsampling, padding, or place features', hog_time))
+    display(sprintf('      spent %f sec doing gradients', grad_time))
+    display(sprintf('      spent %f sec doing hist and norm', hist_norm_time))
 
     pyra.num_levels = length(pyra.feat);
 
