@@ -178,11 +178,11 @@ void streamHog_pyramid(){
         for(int s=0; s<nLevels; s++){
 
             //normImg(x,y) = sum( hist(x,y,0:17) )
-            sHog.hogCell_gradientEnergy(hogBuffer[s], hogHeight[s], hogWidth[s], normImg[s]); //populates normImg
+            //sHog.hogCell_gradientEnergy(hogBuffer[s], hogHeight[s], hogWidth[s], normImg[s]); //populates normImg
 
             //blocks = normalizeCells(hist, normImg)
-            sHog.normalizeCells_voc5(hogBuffer[s], normImg[s], hogBuffer_blocks[s],
-                                     hogHeight[s], hogWidth[s]);
+            //sHog.normalizeCells_voc5(hogBuffer[s], normImg[s], hogBuffer_blocks[s], hogHeight[s], hogWidth[s]);
+            sHog.normalizeCells_stream(hogBuffer[s], normImg[s], hogBuffer_blocks[s], hogHeight[s], hogWidth[s]);
         }
 
         norm_time += (read_timer() - norm_start);

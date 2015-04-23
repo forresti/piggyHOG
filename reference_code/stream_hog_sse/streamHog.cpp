@@ -998,41 +998,84 @@ void streamHog::normalizeCells_voc5(float *__restrict__ in_hogHist, float *__res
 #endif
 }
 
+
+//compute "energy" for one HOG cell
+//input: hogHist, output: normImg
+static inline float _energy(float *__restrict__ in_hogHist, int x, int y, int histWidth)
+{
+    const int hogDepth = 32;
+    int hogIdx = x*hogDepth + y*histWidth*hogDepth;
+    float norm = 0.0f;
+    for(int ori=0; ori<18; ori++){ //0-360 degree ori bins
+        norm += in_hogHist[hogIdx+ori] * in_hogHist[hogIdx+ori]; //squared -- will do sqrt in hogBlock_normalize()
+    }
+    return norm;
+}
+
+//calculation for n1, n2, n3, n4 in voc5 code
+static inline float _sqrt_norm(float *__restrict__ in_normImg, int x, int y, int histWidth)
+{
+    float n1 = 1.0 / sqrt(in_normImg[(y)*histWidth + (x)] + //top-left
+                          in_normImg[(y)*histWidth + (x+1)]   +
+                          in_normImg[(y+1)*histWidth   + (x)] +
+                          in_normImg[(y+1)*histWidth   + (x+1)]   + eps);
+    return n1;
+}
+
 //hog cells -> hog blocks
 //@param in_hogHist = hog cells
 //@param in_normImg = result of hogCell_gradientEnergy()
 //@param out_hogBlocks = normalized hog blocks
+// DO NOT CALL hogCell_gradientEnergy() BEFORE THIS. (functionality is pipelined in here.)
 void streamHog::normalizeCells_stream(float *__restrict__ in_hogHist, float *__restrict__ in_normImg, 
                                     float *__restrict__ out_hogBlocks,
                                     int histHeight, int histWidth)
 {
     const int hogDepth = 32;
-    //TODO: test my ptr indexing vs. voc5 ptr indexing.
+
+    float* normImg_sqrt = (float*)malloc_aligned(32, histWidth * histHeight * sizeof(float)); //TODO: preallocate
+
+    //assume "normImg" has NOT been computed yet. (pipelining this w/ the rest of the code).
+
+  //top-left corner (2 rows, 2 cols): gradient energy
+    for(int y=0; y < histHeight; y++){
+        for(int x=0; x < 2; x++){
+            in_normImg[y*histHeight + x] = _energy(in_hogHist, x, y, histWidth);
+        }
+    }
+    for(int y=0; y<2; y++){
+        for(int x=0; x<histWidth; x++){
+            in_normImg[y*histHeight + x] = _energy(in_hogHist, x, y, histWidth);
+        }
+    }
+    
+  //top-left corner (1 row, 1 col): sqrt gradient energy
+    for(int y=0; y < histHeight; y++){
+        int x=0;
+        normImg_sqrt[y*histHeight + x] = _sqrt_norm(in_normImg, x, y, histWidth); //"n1" from voc5 code
+    }
+    for(int x=0; x<histWidth; x++){
+        int y=0;
+        normImg_sqrt[y*histHeight + x] = _sqrt_norm(in_normImg, x, y, histWidth);
+    }
 
     // compute features
 #pragma omp parallel for
     for(int y=1; y < histHeight-1; y++){
         for(int x=1; x < histWidth-1; x++){
 
-            float n1 = 1.0 / sqrt(in_normImg[(y-1)*histWidth + (x-1)] + //top-left
-                                  in_normImg[(y-1)*histWidth + (x)]   +
-                                  in_normImg[(y)*histWidth   + (x-1)] +
-                                  in_normImg[(y)*histWidth   + (x)]   + eps);
 
-            float n2 = 1.0 / sqrt(in_normImg[(y-1)*histWidth + (x)]   + //top-right
-                                  in_normImg[(y-1)*histWidth + (x+1)] +
-                                  in_normImg[(y)*histWidth   + (x)]   +
-                                  in_normImg[(y)*histWidth   + (x+1)] + eps);
+          //Forrest's way of pipelining & sharing n1-n4 across neighborhoods.
+            float n1 = normImg_sqrt[(y-1)*histWidth + (x-1)];
+            float n2 = normImg_sqrt[(y-1)*histWidth + (x)];
+            float n3 = normImg_sqrt[(y)*histWidth + (x-1)];
 
-            float n3 = 1.0 / sqrt(in_normImg[(y)*histWidth   + (x-1)] + //bottom-left
-                                  in_normImg[(y)*histWidth   + (x)]   +
-                                  in_normImg[(y+1)*histWidth + (x-1)] +
-                                  in_normImg[(y+1)*histWidth + (x)]   + eps);
+            //compute my bottom-right normImg_sqrt...
+            in_normImg[(y+1)*histHeight + (x+1)] = _energy(in_hogHist, x+1, y+1, histWidth); //ghost zone for normImg_sqrt 
+            normImg_sqrt[y*histHeight + x] = _sqrt_norm(in_normImg, x, y, histWidth);
 
-            float n4 = 1.0 / sqrt(in_normImg[(y)*histWidth   + (x)]   + //bottom-right
-                                  in_normImg[(y)*histWidth   + (x+1)] +
-                                  in_normImg[(y+1)*histWidth + (x)]   +
-                                  in_normImg[(y+1)*histWidth + (x+1)] + eps);
+            float n4 = normImg_sqrt[(y)*histWidth + (x)];
+
             float t1 = 0;
             float t2 = 0;
             float t3 = 0;
@@ -1040,7 +1083,12 @@ void streamHog::normalizeCells_stream(float *__restrict__ in_hogHist, float *__r
 
             // contrast-sensitive features
             //src = hist + (x+1)*blocks[0] + (y+1);
-            int hogIdx = (x+1)*hogDepth + (y+1)*histWidth*hogDepth; 
+            int hogIdx = (x+1)*hogDepth + (y+1)*histWidth*hogDepth;
+
+            //for(int o=0; o<18; o++){
+            //    out_hogBlocks[hogIdx + o] = n1 + n2 + n3 + n4; //stub
+            //}
+#if 1 // scalar 0:17
             for (int o = 0; o < 18; o++) {
                 float in_bin = in_hogHist[hogIdx + o]; 
 
@@ -1057,7 +1105,59 @@ void streamHog::normalizeCells_stream(float *__restrict__ in_hogHist, float *__r
                 t3 += h3;
                 t4 += h4;
             }
+#endif
 
+#if 0 // vector 0:17
+
+            __m128 n1_vec = _mm_set_ps(n1, n1, n1, n1);
+            __m128 n2_vec = _mm_set_ps(n2, n2, n2, n2);              
+            __m128 n3_vec = _mm_set_ps(n3, n3, n3, n3);              
+            __m128 n4_vec = _mm_set_ps(n4, n4, n4, n4);              
+            __m128 point_two_vec = _mm_set_ps(0.2f, 0.2f, 0.2f, 0.2f);
+
+            for(int o=0; o<16; o+=4){
+                __m128 in_bin = _mm_loadu_ps( &in_hogHist[hogIdx + o] );  
+                __m128 out_vec = _mm_setzero_ps(); //accumulate here
+
+                __m128 h1 = _mm_mul_ps(in_bin, n1_vec);
+                __m128 h2 = _mm_mul_ps(in_bin, n2_vec);
+                __m128 h3 = _mm_mul_ps(in_bin, n3_vec);
+                __m128 h4 = _mm_mul_ps(in_bin, n4_vec);
+ 
+                //TODO: max with 0.2f
+
+
+                //TODO: reduction here?
+                out_vec = _mm_add_ps(h1, out_vec);
+                out_vec = _mm_add_ps(h2, out_vec);
+                out_vec = _mm_add_ps(h3, out_vec);
+                out_vec = _mm_add_ps(h4, out_vec);
+
+
+                //TODO: multiply by 0.5 at the end
+                _mm_storeu_ps( &out_hogBlocks[hogIdx + o], out_vec ); //out_hogBlocks[...] = out_vec
+            }
+
+            //cleanup loop for contrast-sensitive features
+            for(int o=16; o<18; o++){
+                float in_bin = in_hogHist[hogIdx + o]; 
+                
+                float h1 = min(in_bin * n1, 0.2f);
+                float h2 = min(in_bin * n2, 0.2f);
+                float h3 = min(in_bin * n3, 0.2f);
+                float h4 = min(in_bin * n4, 0.2f);
+                
+                //*dst = 0.5 * (h1 + h2 + h3 + h4); 
+                out_hogBlocks[hogIdx + o] = 0.5f * (h1 + h2 + h3 + h4);
+
+                t1 += h1;
+                t2 += h2;
+                t3 += h3;
+                t4 += h4;
+            } 
+#endif
+
+#if 1
             // contrast-insensitive features
             //src = hist + (x+1)*blocks[0] + (y+1);
             for (int o = 0; o < 9; o++) {
@@ -1070,12 +1170,16 @@ void streamHog::normalizeCells_stream(float *__restrict__ in_hogHist, float *__r
 
                 out_hogBlocks[hogIdx + o + 18] = 0.5 * (h1 + h2 + h3 + h4);
             }
+#endif
+#if 1
             out_hogBlocks[hogIdx + 27] = 0.2357f * t1;
             out_hogBlocks[hogIdx + 28] = 0.2357f * t2;
             out_hogBlocks[hogIdx + 29] = 0.2357f * t3;
             out_hogBlocks[hogIdx + 30] = 0.2357f * t4;
+#endif
         }
     }
+    free(normImg_sqrt);
 }
 
 
