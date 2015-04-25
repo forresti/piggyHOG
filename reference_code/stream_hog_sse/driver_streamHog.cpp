@@ -51,7 +51,7 @@ void streamHog_pyramid(){
     printf("streamHog_pyramid() \n");
     int nLevels = 40; //TODO: compute this based on img size
     int interval = 10;
-    int n_iter = 300; //not really "iterating" -- just number of times to run the experiment
+    int n_iter = 100; //not really "iterating" -- just number of times to run the experiment
     if(n_iter < 10){
         printf("    WARNING: n_iter = %d. For statistical significance, we recommend n_iter=10 or greater. \n", n_iter);
     }
@@ -151,6 +151,9 @@ void streamHog_pyramid(){
             int sbin = get_sbin_for_scale(s, interval);
 
             //[mag, ori] = gradient_stream(img)
+            //sHog.gradient_voc5_reference(imgPyramid[s]->height, imgPyramid[s]->width, imgPyramid[s]->stride, 
+            //                             imgPyramid[s]->n_channels, ori[s]->n_channels, imgPyramid[s]->data, ori[s]->data, mag[s]->data);
+
             sHog.gradient_stream(imgPyramid[s]->height, imgPyramid[s]->width, imgPyramid[s]->stride, 
                                  imgPyramid[s]->n_channels, ori[s]->n_channels, imgPyramid[s]->data, ori[s]->data, mag[s]->data);
         }
@@ -312,11 +315,11 @@ void outerLoopParallel_streamHog_pyramid(){
 
 //step 4: normalize cells into blocks
             //normImg(x,y) = sum( hist(x,y,0:17) )
-            sHog.hogCell_gradientEnergy(hogBuffer[s], hogHeight[s], hogWidth[s], normImg[s]); //populates normImg
+            //sHog.hogCell_gradientEnergy(hogBuffer[s], hogHeight[s], hogWidth[s], normImg[s]); //populates normImg
 
             //blocks = normalizeCells(hist, normImg)
-            sHog.normalizeCells_voc5(hogBuffer[s], normImg[s], hogBuffer_blocks[s],
-                                     hogHeight[s], hogWidth[s]);
+            //sHog.normalizeCells_voc5(hogBuffer[s], normImg[s], hogBuffer_blocks[s], hogHeight[s], hogWidth[s]);
+            sHog.normalizeCells_stream(hogBuffer[s], normImg[s], hogBuffer_blocks[s], hogHeight[s], hogWidth[s]);
    
         }
         grad_hist_norm_time += (read_timer() - grad_hist_norm_start);

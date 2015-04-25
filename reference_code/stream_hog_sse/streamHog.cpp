@@ -218,6 +218,48 @@ void streamHog::ori_atan2_LUT(__m128i gradX_max_0, __m128i gradX_max_1,
 
 }
 
+//@param 16-bit packed gradX and gradY
+//@return 16-bit sqrt(gradX^2 + gradY^2)
+static inline __m128i _L2(__m128i gradX, __m128i gradY){
+
+    __m128i gradX_int32[2]; //[0] = lo bits, [1] = hi bits
+    __m128i gradY_int32[2]; 
+    __m128i result_int32[2]; 
+    __m128i result_int16;
+
+    //int16 -> int32
+    gradX_int32[0] = _mm_unpacklo_epi16(gradX, _mm_set1_epi16(0));
+    gradX_int32[1] = _mm_unpackhi_epi16(gradX, _mm_set1_epi16(0));
+    gradY_int32[0] = _mm_unpacklo_epi16(gradY, _mm_set1_epi16(0));
+    gradY_int32[1] = _mm_unpackhi_epi16(gradY, _mm_set1_epi16(0));
+
+
+    for(int i=0; i<2; i++){ //lo and hi bits
+        //int32 -> float
+        __m128 gradX_float = _mm_cvtepi32_ps(gradX_int32[i]);
+        __m128 gradY_float = _mm_cvtepi32_ps(gradY_int32[i]);
+
+        //result = gradX^2 + gradY^2
+        gradX_float = _mm_mul_ps(gradX_float, gradX_float);
+        gradY_float = _mm_mul_ps(gradY_float, gradY_float);
+        __m128 result_float = _mm_add_ps(gradX_float, gradY_float); 
+
+        //result = sqrt(result)
+        result_float = _mm_rsqrt_ps(result_float); //approx reciprocal sqrt
+        result_float = _mm_rcp_ps(result_float); // sqrt = 1/rsqrt
+        //result_float = _mm_sqrt_ps(result_float);
+
+        //float -> int32
+        result_int32[i] = _mm_cvtps_epi32(result_float);
+    }
+
+    //int32 -> int16
+    result_int16 = _mm_packs_epi16(result_int32[0], result_int32[1]);
+    return result_int16;
+}
+
+//#define L2_GRAD
+
 //TODO: replace outOri with outGradX_max and outGradY_max. (after calling gradient_stream, you do a lookup table)
 //  or, just do the lookup in here...
 void streamHog::gradient_stream(int height, int width, int stride, int n_channels_input, int n_channels_output,
@@ -274,10 +316,16 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
                 gradY_0_ch[channel] =  _mm_sub_epi16(yHi_0, yLo_0);
                 gradY_1_ch[channel] =  _mm_sub_epi16(yHi_1, yLo_1); 
 
+#ifdef L2_GRAD
+                //mag = sqrt(gradX^2 + gradY^2)
+                mag_0_ch[channel] = _L2(gradX_0_ch[channel], gradY_0_ch[channel]);
+                mag_1_ch[channel] = _L2(gradX_1_ch[channel], gradY_1_ch[channel]);
+#else //L1 gradient 
                 //mag = abs(gradX) + abs(gradY)
                 // this is using the non-sqrt approach that has proved equally accurate to mag=sqrt(gradX^2 + gradY^2)
                 mag_0_ch[channel] = _mm_add_epi16( _mm_abs_epi16(gradX_0_ch[channel]), _mm_abs_epi16(gradY_0_ch[channel]) ); // abs(gradX[0:7]) + abs(gradY[0:7])
                 mag_1_ch[channel] = _mm_add_epi16( _mm_abs_epi16(gradX_1_ch[channel]), _mm_abs_epi16(gradY_1_ch[channel]) ); // abs(gradX[8:15]) + abs(gradY[8:15])
+#endif
 
                 //gradX, gradY of the argmax(magnitude) channel
                 select_epi16(mag_0_ch[channel], magMax_0, gradX_0_ch[channel], gradY_0_ch[channel], gradX_max_0, gradY_max_0); //output gradX_max_0, gradY_max_0
