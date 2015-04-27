@@ -171,13 +171,45 @@ void diff_hogs(float* hog_gold, float* hog_test, int hogHeight, int hogWidth, in
 }
 
 //correctness check
+void test_gradients_voc5_vs_streamHOG(){
+    streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
+    int sbin = 4;
+
+    SimpleImg<uint8_t>img("../../images_640x480/carsgraz_001.image.jpg");
+
+//TODO: use STRIDE instead of WIDTH for the following:
+    SimpleImg<uint8_t> ori_stream(img.height, img.width, 1); //out img has just 1 channel
+    SimpleImg<uint8_t> ori_voc5(img.height, img.width, 1);
+    SimpleImg<int16_t> mag_stream(img.height, img.width, 1); //out img has just 1 channel
+    SimpleImg<int16_t> mag_voc5(img.height, img.width, 1); 
+
+  //[mag, ori] = gradient_stream(img)
+    sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori_voc5.n_channels, img.data, ori_voc5.data, mag_voc5.data);
+    sHog.gradient_stream(img.height, img.width, img.stride, img.n_channels, ori_stream.n_channels, img.data, ori_stream.data, mag_stream.data); 
+
+    mag_voc5.simple_imwrite("mag_voc5.jpg");
+    mag_stream.simple_imwrite("mag_stream.jpg");
+    //ori_voc5.simple_imwrite("ori_voc5.jpg");
+    //ori_stream.simple_imwrite("ori_stream.jpg");
+    ori_voc5.simple_csvwrite("ori_voc5.csv");
+    ori_stream.simple_csvwrite("ori_stream.csv");
+
+    #if 1
+    printf("diff ori:\n");
+    diff_imgs<uint8_t>(ori_voc5.data, ori_stream.data, img.height, img.width, 1, "ori_voc5", "ori_streamHog");
+    printf("diff mag:\n");
+    diff_imgs<int16_t>(mag_voc5.data, mag_stream.data, img.height, img.width, 1, "mag_voc5", "mag_streamHog");
+    #endif
+}
+
+//correctness check
 void test_computeCells_voc5_vs_streamHOG(){
     streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
     int sbin = 4;
 
-    SimpleImg<uint8_t> img("./carsgraz001_goofySize_539x471.jpg");
-    //SimpleImg img("./carsgraz001_goofySize_641x480.jpg");
-    //SimpleImg img("../../images_640x480/carsgraz_001.image.jpg");
+    //SimpleImg<uint8_t> img("./carsgraz001_goofySize_539x471.jpg");
+    //SimpleImg<uint8_t> img("./carsgraz001_goofySize_641x480.jpg");
+    SimpleImg<uint8_t>img("../../images_640x480/carsgraz_001.image.jpg");
 
 //TODO: use STRIDE instead of WIDTH for the following:
     SimpleImg<uint8_t> ori_stream(img.height, img.width, 1); //out img has just 1 channel
@@ -195,20 +227,6 @@ void test_computeCells_voc5_vs_streamHOG(){
   //[mag, ori] = gradient_stream(img)
     sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori_voc5.n_channels, img.data, ori_voc5.data, mag_voc5.data);
     sHog.gradient_stream(img.height, img.width, img.stride, img.n_channels, ori_stream.n_channels, img.data, ori_stream.data, mag_stream.data); 
-
-    mag_voc5.simple_imwrite("mag_voc5.jpg");
-    mag_stream.simple_imwrite("mag_stream.jpg");
-    //ori_voc5.simple_imwrite("ori_voc5.jpg");
-    //ori_stream.simple_imwrite("ori_stream.jpg");
-    ori_voc5.simple_csvwrite("ori_voc5.csv");
-    ori_stream.simple_csvwrite("ori_stream.csv");
-
-    #if 0
-    printf("diff ori:\n");
-    diff_imgs<uint8_t>(ori_voc5.data, ori_stream.data, img.height, img.width, 1, "ori_voc5", "ori_streamHog");
-    printf("diff mag:\n");
-    diff_imgs<int16_t>(mag_voc5.data, mag_stream.data, img.height, img.width, 1, "mag_voc5", "mag_streamHog");
-    #endif
 
   //hist = computeCells(mag, ori, sbin)
     sHog.computeCells_voc5_reference(img.height, img.width, img.stride, sbin,

@@ -13,6 +13,7 @@ using namespace std;
 
 #define eps 0.0001
 
+//#define L2_GRAD
 //#define SCALE_ORI //if defined, scale up the orientation (1 to 18) to make it more visible in output images for debugging
 
 //constructor
@@ -245,9 +246,9 @@ static inline __m128i _L2(__m128i gradX, __m128i gradY){
         __m128 result_float = _mm_add_ps(gradX_float, gradY_float); 
 
         //result = sqrt(result)
-        result_float = _mm_rsqrt_ps(result_float); //approx reciprocal sqrt
-        result_float = _mm_rcp_ps(result_float); // sqrt = 1/rsqrt
-        //result_float = _mm_sqrt_ps(result_float);
+        //result_float = _mm_rsqrt_ps(result_float); //approx reciprocal sqrt
+        //result_float = _mm_rcp_ps(result_float); // sqrt = 1/rsqrt
+        result_float = _mm_sqrt_ps(result_float);
 
         //float -> int32
         result_int32[i] = _mm_cvtps_epi32(result_float);
@@ -258,7 +259,6 @@ static inline __m128i _L2(__m128i gradX, __m128i gradY){
     return result_int16;
 }
 
-//#define L2_GRAD
 
 //TODO: replace outOri with outGradX_max and outGradY_max. (after calling gradient_stream, you do a lookup table)
 //  or, just do the lookup in here...
@@ -289,8 +289,11 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
     __m128i mag_1_ch[3]; //top bits
     __m128i magMax, magMax_0, magMax_1; //packed 8-bit, bottom bits, top bits
 
+    //TODO: assert that stride = (width + width%8), so we can load 8 uchars starting at img[width-2]
+
     for(int y=0; y<height-2; y++){
-        for(int x=0; x < stride-2; x+=loadSize){ //(stride-2) to avoid falling off the end when doing (location+2) to get xHi
+        //for(int x=0; x < stride-2; x+=loadSize){ //(stride-2) to avoid falling off the end when doing (location+2) to get xHi
+        for(int x=0; x < width-2; x+=loadSize){
 
             magMax = magMax_0 = magMax_1 = _mm_setzero_si128();
 
@@ -371,8 +374,6 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
                             (double)img[y*stride + (x-1) + channel*height*stride];
             double dy = (double)img[(y+1)*stride + x + channel*height*stride] -
                             (double)img[(y-1)*stride + x + channel*height*stride];
-            //double v = dx*dx + dy*dy; //max magnitude (gets updated later)
-            double v = fabs(dx) + fabs(dy);
 
             // second color channel
             channel=1;
@@ -380,8 +381,6 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
                             (double)img[y*stride + (x-1) + channel*height*stride];
             double dy2 = (double)img[(y+1)*stride + x + channel*height*stride] -
                             (double)img[(y-1)*stride + x + channel*height*stride];
-            //double v2 = dx2*dx2 + dy2*dy2;
-            double v2 = fabs(dx2) + fabs(dy2);
 
             // third color channel
             channel=2;
@@ -389,8 +388,16 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
                             (double)img[y*stride + (x-1) + channel*height*stride];
             double dy3 = (double)img[(y+1)*stride + x + channel*height*stride] -
                             (double)img[(y-1)*stride + x + channel*height*stride];
-            //double v3 = dx3*dx3 + dy3*dy3;
-            double v3 = fabs(dx3) + fabs(dy3); //Forrest's version
+
+#ifdef L2_GRAD
+            double v = dx*dx + dy*dy; //max magnitude (gets updated later)
+            double v2 = dx2*dx2 + dy2*dy2;
+            double v3 = dx3*dx3 + dy3*dy3;
+#else
+            double v = fabs(dx) + fabs(dy);
+            double v2 = fabs(dx2) + fabs(dy2);
+            double v3 = fabs(dx3) + fabs(dy3);
+#endif
 
             // pick channel with strongest gradient
             if (v2 > v) {
@@ -421,7 +428,9 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
             #ifdef SCALE_ORI
             best_o = best_o * 9;
             #endif
-            //v = sqrt(v); //Forrest -- no longer need to sqrt the magnitude
+#ifdef L2_GRAD
+            v = sqrt(v); //Forrest -- no longer need to sqrt the magnitude
+#endif
 
             //outMag[y*stride + x] = v;
             //outOri[y*stride + x] = best_o;

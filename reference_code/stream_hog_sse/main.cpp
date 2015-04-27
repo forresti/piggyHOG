@@ -18,6 +18,7 @@ using namespace std;
 int main (int argc, char **argv)
 {
     //run_tests_ori_argmax(); //unit test
+//    test_gradients_voc5_vs_streamHOG();
 //    test_computeCells_voc5_vs_streamHOG(); //unit test -- computeCells_stream matches voc5. computeCells_stream_noBorderCheck matches except for ~100 pixels.
 
 //    test_streamHog_oneScale_default(); //timing experiment
