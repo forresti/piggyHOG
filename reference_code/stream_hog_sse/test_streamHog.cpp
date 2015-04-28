@@ -249,12 +249,44 @@ void test_computeCells_voc5_vs_streamHOG(){
 
     float* hogBuffer_streamHog_blocks = allocate_hist(img.height, img.width, sbin,
                                                       hogHeight, hogWidth); //will contain final output
-
-  //blocks = normalizeCells(hist, normImg)
-    sHog.normalizeCells_voc5(hogBuffer_streamHog, normImg, hogBuffer_streamHog_blocks,
-                             hogHeight, hogWidth);
 }
 
+///correctness check
+void test_normalizeCells_voc5_vs_streamHOG(){
+    streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
+    int sbin = 4;
+    int hogDepth = 32;
+
+    SimpleImg<uint8_t>img("../../images_640x480/carsgraz_001.image.jpg");
+
+//TODO: use STRIDE instead of WIDTH for the following:
+    SimpleImg<uint8_t> ori_voc5(img.height, img.width, 1);
+    SimpleImg<int16_t> mag_voc5(img.height, img.width, 1); 
+    int hogWidth, hogHeight;
+    float* hogBuffer_voc5 = allocate_hist(img.height, img.width, sbin, hogHeight, hogWidth); //hog{Height,Width} are passed by ref.
+    int hogStride = hogWidth; //TODO: change this?
+    float* normImg = (float*)malloc_aligned(32, hogWidth * hogHeight * sizeof(float));
+
+  //[mag, ori] = gradient_stream(img)
+    sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori_voc5.n_channels, img.data, ori_voc5.data, mag_voc5.data);
+
+  //hist = computeCells(mag, ori, sbin)
+    sHog.computeCells_voc5_reference(img.height, img.width, img.stride, sbin,
+                                     ori_voc5.data, mag_voc5.data, 
+                                     hogHeight, hogWidth, hogBuffer_voc5); 
+
+    float* hogBuffer_blocks_voc5 = allocate_hist(img.height, img.width, sbin, hogHeight, hogWidth); //will contain final output
+    float* hogBuffer_blocks_stream = allocate_hist(img.height, img.width, sbin, hogHeight, hogWidth); //will contain final output
+
+  //blocks = normalizeCells(hist, normImg)
+    sHog.hogCell_gradientEnergy(hogBuffer_voc5, hogHeight, hogWidth, normImg); //normImg(x,y) = sum( hist(x,y,0:17) )
+    sHog.normalizeCells_voc5(hogBuffer_voc5, normImg, hogBuffer_blocks_voc5, hogHeight, hogWidth); //gold impl
+
+    memset(normImg, 0, hogHeight * hogWidth * sizeof(float)); //normalizeCells_stream repopulates normImg
+    sHog.normalizeCells_stream(hogBuffer_voc5, normImg, hogBuffer_blocks_stream, hogHeight, hogWidth); //impl to test
+
+    diff_hogs(hogBuffer_blocks_voc5, hogBuffer_blocks_stream, hogHeight, hogWidth, hogDepth, "voc5_blocks", "streamHog_blocks");
+}
 // MAIN TEST OF FUNCTIONALITY
 // TODO: return a HOG object
 // TODO: have a 'bool doWrite' input param
