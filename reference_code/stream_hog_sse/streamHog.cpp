@@ -5,6 +5,8 @@
 #include <cassert>
 #include <xmmintrin.h>
 #include <pmmintrin.h> //for _mm_hadd_pd()
+#include <emmintrin.h> //for _mm_ shift
+#include <smmintrin.h> //for _mm_cvtepi16_...
 
 //#include "SimpleImg.h"
 #include "streamHog.h"
@@ -13,7 +15,7 @@ using namespace std;
 
 #define eps 0.0001
 
-//#define L2_GRAD
+#define L2_GRAD
 //#define SCALE_ORI //if defined, scale up the orientation (1 to 18) to make it more visible in output images for debugging
 
 //constructor
@@ -229,11 +231,18 @@ static inline __m128i _L2(__m128i gradX, __m128i gradY){
     __m128i result_int16;
 
     //int16 -> int32
+#if 0
+    // FIXME: doesn't sign extend
     gradX_int32[0] = _mm_unpacklo_epi16(gradX, _mm_set1_epi16(0));
     gradX_int32[1] = _mm_unpackhi_epi16(gradX, _mm_set1_epi16(0));
     gradY_int32[0] = _mm_unpacklo_epi16(gradY, _mm_set1_epi16(0));
     gradY_int32[1] = _mm_unpackhi_epi16(gradY, _mm_set1_epi16(0));
-
+#else
+    gradX_int32[0] = _mm_cvtepi16_epi32(gradX);
+    gradX_int32[1] = _mm_cvtepi16_epi32(_mm_srli_si128(gradX,8));
+    gradY_int32[0] = _mm_cvtepi16_epi32(gradY);
+    gradY_int32[1] = _mm_cvtepi16_epi32(_mm_srli_si128(gradY,8));
+#endif
 
     for(int i=0; i<2; i++){ //lo and hi bits
         //int32 -> float
@@ -255,7 +264,12 @@ static inline __m128i _L2(__m128i gradX, __m128i gradY){
     }
 
     //int32 -> int16
+#if 0
+    // FIXME: seems wrong, maybe you want _mm_packs_epi32 here instead?
     result_int16 = _mm_packs_epi16(result_int32[0], result_int32[1]);
+#else
+    result_int16 = _mm_packs_epi32(result_int32[0], result_int32[1]);
+#endif
     return result_int16;
 }
 

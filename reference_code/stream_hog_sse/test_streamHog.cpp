@@ -132,28 +132,38 @@ bool run_tests_ori_argmax(){
     printf("number of select_epi16 tests failed: %d \n", numFailed); 
 }
 
-template<class my_pixel_t>
-void diff_imgs(my_pixel_t* img_gold, my_pixel_t* img_test, int imgHeight, int imgWidth, int imgDepth,
-               string img_gold_name, string img_test_name){
+  template< typename T >
+  inline std::string str(T const & i)	// convert T i to string
+  {
+    std::stringstream s;
+    s << i;
+    return s.str();
+  }
 
-    for(int y=0; y<imgHeight; y++){
-        for(int x=0; x<imgWidth; x++){
-            for(int d=0; d<imgDepth; d++){
-                my_pixel_t gold_element = img_gold[x*imgDepth + y*imgWidth*imgDepth + d];
-                my_pixel_t test_element = img_test[x*imgDepth + y*imgWidth*imgDepth + d];
-                if(test_element != gold_element){
-                    //e.g. x=1, y=1, d=31, voc5=..., streamHog=...
-                    printf("    x=%d, y=%d, d=%d. %s=%d, %s=%d \n", x, y, d, 
-                            img_gold_name.c_str(), gold_element, img_test_name.c_str(), test_element);
-                }
-            }
-        }
+
+template< typename ori_pel_t, typename mag_pel_t >
+void diff_imgs(ori_pel_t* ori_gold, ori_pel_t* ori_test, mag_pel_t* mag_gold, mag_pel_t* mag_test,
+	       int imgHeight, int imgWidth, int imgDepth, string img_gold_name, string img_test_name){
+
+  for(int y=0; y<imgHeight; y++){
+    for(int x=0; x<imgWidth; x++){
+      for(int d=0; d<imgDepth; d++){
+	uint32_t const pix = x*imgDepth + y*imgWidth*imgDepth + d;
+	bool const mag_diff = abs(mag_gold[pix] - mag_test[pix])>1;
+	bool const ori_diff = ! ( (ori_gold[pix] == ori_test[pix]) || ( (!mag_diff) && (mag_gold[pix]<20) ) );
+	if( ori_diff || mag_diff ) {
+	  printf( "ori_diff=%s mag_diff=%s ", str(ori_diff).c_str(), str(mag_diff).c_str() );
+	  printf( "x=%s y=%s d=%s img_gold_name=%s ori_gold[pix]=%s ori_test[pix]=%s mag_gold[pix]=%s mag_test[pix]=%s\n", str(x).c_str(), str(y).c_str(), str(d).c_str(), str(img_gold_name).c_str(), str(uint32_t(ori_gold[pix])).c_str(), str(uint32_t(ori_test[pix])).c_str(), str(mag_gold[pix]).c_str(), str(mag_test[pix]).c_str() );
+	}
+      }
     }
+  }
 }
+
 
 void diff_hogs(float* hog_gold, float* hog_test, int hogHeight, int hogWidth, int hogDepth,
                string hog_gold_name, string hog_test_name){
-    float eps_diff = 0.01;
+  float eps_diff = 0.01;
 
     for(int y=0; y<hogHeight; y++){
         for(int x=0; x<hogWidth; x++){
@@ -195,10 +205,11 @@ void test_gradients_voc5_vs_streamHOG(){
     ori_stream.simple_csvwrite("ori_stream.csv");
 
     #if 1
-    printf("diff ori:\n");
-    diff_imgs<uint8_t>(ori_voc5.data, ori_stream.data, img.height, img.width, 1, "ori_voc5", "ori_streamHog");
-    printf("diff mag:\n");
-    diff_imgs<int16_t>(mag_voc5.data, mag_stream.data, img.height, img.width, 1, "mag_voc5", "mag_streamHog");
+    printf("diff:\n");
+    diff_imgs(ori_voc5.data, ori_stream.data, mag_voc5.data, mag_stream.data,
+	      img.height, img.width, 1, "voc5", "streamHog");
+    //printf("diff mag:\n");
+    //diff_imgs<int16_t>(, img.height, img.width, 1, "mag_voc5", "mag_streamHog");
     #endif
 }
 
