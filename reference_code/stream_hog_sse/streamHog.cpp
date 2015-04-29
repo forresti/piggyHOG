@@ -17,6 +17,44 @@ using namespace std;
 
 #define L2_GRAD
 //#define SCALE_ORI //if defined, scale up the orientation (1 to 18) to make it more visible in output images for debugging
+extern uint32_t ref_x, ref_y;
+
+
+int16_t extract_epi16( __m128i const & v, uint8_t const off ) {
+  uint8_t off2 = off;
+  if( 0 ) { } 
+  else if( off2 == 0 ) { return _mm_extract_epi16(v,0); }
+  else if( off2 == 1 ) { return _mm_extract_epi16(v,1); }
+  else if( off2 == 2 ) { return _mm_extract_epi16(v,2); }
+  else if( off2 == 3 ) { return _mm_extract_epi16(v,3); }
+  else if( off2 == 4 ) { return _mm_extract_epi16(v,4); }
+  else if( off2 == 5 ) { return _mm_extract_epi16(v,5); }
+  else if( off2 == 6 ) { return _mm_extract_epi16(v,6); }
+  else if( off2 == 7 ) { return _mm_extract_epi16(v,7); }
+  else { assert(0); }
+}
+
+uint8_t extract_epi8( __m128i const & v, uint8_t const off ) {
+  uint8_t off2 = off;
+  if( 0 ) { } 
+  else if( off2 == 0 ) { return _mm_extract_epi8(v,0); }
+  else if( off2 == 1 ) { return _mm_extract_epi8(v,1); }
+  else if( off2 == 2 ) { return _mm_extract_epi8(v,2); }
+  else if( off2 == 3 ) { return _mm_extract_epi8(v,3); }
+  else if( off2 == 4 ) { return _mm_extract_epi8(v,4); }
+  else if( off2 == 5 ) { return _mm_extract_epi8(v,5); }
+  else if( off2 == 6 ) { return _mm_extract_epi8(v,6); }
+  else if( off2 == 7 ) { return _mm_extract_epi8(v,7); }
+  else if( off2 == 8 ) { return _mm_extract_epi8(v,8); }
+  else if( off2 == 9 ) { return _mm_extract_epi8(v,9); }
+  else if( off2 == 10 ) { return _mm_extract_epi8(v,10); }
+  else if( off2 == 11 ) { return _mm_extract_epi8(v,11); }
+  else if( off2 == 12 ) { return _mm_extract_epi8(v,12); }
+  else if( off2 == 13 ) { return _mm_extract_epi8(v,13); }
+  else if( off2 == 14 ) { return _mm_extract_epi8(v,14); }
+  else if( off2 == 15 ) { return _mm_extract_epi8(v,15); }
+  else { assert(0); }
+}
 
 //constructor
 streamHog::streamHog(){
@@ -257,7 +295,7 @@ static inline __m128i _L2(__m128i gradX, __m128i gradY){
         //result = sqrt(result)
         //result_float = _mm_rsqrt_ps(result_float); //approx reciprocal sqrt
         //result_float = _mm_rcp_ps(result_float); // sqrt = 1/rsqrt
-        result_float = _mm_sqrt_ps(result_float);
+        //result_float = _mm_sqrt_ps(result_float);
 
         //float -> int32
         result_int32[i] = _mm_cvtps_epi32(result_float);
@@ -277,7 +315,8 @@ static inline __m128i _L2(__m128i gradX, __m128i gradY){
 //TODO: replace outOri with outGradX_max and outGradY_max. (after calling gradient_stream, you do a lookup table)
 //  or, just do the lookup in here...
 void streamHog::gradient_stream(int height, int width, int stride, int n_channels_input, int n_channels_output,
-                  uint8_t *__restrict__ img, uint8_t *__restrict__ outOri, int16_t *__restrict__ outMag){
+				uint8_t *__restrict__ img, uint8_t *__restrict__ outOri, int16_t *__restrict__ outMag,
+				int16_t *__restrict__ outGrad ){
     assert(n_channels_input == 3);
     assert(n_channels_output == 1);
     assert(sizeof(__m128i) == 16);
@@ -295,7 +334,6 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
     __m128i gradX_1_ch[3], gradY_1_ch[3]; //top bits: upcast from 8-bit to 16-bit
     __m128i gradX_max_0, gradX_max_1; //gradX of the max-mag channel
     __m128i gradY_max_0, gradY_max_1; //gradY of the max-mag channel
-    __m128i gradMax_0, gradMax_1; //bottom bits, top bits (after arctan)
 
     //magnitudes
     __m128i mag_ch[3]; //packed 8-bit
@@ -310,6 +348,8 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
         for(int x=0; x < width-2; x+=loadSize){
 
             magMax = magMax_0 = magMax_1 = _mm_setzero_si128();
+	    gradX_max_0 = gradX_max_1 = _mm_setzero_si128();
+	    gradY_max_0 = gradY_max_1 = _mm_setzero_si128();
 
             for(int channel=0; channel<3; channel++){ //TODO: unroll channels
 
@@ -332,6 +372,29 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
 
                 gradY_0_ch[channel] =  _mm_sub_epi16(yHi_0, yLo_0);
                 gradY_1_ch[channel] =  _mm_sub_epi16(yHi_1, yLo_1); 
+
+		if( x/loadSize==((ref_x - 1)/loadSize) && ((y+1)==ref_y) ) {
+		  //if( (x==0) && ((y+1)==ref_y) ) {
+	          uint8_t off = (ref_x - 1)%loadSize;
+		  int16_t gx, gy;
+		  uint16_t xl, xh, yl, yh;
+		  assert( off < 16 );
+		  xl = extract_epi8(xLo,off);
+		  xh = extract_epi8(xHi,off);
+		  yl = extract_epi8(yLo,off);
+		  yh = extract_epi8(yHi,off);
+		  if( off < 8) { 
+		    gx = extract_epi16(gradX_0_ch[channel],off); 
+		    gy = extract_epi16(gradY_0_ch[channel],off);
+		  }
+		  else { 
+		    gx = extract_epi16(gradX_1_ch[channel],off - 8); 
+		    gy = extract_epi16(gradY_1_ch[channel],off - 8); 
+		  }
+		  printf( "gxy=%s,%s xlh=%s,%s ylh=%s,%s\n", str(gx).c_str(), str(gy).c_str(), 
+			  str(xl).c_str(), str(xh).c_str(),
+			  str(yl).c_str(), str(yh).c_str() );
+		}
 
 #ifdef L2_GRAD
                 //mag = sqrt(gradX^2 + gradY^2)
@@ -362,6 +425,14 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
             _mm_store_si128( (__m128i*)(&outMag[y*stride + x]                 ), magMax_0 );           
             _mm_store_si128( (__m128i*)(&outMag[y*stride + x + loadSize_16bit]), magMax_1 );
 
+	    if( outGrad ) {
+	      uint32_t const pix = (y*stride + x)*2;
+	      _mm_store_si128( (__m128i*)(&outGrad[pix+8*0]), _mm_unpacklo_epi16(gradX_max_0,gradY_max_0) );
+	      _mm_store_si128( (__m128i*)(&outGrad[pix+8*1]), _mm_unpackhi_epi16(gradX_max_0,gradY_max_0) );
+	      _mm_store_si128( (__m128i*)(&outGrad[pix+8*2]), _mm_unpacklo_epi16(gradX_max_1,gradY_max_1) );
+	      _mm_store_si128( (__m128i*)(&outGrad[pix+8*3]), _mm_unpackhi_epi16(gradX_max_1,gradY_max_1) );
+	    }
+
 #if 1 //atan2 nonvectorized LUT. (not tested for correctness)
             //outOri[y*stride + x + 0:15] = atan2(gradX_max[0:15], gradY_max[0:15])
             ori_atan2_LUT(gradX_max_0, gradX_max_1, gradY_max_0, gradY_max_1, &outOri[y*stride + x]);
@@ -378,7 +449,8 @@ void streamHog::gradient_stream(int height, int width, int stride, int n_channel
 
 //gradient code from voc-release5 DPM. (reference impl)
 void streamHog::gradient_voc5_reference(int height, int width, int stride, int n_channels_input, int n_channels_output,
-                  uint8_t *__restrict__ img, uint8_t *__restrict__ outOri, int16_t *__restrict__ outMag){
+					uint8_t *__restrict__ img, uint8_t *__restrict__ outOri, int16_t *__restrict__ outMag,
+					int16_t *__restrict__ outGrad ){
 
     for(int y=1; y<height-1; y++){
         for(int x=1; x<width-1; x++){
@@ -403,6 +475,10 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
             double dy3 = (double)img[(y+1)*stride + x + channel*height*stride] -
                             (double)img[(y-1)*stride + x + channel*height*stride];
 
+	    if( (x==ref_x) && (y==ref_y) ) {
+	      printf( "voc5 chan grads: dxy=%s,%s dxy2=%s,%s dxy3=%s,%s\n", str(dx).c_str(), str(dy).c_str(), str(dx2).c_str(), str(dy2).c_str(), str(dx3).c_str(), str(dy3).c_str() );
+	    }
+
 #ifdef L2_GRAD
             double v = dx*dx + dy*dy; //max magnitude (gets updated later)
             double v2 = dx2*dx2 + dy2*dy2;
@@ -412,6 +488,11 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
             double v2 = fabs(dx2) + fabs(dy2);
             double v3 = fabs(dx3) + fabs(dy3);
 #endif
+	    if( (x==ref_x) && (y==ref_y) ) {
+	      printf( "voc5 chan grads: dxy=%s,%s\n", str(dx).c_str(), str(dy).c_str() );
+	      printf( "v=%s v2=%s v3=%s\n", str(v).c_str(), str(v2).c_str(), str(v3).c_str() );
+	    }
+
 
             // pick channel with strongest gradient
             if (v2 > v) {
@@ -424,6 +505,10 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
                 dx = dx3;
                 dy = dy3;
             }     
+	    if( outGrad ) {
+	      outGrad[(y-1)*stride*2 + (x-1)*2] = nearbyintl(dx);
+	      outGrad[(y-1)*stride*2 + (x-1)*2 + 1] = nearbyintl(dy);
+	    }
 
             // snap to one of 18 orientations
             double best_dot = 0;
@@ -450,7 +535,7 @@ void streamHog::gradient_voc5_reference(int height, int width, int stride, int n
             //outOri[y*stride + x] = best_o;
 
             //to line up with forrest's 0-indexed version....
-            outMag[(y-1)*stride + (x-1)] = v;
+            outMag[(y-1)*stride + (x-1)] = nearbyint(v);
             outOri[(y-1)*stride + (x-1)] = best_o; 
         }
     }

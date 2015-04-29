@@ -25,8 +25,17 @@ int compute_stride(int width, int size_per_element, int ALIGN_IN_BYTES){
     //thanks: http://stackoverflow.com/questions/2403631
 
     //int ALIGN_IN_BYTES=32; //for AVX
+#if 0
+  // FIXME: incorrect. compute_stride(640,1,32) returns 672
     int stride = (width*size_per_element + (ALIGN_IN_BYTES - (width*size_per_element)%ALIGN_IN_BYTES))/size_per_element;
     return stride;
+#else
+    if( (width*size_per_element)%ALIGN_IN_BYTES ) { 
+      return (width*size_per_element + (ALIGN_IN_BYTES - (width*size_per_element)%ALIGN_IN_BYTES))/size_per_element;
+    } else {
+      return width; // already aligned
+    }
+#endif
 }
 
 //TODO: put this into a class (like PgHogContainer or streamHog), once I decide what data types to use

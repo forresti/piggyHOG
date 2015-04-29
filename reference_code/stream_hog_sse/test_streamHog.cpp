@@ -132,29 +132,25 @@ bool run_tests_ori_argmax(){
     printf("number of select_epi16 tests failed: %d \n", numFailed); 
 }
 
-  template< typename T >
-  inline std::string str(T const & i)	// convert T i to string
-  {
-    std::stringstream s;
-    s << i;
-    return s.str();
-  }
 
-
-template< typename ori_pel_t, typename mag_pel_t >
+template< typename ori_pel_t, typename mag_pel_t, typename grad_pel_t >
 void diff_imgs(ori_pel_t* ori_gold, ori_pel_t* ori_test, mag_pel_t* mag_gold, mag_pel_t* mag_test,
-	       int imgHeight, int imgWidth, int imgDepth, string img_gold_name, string img_test_name){
+	       grad_pel_t* grad_gold, grad_pel_t* grad_test,
+	       int imgHeight, int imgWidth, string img_gold_name, string img_test_name){
 
-  for(int y=0; y<imgHeight; y++){
-    for(int x=0; x<imgWidth; x++){
-      for(int d=0; d<imgDepth; d++){
-	uint32_t const pix = x*imgDepth + y*imgWidth*imgDepth + d;
-	bool const mag_diff = abs(mag_gold[pix] - mag_test[pix])>1;
-	bool const ori_diff = ! ( (ori_gold[pix] == ori_test[pix]) || ( (!mag_diff) && (mag_gold[pix]<20) ) );
-	if( ori_diff || mag_diff ) {
-	  printf( "ori_diff=%s mag_diff=%s ", str(ori_diff).c_str(), str(mag_diff).c_str() );
-	  printf( "x=%s y=%s d=%s img_gold_name=%s ori_gold[pix]=%s ori_test[pix]=%s mag_gold[pix]=%s mag_test[pix]=%s\n", str(x).c_str(), str(y).c_str(), str(d).c_str(), str(img_gold_name).c_str(), str(uint32_t(ori_gold[pix])).c_str(), str(uint32_t(ori_test[pix])).c_str(), str(mag_gold[pix]).c_str(), str(mag_test[pix]).c_str() );
-	}
+  // FIXME: doesn't compare borders
+  for(int y=1; y<imgHeight - 1; y++){
+    for(int x=1; x<imgWidth - 1; x++){
+      uint32_t const pix = ((x - 1) + (y - 1)*imgWidth ); // x + y*imgWidth;
+      uint32_t const gpix = ((x - 1) + (y - 1)*imgWidth ); 
+      bool const mag_diff = abs(mag_gold[pix] - nearbyintl(sqrt(mag_test[pix])))>0;
+      bool grad_diff = (grad_gold[gpix*2] != grad_test[gpix*2]) || (grad_gold[gpix*2+1] != grad_test[gpix*2+1]);
+      bool ori_diff = abs(ori_gold[pix] - ori_test[pix]) > 0;
+      if( ori_diff || mag_diff || grad_diff || 0 ) {
+	printf( "ori_diff=%s mag_diff=%s grad_diff=%s ", str(ori_diff).c_str(), str(mag_diff).c_str(), str(grad_diff).c_str() );
+	printf( "  x=%s y=%s img_gold_name=%s ori_gold[pix]=%s ori_test[pix]=%s mag_gold[pix]=%s mag_test[pix]=%s ", str(x).c_str(), str(y).c_str(), str(img_gold_name).c_str(), str(uint32_t(ori_gold[pix])).c_str(), str(uint32_t(ori_test[pix])).c_str(), str(mag_gold[pix]).c_str(), str(mag_test[pix]).c_str() );
+	printf( "  grad_gold[pix]=%s,%s grad_test[pix]=%s,%s\n", str(grad_gold[gpix*2]).c_str(), str(grad_gold[gpix*2+1]).c_str(), str(grad_test[gpix*2]).c_str(), str(grad_test[gpix*2+1]).c_str() );
+
       }
     }
   }
@@ -180,6 +176,9 @@ void diff_hogs(float* hog_gold, float* hog_test, int hogHeight, int hogWidth, in
     }
 }
 
+uint32_t ref_x = 3;
+uint32_t ref_y = 1;
+
 //correctness check
 void test_gradients_voc5_vs_streamHOG(){
     streamHog sHog; //streamHog constructor initializes lookup tables & constants (mostly for orientation bins)
@@ -192,10 +191,35 @@ void test_gradients_voc5_vs_streamHOG(){
     SimpleImg<uint8_t> ori_voc5(img.height, img.width, 1);
     SimpleImg<int16_t> mag_stream(img.height, img.width, 1); //out img has just 1 channel
     SimpleImg<int16_t> mag_voc5(img.height, img.width, 1); 
+    SimpleImg<int16_t> grad_voc5(img.height, img.width, 2); 
+    SimpleImg<int16_t> grad_stream(img.height, img.width, 2); 
+
+    // FIXME: various code below and called seems to depend on this
+    printf( "img.stride=%s img.width=%s\n", str(img.stride).c_str(), str(img.width).c_str() );
+    assert( img.stride == img.width ); 
+    assert( ori_stream.stride == img.stride );
+    assert( mag_stream.stride == img.stride );
+    assert( grad_stream.stride == img.stride );
+
+    uint32_t xc = ref_x;
+    uint32_t yc = ref_y;
+    printf( "xc=%s yc=%s\n", str(xc).c_str(), str(yc).c_str() );
+    for( uint32_t c = 0; c != 3; ++c ) {
+      for( uint32_t y = yc - 1; y != yc + 2; ++y ) {
+	for( uint32_t x = xc - 1; x != xc + 2; ++x ) {
+	  uint32_t const pix = c*img.stride*img.height + y*img.stride + x;
+	  printf( " %3u", uint32_t(img.data[pix]) );
+	}
+	printf("\n");
+      }
+      printf("\n");
+    }
 
   //[mag, ori] = gradient_stream(img)
-    sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori_voc5.n_channels, img.data, ori_voc5.data, mag_voc5.data);
-    sHog.gradient_stream(img.height, img.width, img.stride, img.n_channels, ori_stream.n_channels, img.data, ori_stream.data, mag_stream.data); 
+    sHog.gradient_voc5_reference(img.height, img.width, img.stride, img.n_channels, ori_voc5.n_channels, img.data, 
+				 ori_voc5.data, mag_voc5.data, grad_voc5.data );
+    sHog.gradient_stream(img.height, img.width, img.stride, img.n_channels, ori_stream.n_channels, img.data, 
+			 ori_stream.data, mag_stream.data, grad_stream.data ); 
 
     mag_voc5.simple_imwrite("mag_voc5.jpg");
     mag_stream.simple_imwrite("mag_stream.jpg");
@@ -206,8 +230,8 @@ void test_gradients_voc5_vs_streamHOG(){
 
     #if 1
     printf("diff:\n");
-    diff_imgs(ori_voc5.data, ori_stream.data, mag_voc5.data, mag_stream.data,
-	      img.height, img.width, 1, "voc5", "streamHog");
+    diff_imgs(ori_voc5.data, ori_stream.data, mag_voc5.data, mag_stream.data, grad_voc5.data, grad_stream.data,
+	      img.height, img.width, "voc5", "streamHog");
     //printf("diff mag:\n");
     //diff_imgs<int16_t>(, img.height, img.width, 1, "mag_voc5", "mag_streamHog");
     #endif
@@ -227,6 +251,7 @@ void test_computeCells_voc5_vs_streamHOG(){
     SimpleImg<uint8_t> ori_voc5(img.height, img.width, 1);
     SimpleImg<int16_t> mag_stream(img.height, img.width, 1); //out img has just 1 channel
     SimpleImg<int16_t> mag_voc5(img.height, img.width, 1); 
+
     int hogWidth, hogHeight;
     float* hogBuffer_voc5 = allocate_hist(img.height, img.width, sbin,
                                           hogHeight, hogWidth); //hog{Height,Width} are passed by ref.

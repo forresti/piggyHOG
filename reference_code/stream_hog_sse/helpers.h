@@ -30,5 +30,15 @@ int16_t* allocate_hist_16bit(int in_imgHeight, int in_imgWidth, int sbin,
                    int &out_hogHeight, int &out_hogWidth);
 
 Mat downsampleWithOpenCV(Mat img, double scale);
+
+template< typename T >
+inline std::string str(T const & i)	// convert T i to string
+{
+  std::stringstream s;
+  s << i;
+  return s.str();
+}
+
+
 #endif
 

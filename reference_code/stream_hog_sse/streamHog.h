@@ -32,10 +32,12 @@ class streamHog{
                        __m128i gradY_max_0, __m128i gradY_max_1, uint8_t* outOri_currPtr);
 
     void gradient_stream(int height, int width, int stride, int n_channels_input, int n_channels_output,
-                         uint8_t *__restrict__ img, uint8_t *__restrict__ outOri, int16_t *__restrict__ outMag);
+                         uint8_t *__restrict__ img, uint8_t *__restrict__ outOri, int16_t *__restrict__ outMag,
+			 int16_t *__restrict__ outGrad = 0 );
 
     void gradient_voc5_reference(int height, int width, int stride, int n_channels_input, int n_channels_output,
-                  uint8_t *__restrict__ img, uint8_t *__restrict__ outOri, int16_t *__restrict__ outMag);
+				 uint8_t *__restrict__ img, uint8_t *__restrict__ outOri, int16_t *__restrict__ outMag,
+				 int16_t *__restrict__ outGrad = 0);
 
     void computeCells_voc5_reference(int imgHeight, int imgWidth, int imgStride, int sbin,
                                      uint8_t *__restrict__ ori, int16_t *__restrict__ mag,
